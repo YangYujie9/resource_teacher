@@ -1,0 +1,175 @@
+<template>
+  <div class="home"  ref="home">
+   <!--  /*<el-scrollbar style="height:100%"  ref="home">*/ -->
+      <page-head></page-head>
+      <div class="home-wrap">
+        <div class="nav" :class="{ fixedNavbar: isfixTab}" ref="navBar">
+          <ul>
+            <li
+              v-for="(list,index) in navList"
+              @click="choose_nau(list)"
+              :class="{active:list.check}"
+            >{{list.label}}</li>
+          </ul>
+        </div>
+
+        <router-view :isfixTab="isfixTab"></router-view>
+
+      </div>
+      <div class="footer"></div>
+<!--     </el-scrollbar> -->
+  </div>
+</template>
+
+<script>
+import pageHead from "@/components/Nav/pageHead";
+export default {
+  components: {
+    pageHead
+  },
+  data() {
+    return {
+      isfixTab: false,
+      //isfixLeft: false,
+      treeData: {
+        data: [],
+        showCheckBox: false
+      },
+      navList: [
+        {
+          label: "章节挑题",
+          route: "/questions/chooseBychapter",
+          check: false
+        },
+        {
+          label: "知识点挑题",
+          route: "/questions/chooseByknowledge",
+          check: false
+        },
+        {
+          label: "智能挑题",
+          route: "/questions/chooseByIntelligent",
+          check: false
+        },
+        {
+          label: "真题试卷",
+          route: "/questions/actualPaper",
+          check: false
+        },
+        {
+          label: "试卷中心",
+          route: "/questions/examinationPaper",
+          check: false
+        },
+        {
+          label: "资源中心",
+          route: "/questions/resourceCenter",
+          check: false
+        }
+      ]
+    };
+  },
+  watch:{
+
+    $route(to,from){
+      this.navList.forEach(list=>{
+        to.path.indexOf(list.route)>-1?list.check=true:list.check=false
+      })
+
+    }
+
+  },
+  mounted() {
+    //window.addEventListener('scroll', this.handleTabFix, true)
+    this.$refs.home.addEventListener("scroll", this.handleTabFix, true);
+
+    this.navList.forEach(list=>{
+      this.$route.fullPath.indexOf(list.route)>-1?list.check=true:list.check=false
+    })
+
+  },
+  methods: {
+    // 先分别获得id为testNavBar的元素距离顶部的距离和页面滚动的距离
+    // 比较他们的大小来确定是否添加fixedNavbar样式
+    handleTabFix() {
+      // let scrollTop = this.$refs.home.scrollTop;
+      // let scrollTop = this.$refs['home'].$refs['wrap'].scrollTop;
+      let scrollTop = this.$refs['home'].scrollTop;
+      let offsetTop = this.$refs.navBar.scrollTop;
+      scrollTop > 208 ? (this.isfixTab = true) : (this.isfixTab = false);
+    },
+
+    choose_nau(list) {
+      this.navList.forEach(list => {
+        list.check = false;
+      });
+      list.check = true;
+      this.$router.push(list.route);
+    }
+  }
+};
+</script>
+<style lang="less">
+
+</style>
+<style scoped lang="less">
+.home {
+  //width: 100%;
+  height: calc(100% - 0px);
+  background-color: #f0f3fa;
+  overflow-y: auto;
+
+
+  &-wrap {
+    width: 100%;
+    position: relative;
+    
+    //height: 100%;
+
+    .nav {
+      height: 40px;
+      line-height: 40px;
+      color: #ffffff;
+      background-color: #5182f4;
+      margin-bottom: 20px;
+      z-index: 1000;
+      ul {
+        display: flex;
+        justify-content: center;
+        font-size: 1.1rem;
+
+        li {
+          margin: 0px 30px;
+          padding: 0 20px;
+          cursor: pointer;
+
+          &:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+          }
+        }
+
+        .active {
+          background-color: rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+
+    .fixedNavbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      margin-bottom: 20px;
+      // border-top: 0.05rem solid #f5f5f5;
+      // border-bottom: 0.05rem solid #f5f5f5;
+      // background: #f5f5f5;
+    }
+  }
+
+  .footer {
+    height: 60px;
+    line-height: 60px;
+    background-color: #75777c;
+  }
+}
+</style>

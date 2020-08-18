@@ -1,6 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
+
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 
 Vue.use(VueRouter)
 
@@ -8,18 +15,80 @@ Vue.use(VueRouter)
   {
     path: '/',
     name: 'Home',
-    component: Home
+    redirect:'/login'
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: function () {
-      return import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/login',
+    name: 'login',
+    component:  ()=>import('@/views/login'),
+
+  },
+    {
+      path: '/addquestion',
+      name: '/addquestion',
+      component: ()=>import('@/views/teacher/index'),
+      children: [    
+      {
+        path: 'submitQuestions',
+        name: 'submitQuestions',
+        component: ()=>import('@/views/teacher/submit_question/addquestion'),
+      },]
+    },
+    {
+      path: '/questions',
+      name: 'questions',
+      component: ()=>import('@/views/questions/index'),
+      children:[
+      {
+        path: 'chooseBychapter',
+        name: 'chooseBychapter',
+        component: ()=>import('@/views/questions/chapter/choose_bychapter'),
+      },{
+        path: 'chooseByknowledge',
+        name: 'chooseByknowledge',
+        component: ()=>import('@/views/questions/knowledge/choose_byknowledge'),
+      },{
+        path: 'chooseByIntelligent',
+        name: 'chooseByIntelligent',
+        component: ()=>import('@/views/questions/intelligent/choose_byIntelligent'),
+      },{
+        path: 'examinationPaper',
+        name: 'examinationPaper',
+        component: ()=>import('@/views/questions/examination/examination_paper'),
+      },{
+        path: 'actualPaper',
+        name: 'actualPaper',
+        component: ()=>import('@/views/questions/actual/actual_paper'),
+      }]
+    },
+    {
+      path: '/teacher',
+      name: 'teacher',
+      component: ()=>import('@/views/teacher/index'),
+      children:[{
+        path: 'home',
+        name: 'home',
+        component: ()=>import('@/views/teacher/home/home'),
+      },{
+        path: 'uploadResource',
+        name: 'uploadResource',
+        component: ()=>import('@/views/teacher/home/upload_resource'),
+      },{
+        path: 'myWarehouse',
+        name: 'myWarehouse',
+        component: ()=>import('@/views/teacher/warehouse'),
+      },{
+        path: 'myExampaper',
+        name: 'myExampaper',
+        component: ()=>import('@/views/teacher/exampaper'),
+      }
+      // ,{
+      //   path: 'myCollections',
+      //   name: 'myCollections',
+      //   component: ()=>import('@/views/teacher/collections'),
+      // },
+      ]
     }
-  }
 ]
 
 const router = new VueRouter({
@@ -27,5 +96,8 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
+
+
+
 
 export default router
