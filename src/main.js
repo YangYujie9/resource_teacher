@@ -13,7 +13,7 @@ Vue.use(plugins)
 
 
 Vue.use(ElementUI)
-import Cookies from 'js-cookie'
+// import Cookies from 'js-cookie'
 
 
 

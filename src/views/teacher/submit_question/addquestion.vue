@@ -117,7 +117,7 @@
               </el-form-item>-->
               <el-form-item label="难度：">
                 <el-radio-group v-model="form.difficulty" size="mini">
-                  <el-radio-button v-for="list in difficultyList" :label="list" :id="list"></el-radio-button>
+                  <el-radio-button v-for="list in difficultyList" :label="list.value" :key="list.key"></el-radio-button>
                 </el-radio-group>
               </el-form-item>
             </el-form>
@@ -632,7 +632,7 @@ export default {
         : this.typeList[0].key;
       this.form.difficulty = list.difficulty
         ? list.difficulty
-        : this.difficultyList[0];
+        : this.difficultyList[0].value;
         list.ques = list.ques?list.ques:''
         list.analyze = list.analyze?list.analyze:''
         list.answ = list.answ?list.answ:''
@@ -725,7 +725,7 @@ export default {
           if (data.status == "200") {
             this.difficultyList = data.data;
 
-            this.form.difficulty = this.difficultyList[0];
+            this.form.difficulty = this.difficultyList[0].value;
           }
         })
  

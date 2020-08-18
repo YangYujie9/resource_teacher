@@ -125,6 +125,8 @@ const actions = {
             // context.commit('setloading',false)
             getGradeList(data.data.school.id,context)
 
+            context.commit('setpaperId',Cookies.get('paperId'))
+
           }
         
       })
@@ -137,7 +139,7 @@ const actions = {
         .then(data => {
           if (data.status == "200") {
             let arr = []
-            arr.push("全部") 
+            arr.push({key:'',value:"全部"}) 
             data.data.forEach(item=>{
               arr.push(item) 
             })

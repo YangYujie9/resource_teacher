@@ -1,7 +1,7 @@
 <template>
 	<div class="basket-tag">
-    <div class="right-tag">
-      <el-badge :value="testBasket" class="item">
+    <div class="right-tag" @click="gotoExamination">
+      <el-badge :value="testBasket" class="item" >
         <div class="circle">
           <i class="iconfont iconjiagouwuche iconposition"></i>
         </div>
@@ -12,7 +12,7 @@
 </template>
 
 <script>
-	// import { mapGetters } from 'vuex'
+import Cookies from 'js-cookie'
 export default {
 
   props: {
@@ -44,7 +44,16 @@ export default {
 
     	.then((data)=>{
 
-        this.$store.commit('setpaperId',data.data.paperId)
+        
+        if(data.data.paperId != Cookies.get('paperId')) {
+
+          this.$store.commit('setpaperId',data.data.paperId)
+
+          Cookies.set("paperId", data.data.paperId)
+        }
+        
+
+
         let count = 0
         if(data.data.questionMap) {
           for(let key in data.data.questionMap) {
@@ -59,6 +68,12 @@ export default {
         this.testBasket = count
 
       })
+    },
+
+
+    gotoExamination() {
+
+      this.$router.push('/questions/examinationPaper')
     }
   }
 };

@@ -15,7 +15,7 @@
           <p>难度</p>
           <div class="div2">
             <el-radio-group v-model="search.difficulty" size="mini" @change="resetPage">
-              <el-radio-button :label="item" v-for="item in difficultyList"></el-radio-button>
+              <el-radio-button :label="item.key" :key="item.key" v-for="item in difficultyList">{{item.value}}</el-radio-button>
             </el-radio-group>
           </div>
         </li>
@@ -203,7 +203,7 @@ export default {
     favoriteDialog,
     singleQuestion,
   },
-  props: ['chapterList','gradeName','subjectCode'],
+  props: ['chapterList','gradeName','subjectCode','grade'],
   data() {
     return {
       search: {
@@ -247,12 +247,16 @@ export default {
       
 
     },
-
+    grade(val) {
+      if(val) {
+        this.resetPage()
+      }
+    },
     gradeName(val) {
       if(val) {
 
         this.getmyTestBasket()
-        this.resetPage()
+        
       }
     },
 
@@ -265,7 +269,7 @@ export default {
 
     MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 
-    this.search.difficulty = this.difficultyList[0]
+    this.search.difficulty = this.difficultyList[0].key
 
 
     this.subjectCode?this.getquestionType():null
@@ -338,9 +342,10 @@ export default {
       let params = {
         method:1,
         questionType: this.search.type,
-        difficultyType: this.search.difficulty == "全部"?"":this.search.difficulty,
+        difficultyType: this.search.difficulty,
         name: this.search.keyword,
-        gradeName: this.gradeName.substr(0,this.gradeName.length-1),
+        // gradeName: this.gradeName.substr(0,this.gradeName.length-1),
+        grade: this.grade.substr(0,this.grade.length-2),
         chapterId: chapterIds.join(),
         page: this.search.page - 1,
         size: this.search.size,

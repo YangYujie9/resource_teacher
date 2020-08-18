@@ -51,22 +51,29 @@
           </p>
           <div class="content">
             <el-button type="primary" size="mini" class="uploadbtn">试卷下载</el-button>
-            <div v-for="i in 2" class="singlediv">
-              <p>一、选择题（共2小题，满分30分）</p>
-              <div class="singleques" v-for="j in 2">
+            <div v-for="list in questionList" class="singlediv">
+              <p>一、{{list.type}}（共{{list.list.length}}小题）</p>
+              <div class="singleques" v-for="(list1,index1) in list.list">
+
                 <div class="pt1">
-                  <img src="@/assets/test1.png" />
-                  1、2020年3月9日，中国第54颗北斗导航卫星成功发射，其轨道高度约为36000000m．数36000000用科学记数法表示为（ ）
-                  <p>
-                    请选择bai
-                    <input type="text" class="underline" />。
-                  </p>
+                  <span>{{index1 + 1}}</span>
+                  <span>、</span>
+                  <div  v-html="list1.name"></div>
+                  <!-- <img src="@/assets/test1.png" /> -->
+                  
+                  
                 </div>
-                <div class="pt2">
-                  <p class="oneline">A、2.333</p>
-                  <p class="oneline">B、4.5666</p>
-                  <p class="oneline">C、4.5666</p>
-                  <p class="oneline">D、4.5666</p>
+                <div class="pt2" v-if="list1.options.length">
+
+                  <ul>
+                    <li style="width: 100%;" class="selectoption" v-for="list2 in list1.selectoption">
+                      <span style="margin-right: 10px;font-style: italic;">{{list2.key}}.</span>
+                      <div v-html="list2.value"></div>
+                      <!-- <img src="@/assets/test1.png" /> -->
+                    </li>
+
+                  </ul>
+                  
                 </div>
                 <div class="pt3">
                   <div class="wrap">
@@ -281,15 +288,62 @@ export default {
               list.push({type:key})
               list[list.length-1].list = []
 
-              data.data.questionMap[key]
+              data.data.questionMap[key].forEach(item=>{
+                console.log(item)
+                item.answers = []
+                this.handleQuestion(item,item)
+                list[list.length-1].list.push(item)
+              })
             }
           }
 
+          console.log(list)
 
-          this.questionList = data.data
+
+          this.questionList = list
         }
       })
-    }
+    },
+
+    handleQuestion(item,item0) {
+
+      item.selectoption = []
+      if(item.options && item.options.length) {
+        item.options.forEach(item1=>{
+          item.selectoption.push(item1)
+          // for(let key in item1) {
+          //   item.selectoption.push({key:key,value:item1[key]})
+          // }
+        })
+      }
+      //答案
+      //item.answers = []
+      if(item.fillAnswers && item.fillAnswers.length) {
+        item.fillAnswers.forEach(item1=>{
+          item0.answers.push(item1.value)
+          // for(let key in item1) {
+          //   item0.answers.push(item1[key])
+          // }
+        })
+      }
+
+      //知识点
+      item.chaptersPoint = []
+      if(item.chapters && item.chapters.length) {
+        item.chapters.forEach(item1=>{
+          item.chaptersPoint.push(item1.name)
+        })
+      }
+
+      if(item.smallQuestions && item.smallQuestions.length) {
+        item.smallQuestions.forEach(item1=>{
+          this.handleQuestion(item1,item)
+        })
+        
+      }
+
+      //console.log(item) 
+    },
   }
 };
 </script>
@@ -336,7 +390,19 @@ export default {
     }
   }
 
+  .pt1,.pt2 {
+    p,div,span {
+      background-color:transparent !important;
+      font-size: 1rem;
+      font-family: "JyeMath", "JyeMathLetters", "Times New Roman", "微软雅黑",
+          Arial, "宋体" !important;
+    }
 
+    img {
+      vertical-align: middle;
+      height: 30px;
+    }
+  }
 
   .down-wrap {
     .el-radio {
@@ -422,6 +488,7 @@ export default {
             position: relative;
             word-break: break-word;
             cursor: pointer;
+            display: flex;
 
             img {
               float: right;
@@ -430,8 +497,32 @@ export default {
           }
           .pt2 {
             padding: 0 30px 20px 30px;
-            display: flex;
-            flex-wrap: wrap;
+
+
+            ul {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: space-around;
+
+
+              li {
+                display: flex;
+              }
+
+              .selectoption {
+                vertical-align: middle;
+                font-size: 14px;
+                padding: 2px;
+
+                // span {
+                //   margin-right: 
+                // }
+
+                label {
+                  line-height: 24px;
+                }
+              }
+            }
 
             .oneline {
               width: 24%;
