@@ -92,7 +92,7 @@
             </p>
           </section>
         </el-card> -->
-        <singleQuestion shadow="never" :list="question" :index="1" :isAnswer="isAnswer" :paperId="paperId" @getData="getSimilarity" v-if="question">
+        <singleQuestion shadow="never" :list="question" :index="1" :isAnswer="isAnswer" @getData="getSimilarity" v-if="question">
           
         </singleQuestion>
         <div v-else style="text-align: center;">暂无数据</div>
@@ -108,7 +108,7 @@
 
 <script>
 export default {
-  props: ['dialogVisible','questionId','paperId'],
+  props: ['dialogVisible','questionId'],
   components: {
     singleQuestion: () => import('@/components/Question/singleQuestion')
     
@@ -171,45 +171,15 @@ export default {
       })
     },
 
-    addTestBasket(id) {
-      this.$http.post(`/api/open/paper/addTestBasket/hand/${id}`)
-      .then((data)=>{
-        if(data.status == '200') {
 
-          this.getSimilarity()
-          this.$emit('getmyTestBasket')
-
-          this.$message({
-            message:'加入试卷成功',
-            type:'success'
-          }) 
-        }
- 
-      })
-    },
-
-    deleteTestBasket(id) {
-      this.$http.delete(`/api/open/paper/${this.paperId}/${id}`)
-      .then((data)=>{
-        if(data.status == '200') {
-          this.getSimilarity()
-          this.$emit('getmyTestBasket')
-          this.$message({
-            message:'移除试卷成功',
-            type:'success'
-          }) 
-        }
- 
-      })
-    },
     handleQuestion(item,item0) {
-      //选项
       item.selectoption = []
       if(item.options && item.options.length) {
         item.options.forEach(item1=>{
-          for(let key in item1) {
-            item.selectoption.push({word:key,value:item1[key]})
-          }
+          item.selectoption.push(item1)
+          // for(let key in item1) {
+          //   item.selectoption.push({word:key,value:item1[key]})
+          // }
         })
       }
       //答案

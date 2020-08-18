@@ -66,6 +66,9 @@
 
 <script>
 import newFavorite from './new_favorite'
+import { VueDebounce } from "@/utils/public";
+
+
 export default {
   props: ["dialogVisible",'questionId'],
   components: {
@@ -86,8 +89,9 @@ export default {
   },
   mounted() {
     //this.$emit("getTreeData", this.treeData);
-    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-    this.getFolderNameList()
+    // MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    this.getFolderNameListDebounce()
+
   },
 
   methods: {
@@ -98,6 +102,10 @@ export default {
     close_newfavorite() {
       this.newfavoriteVisible = false
     },
+
+    getFolderNameListDebounce: VueDebounce('getFolderNameList',1000),
+
+
     getFolderNameList() {
       this.$http.get(`/api/open/collectFolder/getFolderNameList`)
       .then((data)=>{
@@ -108,6 +116,7 @@ export default {
         }else {
           this.collection.folderName = this.folderNameList[0].folderName
         }
+
         
         
       })

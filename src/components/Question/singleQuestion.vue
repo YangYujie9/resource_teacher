@@ -157,17 +157,17 @@
         </section>
     </el-card>
 
-    <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" :paperId="paperId" @getmyTestBasket="getmyTestBasket"></similarityDialog>
+<!--     <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket"></similarityDialog>
     <errorDialog :dialogVisible="errorVisible"  @close="close_error"></errorDialog>
-    <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog>
+    <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog> -->
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import similarityDialog from '@/components//Dialog/similarity'
-import errorDialog from '@/components/Dialog/error'
-import favoriteDialog from '@/components/Dialog/favorite'
+// import similarityDialog from '@/components//Dialog/similarity'
+// import errorDialog from '@/components/Dialog/error'
+// import favoriteDialog from '@/components/Dialog/favorite'
 export default {
 	name:'singleQuestion',
   props: {
@@ -194,9 +194,9 @@ export default {
 
   },
   components: {
-    similarityDialog,
-    errorDialog,
-    favoriteDialog,
+    // similarityDialog,
+    // errorDialog,
+    // favoriteDialog,
   },
   data() {
     return {
@@ -213,21 +213,70 @@ export default {
 
       ]),
   },
+  watch: {
+    list(val) {
+      val.answers = []
+      this.handleQuestion(val,val)
+    }
+  },
   mounted() {
     // console.log(this.gradeName)
     // this.gradeName?this.getmyTestBasket():null
   },
   methods: {
+
+    handleQuestion(item,item0) {
+
+      item.selectoption = []
+      if(item.options && item.options.length) {
+        item.options.forEach(item1=>{
+          item.selectoption.push(item1)
+          // for(let key in item1) {
+          //   item.selectoption.push({key:key,value:item1[key]})
+          // }
+        })
+      }
+      //答案
+      //item.answers = []
+      if(item.fillAnswers && item.fillAnswers.length) {
+        item.fillAnswers.forEach(item1=>{
+          item0.answers.push(item1.value)
+          // for(let key in item1) {
+          //   item0.answers.push(item1[key])
+          // }
+        })
+      }
+
+      //知识点
+      item.chaptersPoint = []
+      if(item.chapters && item.chapters.length) {
+        item.chapters.forEach(item1=>{
+          item.chaptersPoint.push(item1.name)
+        })
+      }
+
+      if(item.smallQuestions && item.smallQuestions.length) {
+        item.smallQuestions.forEach(item1=>{
+          this.handleQuestion(item1,item)
+        })
+        
+      }
+
+      console.log(item) 
+    },
     getSimilarity(id) {
-      this.similarityId = id
-      this.similarityVisible = true
+      // console.log(id)
+      this.$emit('getSimilarity',id)
+      // this.similarityId = id
+      // this.similarityVisible = true
     },
 
 
     addCollectFolder(id) {
-      this.collectId = id
-      // console.log(this.collectId)
-      this.favoriteVisible = true
+      this.$emit('addCollectFolder',id)
+      // this.collectId = id
+      // // console.log(this.collectId)
+      // this.favoriteVisible = true
     },
     close_similarity() {
       this.similarityVisible = false
@@ -304,7 +353,9 @@ export default {
       border-left: 0px;
       border-radius: 3px;
     }
-
+      p,div,span {
+        background-color:transparent !important;
+      }
   
 }
 </style>

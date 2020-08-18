@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Cookies from 'js-cookie'
+import store from '../store'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
@@ -98,6 +100,48 @@ const router = new VueRouter({
 })
 
 
+router.beforeEach((to, from, next) => { 
 
+    NProgress.start()
+
+    if( Cookies.get('resource-teacher')) {
+
+      if (store.state.person.userInfo.person && store.state.person.userInfo.person.fullName) {
+      } else {
+
+        store.dispatch('getUserBaseInfo',router)
+      }
+
+      if (to.path =='/login') {
+
+
+        next({
+          path: '/addquestion/submitQuestions',
+        })
+      } else {
+
+        next()
+      }
+
+
+    } else {
+
+      if (to.path !='/login') {
+        next({
+          path: '/login',
+        })
+      } else {
+        next()
+      }
+
+    }
+
+
+    next()
+})
+
+router.afterEach(() => {
+  NProgress.done()
+})
 
 export default router

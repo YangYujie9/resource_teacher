@@ -23,43 +23,43 @@ Vue.$http = Vue.prototype.$http = erpAxios
 //路由拦截
 
 
-router.beforeEach((to, from, next) => { 
+// router.beforeEach((to, from, next) => { 
 
-    if( Cookies.get('resource-teacher')) {
+//     if( Cookies.get('resource-teacher')) {
 
-      if (store.state.person.userInfo.person && store.state.person.userInfo.person.fullName) {
-      } else {
+//       if (store.state.person.userInfo.person && store.state.person.userInfo.person.fullName) {
+//       } else {
 
-        store.dispatch('getUserBaseInfo',router)
-      }
+//         store.dispatch('getUserBaseInfo',router)
+//       }
 
-      if (to.path =='/login') {
-
-
-        next({
-          path: '/addquestion/submitQuestions',
-        })
-      } else {
-
-        next()
-      }
+//       if (to.path =='/login') {
 
 
-    } else {
+//         next({
+//           path: '/addquestion/submitQuestions',
+//         })
+//       } else {
 
-      if (to.path !='/login') {
-        next({
-          path: '/login',
-        })
-      } else {
-        next()
-      }
-
-    }
+//         next()
+//       }
 
 
-    next()
-})
+//     } else {
+
+//       if (to.path !='/login') {
+//         next({
+//           path: '/login',
+//         })
+//       } else {
+//         next()
+//       }
+
+//     }
+
+
+//     next()
+// })
 
 
 Vue.config.productionTip = false

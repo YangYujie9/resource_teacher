@@ -107,8 +107,8 @@ export default {
   }
 
   .tree-class {
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: auto;
+    // overflow-x: hidden;
     max-height: calc(100vh - 450px);
   }
 

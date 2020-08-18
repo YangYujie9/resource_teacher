@@ -45,8 +45,14 @@ export default {
     	.then((data)=>{
 
         this.$store.commit('setpaperId',data.data.paperId)
-
-        this.testBasket = data.data.questions && data.data.questions.length?data.data.questions.length:0
+        let count = 0
+        console.log()
+        if(data.data.questionMap && data.data.questionMap.length) {
+          data.data.questionMap.forEach(item=>{
+            console.log(item)
+          })
+        }
+        this.testBasket = count
 
       })
     }

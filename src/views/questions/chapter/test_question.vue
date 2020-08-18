@@ -88,7 +88,7 @@
 
     <div class="card-wrap">
        <div v-for="(list,index) in tableData">
-          <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket">
+          <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder">
             
           </singleQuestion>
         </div>     
@@ -177,10 +177,10 @@
 
 
 
-    <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity"  @getmyTestBasket="getmyTestBasket"></similarityDialog>
+
+    <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket"></similarityDialog>
     <errorDialog :dialogVisible="errorVisible"  @close="close_error"></errorDialog>
     <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog>
-    
   </div>
 </template>
 
@@ -416,6 +416,7 @@ export default {
     },
 
     getSimilarity(id) {
+      console.log(999,id)
       this.similarityId = id
       this.similarityVisible = true
     },

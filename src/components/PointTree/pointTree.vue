@@ -34,7 +34,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { VueDebounce } from "@/utils/public";
+
 export default {
 
   props: {
@@ -333,6 +333,7 @@ export default {
   }
   .el-tree-node__expand-icon.is-leaf {
     color: transparent;
+    width: 20px;
   }
 
 
@@ -345,11 +346,11 @@ export default {
   /* 树形结构节点添加连线 */
    /deep/ .el-tree-node {
     position: relative;
-    padding-left: 16px;
+    padding-left: 6px;
   }
    
    /deep/ .el-tree-node__children {
-    padding-left: 16px;
+    padding-left: 11px;
   }
    
    /deep/ .el-tree-node :last-child:before {
@@ -364,7 +365,7 @@ export default {
    
    /deep/ .el-tree-node:before {
     content: "";
-    left: -4px;
+    left: -1px;
     position: absolute;
     right: auto;
     border-width: 1px;
@@ -372,7 +373,7 @@ export default {
    
    /deep/ .el-tree-node:after {
     content: "";
-    left: -4px;
+    left: -1px;
     position: absolute;
     right: auto;
     border-width: 1px;
@@ -443,6 +444,7 @@ export default {
 
 .point {
   min-height: 56px;
+  margin-left: -10px;
     .custom-tree-node {
       flex: 1;
       display: flex;

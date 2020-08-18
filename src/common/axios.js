@@ -6,6 +6,9 @@ import store from '../store'
 import { Message } from 'element-ui';
 import Cookies from 'js-cookie'
 
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
 // 使用由库提供的配置的默认值来创建实例
 // 此时超时配置的默认值是 `0`
 export const axiosService = axios.create({
@@ -28,6 +31,8 @@ export const axiosService = axios.create({
 // request拦截器
 axiosService.interceptors.request.use(
   config => {
+
+    NProgress.start()
     // 超时
     if(config.httpConfig.timeout) {
       config.timeout = config.httpConfig.timeout;
@@ -64,6 +69,8 @@ axiosService.interceptors.request.use(
  */
 axiosService.interceptors.response.use(
   response => {
+
+    NProgress.done()
     if (response.status !== 200) {
       response.config.httpConfig.loading //&& iView.LoadingBar.error();
       !response.config.httpConfig.clsoeMessage && Message.error('网络异常');
