@@ -273,6 +273,19 @@ export default {
       this.$http.get(`/api/open/paper/${this.paperId}`)
       .then((data)=>{
         if(data.status == '200') {
+          this.paperName = data.data.paperName
+
+          let list = []
+          if(data.data.questionMap) {
+            for(let key in data.data.questionMap) {
+              list.push({type:key})
+              list[list.length-1].list = []
+
+              data.data.questionMap[key]
+            }
+          }
+
+
           this.questionList = data.data
         }
       })

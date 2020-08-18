@@ -74,14 +74,14 @@
                   <el-checkbox-button
                     v-for="item in typeList"
                     :label="item"
-                    :key="item.label"
-                  >{{item.label}}</el-checkbox-button>
+                    :key="item.key"
+                  >{{item.value}}</el-checkbox-button>
                 </el-checkbox-group>
               </div>
               <p class="title2">题量设置</p>
               <div class="inputgroup title2">
                 <p v-for="type in search.type" style="margin-right:20px;margin-bottom:10px;">
-                  <label class="label1">{{type.label}}</label>
+                  <label class="label1">{{type.value}}</label>
                   <el-input
                     v-model="type.number"
                     placeholder="请输入题量"
@@ -241,14 +241,11 @@ export default {
       .then((data)=>{
         if (data.status == "200") {
             
-            let arr = []
+            
             data.data.forEach(item=>{
-              arr.push({
-                label: item,
-                number:''
-              })
+              item.number = ''
             })
-            this.typeList = arr
+            this.typeList = data.data
 
             this.search.type.push(this.typeList[0]);
             // this.search.type = this.typeList[0];
@@ -274,7 +271,7 @@ export default {
       })
 
       this.search.type.forEach(item=>{
-        questions.push(`${item.label},${item.number}`)
+        questions.push(`${item.value},${item.number}`)
       })
 
       let params = {

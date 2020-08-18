@@ -77,7 +77,7 @@
                 <p>题型</p>
                 <div class="div2">
                   <el-radio-group v-model="search.type" size="mini" @change="resetPage">
-                    <el-radio-button :label="item" v-for="item in typeList"></el-radio-button>
+                    <el-radio-button :label="item.key" :key="item.key" v-for="item in typeList">{{item.value}}</el-radio-button>
                   </el-radio-group>
                 </div>
               </li>
@@ -308,13 +308,13 @@ export default {
           if (data.status == "200") {
             
             let arr = []
-            arr.push('全部')
+            arr.push({key:'',value:'全部'})
             data.data.forEach(item=>{
               arr.push(item)
             })
 
             this.typeList = arr
-            this.search.type = this.typeList[0];
+            this.search.type = this.typeList[0].key;
             this.resetPage()
           } 
         })
@@ -354,7 +354,7 @@ export default {
 
       let params = {
         method:1,
-        questionType: this.search.type == "全部"?"":this.search.type,
+        questionType: this.search.type,
         difficultyType: this.search.difficulty == "全部"?"":this.search.difficulty,
         name: this.search.keyword,
         gradeName: this.filter.grade.value.substr(0,this.filter.grade.value.length-1),
