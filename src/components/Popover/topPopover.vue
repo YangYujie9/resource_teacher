@@ -64,11 +64,14 @@ export default {
       color: #3399ff;
       font-weight: 600;
       line-height: 36px;
-      text-align: center;
+      // text-align: center;
+
 
       .top-title {
         position: relative;
         padding: 0 20px;
+        display: flex;
+      justify-content: space-around;
 
         .settingicon {
           position: absolute;

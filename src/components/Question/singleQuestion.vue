@@ -5,7 +5,7 @@
         <div class="qt1">
           <!-- <img src="@/assets/test1.png" /> -->
           <div class="ques-body">
-            <span>{{index+1}}、</span>
+            <span v-if="!showSimilarity">{{index+1}}、</span>
             <div v-html="list.name" style="display:flex;"></div>
           </div>
         </div>
@@ -262,7 +262,7 @@ export default {
         
       }
 
-      console.log(item) 
+      //console.log(item) 
     },
     getSimilarity(id) {
       // console.log(id)
@@ -353,10 +353,20 @@ export default {
       border-left: 0px;
       border-radius: 3px;
     }
+
+    .content {
       p,div,span {
         background-color:transparent !important;
+        font-size: 1rem;
+        font-family: "JyeMath", "JyeMathLetters", "Times New Roman", "微软雅黑",
+            Arial, "宋体" !important;
       }
-  
+    }
+
+  .el-card img {
+    vertical-align: middle;
+    height: 30px;
+  }
 }
 </style>
 <style scoped lang="less">
@@ -411,7 +421,7 @@ export default {
 	      //padding: 20px;
 	      position: relative;
 	      word-break: break-word;
-	      padding-bottom: 20px;
+	      padding-bottom: 10px;
 	      cursor: pointer;
 	      .ques-body {
 	        display: flex;

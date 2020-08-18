@@ -90,7 +90,7 @@ export default {
   mounted() {
     //this.$emit("getTreeData", this.treeData);
     // MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-    this.getFolderNameListDebounce()
+    this.getFolderNameList()
 
   },
 
@@ -103,19 +103,22 @@ export default {
       this.newfavoriteVisible = false
     },
 
-    getFolderNameListDebounce: VueDebounce('getFolderNameList',1000),
+    // getFolderNameListDebounce: VueDebounce('getFolderNameList',1000),
 
 
     getFolderNameList() {
       this.$http.get(`/api/open/collectFolder/getFolderNameList`)
       .then((data)=>{
         this.folderNameList = data.data
-        if(this.isAdd) {
-          this.collection.folderName = this.folderNameList[this.folderNameList.length-1].folderName
-          this.isAdd = false
-        }else {
-          this.collection.folderName = this.folderNameList[0].folderName
+        if(this.folderNameList.length) {
+          if(this.isAdd) {
+            this.collection.folderName = this.folderNameList[this.folderNameList.length-1].folderName
+            this.isAdd = false
+          }else {
+            this.collection.folderName = this.folderNameList[0].folderName
+          }
         }
+
 
         
         

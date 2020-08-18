@@ -46,11 +46,15 @@ export default {
 
         this.$store.commit('setpaperId',data.data.paperId)
         let count = 0
-        console.log()
-        if(data.data.questionMap && data.data.questionMap.length) {
-          data.data.questionMap.forEach(item=>{
-            console.log(item)
-          })
+        if(data.data.questionMap) {
+          for(let key in data.data.questionMap) {
+            data.data.questionMap[key].forEach(item=>{
+              count++
+            })
+          }
+          // data.data.questionMap.forEach(item=>{
+          //   console.log(item)
+          // })
         }
         this.testBasket = count
 

@@ -99,9 +99,9 @@
                 <el-radio-group v-model="questionType" size="mini" @change="changeType()">
                   <el-radio-button
                     v-for="list in typeList"
-                    :label="list"
-                    :id="list"
-                  ></el-radio-button>
+                    :label="list.key"
+                    :id="list.key"
+                  >{{list.value}}</el-radio-button>
                 </el-radio-group>
               </el-form-item>
 
@@ -629,7 +629,7 @@ export default {
       this.editable = list.edit ? true : false;
       this.questionType = list.questionType
         ? list.questionType
-        : this.typeList[0];
+        : this.typeList[0].key;
       this.form.difficulty = list.difficulty
         ? list.difficulty
         : this.difficultyList[0];
@@ -713,7 +713,7 @@ export default {
             
           this.typeList = data.data;
 
-          this.questionType = this.typeList[0];
+          this.questionType = this.typeList[0].key;
         } 
       })
     },
@@ -748,6 +748,15 @@ export default {
       this.chapterTags.forEach(item=>{
         chapterIds.push(item.id)
       })
+
+      if(!knowledgeIds.length && !chapterIds.length) {
+        return this.$message({
+                  message:'必须选择章节或者知识点',
+                  type:'warning'
+                })
+      }
+
+
       for (let i = 0; i < this.form.questionNum; i++) {
         questions[i] = {}
         let selectOption = []

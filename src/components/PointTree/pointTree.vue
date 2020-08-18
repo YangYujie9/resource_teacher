@@ -325,7 +325,7 @@ export default {
 }
 .pageTree {
   .el-tree-node__content {
-    height: 36px;
+    height: 32px;
     padding-left:0px !important;
   }
   .el-tree-node__expand-icon {
@@ -333,7 +333,7 @@ export default {
   }
   .el-tree-node__expand-icon.is-leaf {
     color: transparent;
-    width: 20px;
+    width: 18px;
   }
 
 
@@ -354,7 +354,7 @@ export default {
   }
    
    /deep/ .el-tree-node :last-child:before {
-    height: 36px;
+    height: 32px;
   }
    
    /deep/ .el-tree > .el-tree-node:before {
@@ -386,14 +386,14 @@ export default {
     border-left: 1px dashed #b8b9bb;
     bottom: 0px;
     height: 100%;
-    top: -18px;
+    top: -16px;
     width: 1px;
   }
    
    /deep/ .el-tree-node:after {
     border-top: 1px dashed #b8b9bb;
     height: 36px;
-    top: 18px;
+    top: 16px;
     width: 18px;
   }
   /deep/ .el-tree-node.is-leaf:after {
@@ -444,7 +444,7 @@ export default {
 
 .point {
   min-height: 56px;
-  margin-left: -10px;
+  // margin-left: -10px;
     .custom-tree-node {
       flex: 1;
       display: flex;

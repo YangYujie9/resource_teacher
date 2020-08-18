@@ -155,205 +155,11 @@
           </div>
         <div class="card-wrap">
           <div v-for="(list,index) in tableData">
-            <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket">
+            <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder">
               
             </singleQuestion>
           </div>
-<!--           <div>
-            <el-card class="box-card" shadow="hover" v-for="(list,index) in tableData">
-              <section class="content">
-                <div class="qt1">
-                  <div class="ques-body">
-                    <span>{{index+1}}、</span>
-                    <div v-html="list.name" style="display:flex;"></div>
-                  </div>
-                </div>
-                <div class="qt2" v-if="list.options.length">
-                  <ul>
-                    <li style="width: 100%;" class="selectoption" v-for="list1 in list.selectoption">
-                      <span style="margin-right: 10px;font-style: italic;">{{list1.word}}.</span>
-                      <div v-html="list1.value"></div>
-                    </li>
 
-                  </ul>
-                </div>
-              </section>
-
-
-              <div v-show="!isAnswer">
-                <section class="content" style="border-top: 1px dashed #dbdee4;" v-show="list.showDetail">
-
-                  <div class="middle">
-                    <div>
-                      <p class="title">【知识点】</p>
-                      <p>{{list.chaptersPoint.join()}}</p>
-                    </div>
-
-                    <div  v-if="list.fillAnswers.length ||list.smallQuestions.length">
-                      <p class="title">【答案】</p>
-                      <p>
-                        <span v-for="(item,index1) in list.answers">
-                         <span  v-if="list.smallQuestions.length" style="margin-left: 0px;">{{index1+1}}、</span>
-                         <span style="margin-left: 0px;">{{item}}</span>
-                        </span>
-                      </p>
-                    </div>
-                    <div>
-                      <p class="title">【分析】</p>
-                      <p v-html="list.analysis"></p>
-                    </div>
-                    <div>
-                      <p class="title">【详解】</p>
-                      <p v-html="list.detailedAnalysis"></p>
-                    </div>
-                  </div>
-                </section>
-                <section class="foot-wrap">
-                  <p class="pt1">
-                    <span>收录：{{list.createTime}}</span>
-                    <span>组卷：{{list.groupCount}}</span>
-                    <span>难度：{{list.difficultyTypeName}}</span>
-                  </p>
-                  <p class="pt2">
-                    <span @click="getSimilarity(list.questionId)" class="foot-icon">
-                      <i class="iconfont iconpaibanguanli iconcolor"></i> 相似题
-                    </span>
-      
-                    <span class="foot-icon" @click="addCollectFolder(list.questionId)">
-                      <i class="iconfont iconshoucang2 iconcolor"></i>
-                      收藏
-                    </span>
-                    <span class="foot-icon" @click="list.showDetail=true" v-if="!list.showDetail">
-                      <i class="iconfont iconxiangqing1 iconcolor"></i> 详情
-                    </span>
-                    <span class="foot-icon" @click="list.showDetail=false" v-if="list.showDetail">
-                      <i class="iconfont iconxiangqing1 iconcolor"></i> 题干
-                    </span>
-                    <el-button type="warning" size="mini" v-if="list.isTestBasket" @click="deleteTestBasket(list.questionId)">移除试卷</el-button>
-                    <el-button type="primary" size="mini" v-if="!list.isTestBasket"  @click="addTestBasket(list.questionId)">加入试卷</el-button>
-                  </p>
-                </section>
-              </div>
-              <div v-show="isAnswer">
-                <section class="content" style="border-top: 1px dashed #dbdee4;">
-
-                  <div class="middle">
-                    <div>
-                      <p class="title">【知识点】</p>
-                      <p>{{list.chaptersPoint.join()}}</p>
-                    </div>
-
-                    <div  v-if="list.fillAnswers.length ||list.smallQuestions.length">
-                      <p class="title">【答案】</p>
-                      <p>
-                        <span v-for="(item,index1) in list.answers">
-                         <span  v-if="list.smallQuestions.length" style="margin-left: 0px;">{{index1+1}}、</span>
-                         <span style="margin-left: 0px;">{{item}}</span>
-                        </span>
-                      </p>
-                    </div>
-                    <div>
-                      <p class="title">【分析】</p>
-                      <p v-html="list.analysis"></p>
-                    </div>
-                    <div>
-                      <p class="title">【详解】</p>
-                      <p v-html="list.detailedAnalysis"></p>
-                    </div>
-           
-                  </div>
-                </section>
-                <section class="foot-wrap">
-                  <p class="pt1">
-                    <span>更新：{{list.difficultyTypeName}}</span>
-                    <span>难度：{{list.createTime}}</span>
-                    <span>题型：{{list.questionTypeName}}</span>
-                    <span>组卷：{{list.groupCount}}</span>
-                  </p>
-                  <p class="pt2">
-                    <span @click="getSimilarity(list.questionId)" class="foot-icon">
-                      <i class="iconfont iconpaibanguanli iconcolor"></i> 相似题
-                    </span>
-       
-
-                    <span class="foot-icon" @click="addCollectFolder(list.questionId)">
-                      <i class="iconfont iconshoucang2 iconcolor"></i>
-                      收藏
-                    </span>
-                    <span class="foot-icon">
-                      <i class="iconfont iconxiangqing1 iconcolor"></i> 详情
-                    </span>
-                    <el-button type="primary" size="mini">加入试卷</el-button>
-                  </p>
-                </section>          
-              </div>
-            </el-card>  
-          </div> -->
-
-           <!--<div >
-            <el-card class="box-card" shadow="hover" v-for="i in 10">
-              <div class="maskdiv">
-                <div class="mask">
-                  <span class="maskspan">同步</span>
-                </div>
-              </div> 
-              <section class="content">
-                <div class="qt2 top"></div>
-
-                <div class="middle">
-                  <div>
-                    <p class="title">【知识点】</p>
-                    <p>{{list.knowledgesPoint}}</p>
-                  </div>
-
-                  <div>
-                    <p class="title">【答案】</p>
-                    <p>{{list.answers}}
-                      <span v-for="(item,index1) in list.answers">{{item}}
-                       <span   style="margin-left: 0px;">{{index1+1}}、</span>
-                       <span style="margin-left: 0px;">{{item}}</span>
-                      </span>
-                    </p>
-                  </div>
-                  <div>
-                    <p class="title">【分析】</p>
-                  </div>
-                  <div>
-                    <p class="title">【详解】</p>
-                  </div>
-                  <div>
-                    <p class="title">【点睛】</p>
-                  </div>
-                  <p class="tag">2019~山东省高中二期中</p>
-                </div>
-              </section>
-              <section class="foot-wrap">
-                <p class="pt1">
-                  <span>更新：2020/8/7</span>
-                  <span>难度：0.9</span>
-                  <span>题型：选择题</span>
-                  <span>组卷：60</span>
-                </p>
-                <p class="pt2">
-                  <span>
-                    <i class="iconfont iconpaibanguanli iconcolor"></i> 相似题
-                  </span>
-                  <span>
-                    <i class="iconfont iconjiucuo iconcolor"></i> 纠错
-                  </span>
-                  <span>
-                    <i class="iconfont iconshoucang1" style="color:#ffda33;"></i>
-                    <i class="iconfont iconshoucang2 iconcolor"></i>
-                    收藏
-                  </span>
-                  <span>
-                    <i class="iconfont iconxiangqing1 iconcolor"></i> 详情
-                  </span>
-                  <el-button type="primary" size="mini">加入试卷</el-button>
-                </p>
-              </section>
-            </el-card>
-          </div> -->
 
           <div class="pagination">
             <el-pagination
@@ -370,21 +176,14 @@
         </div>
         </div>
 
-        <!-- <div class="right-tag">
-          <el-badge :value="testBasket" class="item">
-            <div class="circle">
-              <i class="iconfont iconjiagouwuche iconposition"></i>
-            </div>
-          </el-badge>
-          <span class="spandiv">试题篮</span>
-        </div> -->
+
         <basketTag ref="basketTag"></basketTag>
       </div>
     </left-fixed-nav>
 
-<!--     <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" :paperId="paperId" @getmyTestBasket="getmyTestBasket"></similarityDialog>
+    <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket"></similarityDialog>
     <errorDialog :dialogVisible="errorVisible"  @close="close_error"></errorDialog>
-    <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog> -->
+    <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog>
   </div>
 </template>
 
@@ -666,17 +465,16 @@ export default {
 
     },
 
-    // getSimilarity(id) {
-    //   this.similarityId = id
-    //   this.similarityVisible = true
-    // },
+    getSimilarity(id) {
+      this.similarityId = id
+      this.similarityVisible = true
+    },
 
 
-    // addCollectFolder(id) {
-    //   this.collectId = id
-    //   // console.log(this.collectId)
-    //   this.favoriteVisible = true
-    // },
+    addCollectFolder(id) {
+      this.collectId = id
+      this.favoriteVisible = true
+    },
 
     addAllQuestion() {
       let ids = []

@@ -93,6 +93,7 @@ export default {
 <style lang="less">
 .tree-wrap {
   width: 300px;
+  // max-width: 350px;
   min-height: 300px;
   padding: 20px 0px;
   border: 1px solid #e2e2e2;
@@ -103,7 +104,7 @@ export default {
   }
 
   .tree-content {
-    padding: 0 30px;
+    padding: 0 20px;
   }
 
   .tree-class {
