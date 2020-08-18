@@ -9,7 +9,7 @@
               <div v-for="(item,index) in list">
                 <p class="titlep">
                   {{index+1}}{{item.type}}
-                  <span>(共{{item.list.length}}小题)</span>
+                  <!-- <span>(共{{item.list.length}}小题)</span> -->
                 </p>
                 <div class="btngroup">
                   <p>
@@ -51,8 +51,8 @@
           </p>
           <div class="content">
             <el-button type="primary" size="mini" class="uploadbtn">试卷下载</el-button>
-            <div v-for="list in questionList" class="singlediv">
-              <p>一、{{list.type}}（共{{list.list.length}}小题）</p>
+            <div v-for="(list,index) in questionList" class="singlediv">
+              <p><span>{{changeindex(index)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
               <div class="singleques" v-for="(list1,index1) in list.list">
 
                 <div class="pt1">
@@ -69,26 +69,79 @@
                     <li style="width: 100%;" class="selectoption" v-for="list2 in list1.selectoption">
                       <span style="margin-right: 10px;font-style: italic;">{{list2.key}}.</span>
                       <div v-html="list2.value"></div>
-                      <!-- <img src="@/assets/test1.png" /> -->
                     </li>
 
                   </ul>
+
                   
                 </div>
+
+              <!-- 小题 -->
+              <div class="" v-if="list1.smallQuestions.length" style="margin-top: 10px;">
+                <div v-for="(list4,index4) in list1.smallQuestions">
+
+                  <div class="pt1">
+                    <!-- <img src="@/assets/test1.png" /> -->
+                    <span>({{index4+1}})</span><span>、</span>
+                    <span v-html="list4.name"></span>
+                  </div>
+                  <div class="pt2" v-if="list1.options.length">
+                    <ul>
+                      <li style="width: 100%;" class="selectoption" v-for="item in list1.selectoption">
+
+                        <span>{{item.key}}</span>
+                        <span>、</span>
+                        <span v-html="item.value"></span> 
+                        <!-- <img src="@/assets/test1.png" /> -->
+                      </li>
+
+
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <section class="content" style="border-top: 1px dashed #dbdee4;" v-show="list1.showDetail">
+
+                <div class="middle">
+                  <div>
+                    <p class="anstitle">【知识点】</p>
+                    <p>{{list1.knowledgesPoint.join()}}</p>
+                  </div>
+
+                  <div  v-if="list1.fillAnswers.length ||list1.smallQuestions.length">
+                    <p class="anstitle">【答案】</p>
+                    <p>
+                      <span v-for="(list3,index3) in list.answers">
+                       <span  v-if="list1.smallQuestions.length" style="margin-left: 0px;">{{index3+1}}、</span>
+                       <span style="margin-left: 0px;">{{list3}}</span>
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <p class="anstitle">【分析】</p>
+                    <p v-html="list1.analysis"></p>
+                  </div>
+                  <div>
+                    <p class="anstitle">【详解】</p>
+                    <p v-html="list1.detailedAnalysis"></p>
+                  </div>
+                </div>
+              </section>
                 <div class="pt3">
                   <div class="wrap">
                     <div class="operate-wrap">
                       <p>
                         <el-input
-                          v-model="score"
+                          v-model="list1.score"
                           placeholder="请输入内容"
                           style="width:60px;"
                           size="mini"
                         ></el-input> 分
                       </p>
-                      <p>查看解析</p>
-                      <p @click="onUpItem()">上移</p>
-                      <p @click="onDownItem()">下移</p>
+                      <p @click="list1.showDetail = true" v-if="!list1.showDetail">查看解析</p>
+                      <p @click="list1.showDetail = false" v-else>隐藏解析</p>
+                      <!-- <p @click="onUpItem()">上移</p>
+                      <p @click="onDownItem()">下移</p> -->
                       <p>删除</p>
                       <p>换一题</p>
                     </div>
@@ -165,7 +218,7 @@
       </span>
     </el-dialog>
 
-    <scoredialog :dialogVisible="scoredialogVisible" :paperId="paperId" @close="closescore"></scoredialog>
+    <scoredialog :dialogVisible="scoredialogVisible" :paperId="paperId" @close="closescore" :tableData="questionList"></scoredialog>
     <analysisdialog :dialogVisible="analysisdialogVisible" :paperId="paperId" @close="closeanalysis"></analysisdialog>
   </div>
 </template>
@@ -187,7 +240,7 @@ export default {
   data() {
     return {
       questionList:[],
-      paperName: "2020年数学期中考试",
+      paperName: "",
       items: [],
       scoredialogVisible: false,
       analysisdialogVisible: false,
@@ -235,7 +288,10 @@ export default {
     closeanalysis() {
       this.analysisdialogVisible = false;
     },
-
+    changeindex(index) {
+      const list = {'0': '零','1': '一','2': '二','3': '三','4': '四','5': '五','6': '六','7': '七','8': '八','9': '九'};
+      return list[index+1]
+    },
     finishExam() {
       this.$confirm("组卷完成，是否下载", {
         confirmButtonText: "下载试卷",
@@ -288,8 +344,10 @@ export default {
               list.push({type:key})
               list[list.length-1].list = []
 
-              data.data.questionMap[key].forEach(item=>{
-                console.log(item)
+              data.data.questionMap[key].forEach((item,index)=>{
+                // console.log(item)
+                item.index = index + 1
+                item.showDetail = false
                 item.answers = []
                 this.handleQuestion(item,item)
                 list[list.length-1].list.push(item)
@@ -328,15 +386,22 @@ export default {
       }
 
       //知识点
-      item.chaptersPoint = []
+      item.knowledgesPoint = []
       if(item.chapters && item.chapters.length) {
         item.chapters.forEach(item1=>{
-          item.chaptersPoint.push(item1.name)
+          item.knowledgesPoint.push(item1.name)
+        })
+      }else if(item.knowledges && item.knowledges.length) {
+        item.knowledges.forEach(item1=>{
+          item.knowledgesPoint.push(item1.name)
         })
       }
 
       if(item.smallQuestions && item.smallQuestions.length) {
-        item.smallQuestions.forEach(item1=>{
+        item.children = []
+        item.smallQuestions.forEach((item1,index1)=>{
+          item1.index = index1 + 1
+          item.children.push(item1)
           this.handleQuestion(item1,item)
         })
         
@@ -390,7 +455,7 @@ export default {
     }
   }
 
-  .pt1,.pt2 {
+  .pt1,.pt2,.middle {
     p,div,span {
       background-color:transparent !important;
       font-size: 1rem;
@@ -536,6 +601,32 @@ export default {
             }
           }
         }
+
+
+        .content {
+
+          padding: 0 30px 20px 30px;
+          .middle {
+            margin-top: 20px;
+            div {
+              display: flex;
+
+              .anstitle {
+                flex-shrink: 0;
+                color: #22a9e8;
+                font-weight: 600;
+              }
+            }
+
+            .tag {
+              padding-left: 10px;
+              color: #828282;
+              font-size: 0.9rem;
+            }
+          }
+        }
+
+
         .pt3 {
           height: 36px;
           line-height: 36px;

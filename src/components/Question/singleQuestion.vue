@@ -6,7 +6,7 @@
           <!-- <img src="@/assets/test1.png" /> -->
           <div class="ques-body">
             <span v-if="!showSimilarity">{{index+1}}、</span>
-            <div v-html="list.name" style="display:flex;"></div>
+            <div v-html="list.name" style="display:flex;flex-wrap: wrap;"></div>
           </div>
         </div>
         <div class="qt2" v-if="list.options.length">
@@ -18,6 +18,31 @@
             </li>
 
           </ul>
+        </div>
+
+        <!-- 小题 -->
+        <div class="" v-if="list.smallQuestions.length" style="margin-top: 10px;">
+          <div v-for="(list1,index1) in list.smallQuestions">
+
+            <div class="qt1">
+              <!-- <img src="@/assets/test1.png" /> -->
+              <span>{{index1+1}}</span><span>、</span>
+              <span v-html="list1.name"></span>
+            </div>
+            <div class="qt2" v-if="list1.options.length">
+              <ul>
+                <li style="width: 100%;" class="selectoption" v-for="item in list1.selectoption">
+
+                  <span>{{item.key}}</span>
+                  <span>、</span>
+                  <span v-html="item.value"></span> 
+                  <!-- <img src="@/assets/test1.png" /> -->
+                </li>
+
+
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 

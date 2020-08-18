@@ -3,7 +3,7 @@
     title="试卷分析"
     :visible.sync="visible"
     :close-on-click-modal="false"
-    width="700px"
+    width="800px"
     :before-close="closeDialog"
     @opened="getdata"
   >
@@ -92,6 +92,7 @@
 
 <script>
 import echarts from "echarts";
+import { mapGetters } from 'vuex'
 var circle_one_chart;
 var circle_two_chart;
 export default {
@@ -256,7 +257,13 @@ export default {
   computed: {
     visible() {
       return this.dialogVisible;
-    }
+    },
+
+    ...mapGetters([
+      'gradeList',
+      'getuserInfo',
+
+    ]),
   },
   mounted() {},
   methods: {

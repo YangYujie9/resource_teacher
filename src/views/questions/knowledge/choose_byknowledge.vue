@@ -85,7 +85,7 @@
                 <p>难度</p>
                 <div class="div2">
                   <el-radio-group v-model="search.difficulty" size="mini" @change="resetPage">
-                    <el-radio-button :label="item" v-for="item in difficultyList"></el-radio-button>
+                    <el-radio-button :label="item.key" :key="item.key" v-for="item in difficultyList">{{item.value}}</el-radio-button>
                   </el-radio-group>
                 </div>
               </li>
@@ -265,11 +265,6 @@ export default {
 
     },
 
-
-    chapterList(val) {
-
-      this.resetPage()
-    }
   },
   mounted() {
 
@@ -280,7 +275,7 @@ export default {
       this.getmyTestBasket()
       // this.resetPage()
     }
-    this.search.difficulty = this.difficultyList[0]
+    this.search.difficulty = this.difficultyList[0].key
     this.subjectCode = this.getuserInfo.subjectCode
 
     this.getquestionType()
@@ -290,7 +285,23 @@ export default {
 
   methods: {
 
+    close_similarity() {
+      this.similarityVisible = false
+      this.getTableData()
+    },
+    close_error() {
+      this.errorVisible = false
+      this.getTableData()
+    },
+    close_favorite() {
+      this.favoriteVisible = false
+      this.getTableData()
+    },
 
+    chapterList(val) {
+
+      this.resetPage()
+    },
     getCheckedNodes(list) {
 
       this.knowledgeList = list
@@ -355,7 +366,7 @@ export default {
       let params = {
         method:1,
         questionType: this.search.type,
-        difficultyType: this.search.difficulty == "全部"?"":this.search.difficulty,
+        difficultyType: this.search.difficulty,
         name: this.search.keyword,
         gradeName: this.filter.grade.value.substr(0,this.filter.grade.value.length-1),
         knowledgeId: knowledgeIds.join(),

@@ -125,6 +125,8 @@ const actions = {
             // context.commit('setloading',false)
             getGradeList(data.data.school.id,context)
 
+
+            console.log(Cookies.get('paperId'))
             context.commit('setpaperId',Cookies.get('paperId'))
 
           }
