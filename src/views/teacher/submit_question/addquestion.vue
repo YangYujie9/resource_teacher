@@ -164,7 +164,7 @@
           </div>-->
           <div class="form-class" v-show="showQuestonOptions">
             <el-form :model="form" style="margin-bottom:10px;">
-              <el-form-item label="选项个数" v-show="questionType=='单选题' ||questionType=='多选题'">
+              <el-form-item label="选项个数" v-show="questionType=='SingleChoose' ||questionType=='MultipleChoose'">
                 <el-select
                   v-model="form.optionNum"
                   placeholder="请选择"
@@ -190,7 +190,7 @@
           </div>
           <div
             style="display:flex;margin-top:20px;"
-            v-show="activeName=='answer' && (questionType=='单选题' ||questionType=='多选题'||questionType=='判断题'||questionType=='填空题')"
+            v-show="activeName=='answer' && (questionType=='SingleChoose' ||questionType=='MultipleChoose'||questionType=='BoolenQuestion'||questionType=='FillingQuestion')"
           >
             <p>
               <span>答案个数：</span>
@@ -199,12 +199,12 @@
                 placeholder="请选择"
                 style="width:60px;"
                 size="mini"
-                :disabled="questionType=='单选题'||questionType=='判断题'"
+                :disabled="questionType=='SingleChoose'||questionType=='BoolenQuestion'"
               >
                 <el-option v-for="item in relOptions" :key="item" :label="item" :value="item"></el-option>
               </el-select>
             </p>
-            <p v-show="questionType=='单选题' ||questionType=='多选题'||questionType=='判断题'">
+            <p v-show="questionType=='SingleChoose' ||questionType=='MultipleChoose'||questionType=='BoolenQuestion'">
               <span style="margin-left:20px;">正确选项:</span>
               <el-select
                 v-model="answers[index]"
@@ -223,7 +223,7 @@
                 ></el-option>
               </el-select>
             </p>
-            <p style="margin-right:10px;" v-show="questionType=='填空题'">
+            <p style="margin-right:10px;" v-show="questionType=='FillingQuestion'">
               <span style="margin-left:20px;">正确答案:</span>
               <el-button
                 v-for="(item,index) in answers"
@@ -387,7 +387,7 @@ export default {
 
         this.changeOption()
 
-        // if (val == "单选题" || val == "多选题") {
+        // if (val == "SingleChoose" || val == "MultipleChoose") {
         //   this.optionList = [
         //     { label: "A", check: true, content: "" },
         //     { label: "B", check: false, content: "" },
@@ -401,12 +401,12 @@ export default {
         //   this.form.optionNum = 4;
         //   this.answers = ["A", "A", "A", "A", "A", "A", "A", "A"];
 
-        //   if (val == "单选题") {
+        //   if (val == "SingleChoose") {
         //     this.form.relOptionNum = 1;
         //   }else {
         //     this.form.relOptionNum = 2;
         //   }
-        // } else if (val == "判断题") {
+        // } else if (val == "BoolenQuestion") {
         //   this.optionList = [
         //     { label: "对", check: true, content: "" },
         //     { label: "错", check: false, content: "" }
@@ -415,7 +415,7 @@ export default {
         //   this.form.optionNum = 2;
         //   this.form.relOptionNum = 1;
         //   this.answers = ["对"];
-        // } else if (val == "填空题") {
+        // } else if (val == "FillingQuestion") {
         //   this.answers = ["答案","答案","答案","答案","答案","答案","答案","答案","答案"];
         // }
       }
@@ -433,9 +433,9 @@ export default {
 
     showQuestonOptions() {
       if (
-        this.questionType == "单选题" ||
-        this.questionType == "多选题" ||
-        this.questionType == "判断题"
+        this.questionType == "SingleChoose" ||
+        this.questionType == "MultipleChoose" ||
+        this.questionType == "BoolenQuestion"
       ) {
         if (this.activeName == "stems" || this.form.questionNum == 1) {
           return true;
@@ -448,7 +448,7 @@ export default {
     }
 
     // showjudgmentOptions() {
-    //   if(this.questionType=='判断题') {
+    //   if(this.questionType=='BoolenQuestion') {
     //     if(this.form.questionNum == 1 || this.activeName=='stems') {
     //       return true
     //     }else {
@@ -497,7 +497,7 @@ export default {
 
 
     changeOption() {
-        if (this.questionType == "单选题" || this.questionType == "多选题") {
+        if (this.questionType == "SingleChoose" || this.questionType == "MultipleChoose") {
           this.optionList = [
             { label: "A", check: true, content: "" },
             { label: "B", check: false, content: "" },
@@ -511,12 +511,12 @@ export default {
           this.form.optionNum = 4;
           this.answers = ["A", "A", "A", "A", "A", "A", "A", "A"];
 
-          if (this.questionType == "单选题") {
+          if (this.questionType == "SingleChoose") {
             this.form.relOptionNum = 1;
           }else {
             this.form.relOptionNum = 2;
           }
-        } else if (this.questionType == "判断题") {
+        } else if (this.questionType == "BoolenQuestion") {
 
           this.optionList = [
             { label: "对", check: true, content: "" },
@@ -526,7 +526,7 @@ export default {
           this.form.optionNum = 2;
           this.form.relOptionNum = 1;
           this.answers = ["对"];
-        } else if (this.questionType == "填空题") {
+        } else if (this.questionType == "FillingQuestion") {
           this.answers = ["答案","答案","答案","答案","答案","答案","答案","答案","答案"];
         } else {
           this.form.optionNum = 0
@@ -538,7 +538,7 @@ export default {
 
       if(this.editable) {
         this.changeOption()
-        // if (this.questionType == "单选题" || this.questionType == "多选题") {
+        // if (this.questionType == "SingleChoose" || this.questionType == "MultipleChoose") {
         //   this.optionList = [
         //     { label: "A", check: true, content: "" },
         //     { label: "B", check: false, content: "" },
@@ -552,12 +552,12 @@ export default {
         //   this.form.optionNum = 4;
         //   this.answers = ["A", "A", "A", "A", "A", "A", "A", "A"];
 
-        //   if (this.questionType == "单选题") {
+        //   if (this.questionType == "SingleChoose") {
         //     this.form.relOptionNum = 1;
         //   }else {
         //     this.form.relOptionNum = 2;
         //   }
-        // } else if (this.questionType == "判断题") {
+        // } else if (this.questionType == "BoolenQuestion") {
 
         //   this.optionList = [
         //     { label: "对", check: true, content: "" },
@@ -567,7 +567,7 @@ export default {
         //   this.form.optionNum = 2;
         //   this.form.relOptionNum = 1;
         //   this.answers = ["对"];
-        // } else if (this.questionType == "填空题") {
+        // } else if (this.questionType == "FillingQuestion") {
         //   this.answers = ["答案","答案","答案","答案","答案","答案","答案","答案","答案"];
         // }
       }
@@ -762,9 +762,9 @@ export default {
         let selectOption = []
         let answerOption =[]
         let type = this.questionOtions[i].questionType
-        if ( type == "单选题" ||type == "多选题" ||type == "判断题" ||type == "填空题") {
+        if ( type == "SingleChoose" ||type == "MultipleChoose" ||type == "BoolenQuestion" ||type == "FillingQuestion") {
           // console.log(type,this.questionOtions)
-          if(type == "单选题" ||type == "多选题" ||type == "判断题") {
+          if(type == "SingleChoose" ||type == "MultipleChoose" ||type == "BoolenQuestion") {
             for (let j = 0; j < this.questionOtions[i].optionNum; j++) {
               if(this.questionOtions[i].selectOptions[j].content) {
                 selectOption.push({word:this.questionOtions[i].selectOptions[j].label,content:this.questionOtions[i].selectOptions[j].content});
