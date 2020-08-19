@@ -96,7 +96,7 @@
               <p class="title1">难度设置</p>
               <div class="btngroup">
                 <el-radio-group v-model="search.difficulty" size="mini">
-                  <el-radio-button v-for="item in partDifficultyList" :label="item" :key="item">{{item}}</el-radio-button>
+                  <el-radio-button v-for="item in partDifficultyList" :label="item.value" :key="item.key">{{item.value}}</el-radio-button>
                 </el-radio-group>
               </div>
             </li>
@@ -202,7 +202,7 @@ export default {
   mounted() {
     this.gradeList.length? this.filter.grade = this.gradeList[0]: null
     this.subjectCode = this.getuserInfo.subjectCode
-    this.search.difficulty = this.partDifficultyList[0]
+    this.search.difficulty = this.partDifficultyList[0].value
     // this.subjectCode = this.getuserInfo.subjectCode
     this.getquestionType()
     

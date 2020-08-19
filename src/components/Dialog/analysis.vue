@@ -66,7 +66,7 @@
               <el-table-column
                 prop="point"
                 align="center"
-                label="试题难易程度">
+                label="知识点">
               </el-table-column>
               <el-table-column
                 prop="num"

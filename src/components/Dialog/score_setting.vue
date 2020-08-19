@@ -11,53 +11,54 @@
           <span>试卷总分：{{totalScore}}</span>
           <!-- <span style="margin-left:40px;">难度系数：0.64</span> -->
         </p>
-        
-        <div v-for="(list,index) in tableData">
-          <p class="p2">{{changeindex(index)}}、{{list.type}}</p>
+        <div class="score-table-wrap">
+          <div v-for="(list,index) in tableData">
+            <p class="p2">{{changeindex(index)}}、{{list.type}}</p>
 
-            <el-table
-              :data="list.list"
-              border
-              :height="table_height"
-              style="width: 100%"
-              row-key="questionId"
-              :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
-              <el-table-column
-                label="题号"
-                align="center"
-                width="80">
-                 <template slot-scope="scope" >
+              <el-table
+                :data="list.list"
+                border
+                style="width: 100%"
+                row-key="questionId"
+                :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+                <el-table-column
+                  label="题号"
+                  align="center"
+                  width="80">
+                   <template slot-scope="scope" >
+                       
+                      <span  v-if="scope.row.parentId != '0'">({{scope.row.index}})</span>
+                      <span  v-else>{{scope.row.index}}</span> 
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="point"
+                  align="center"
+                  label="知识点">
+                  <template slot-scope="scope">
+                    {{scope.row.knowledgesPoint.join()}}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="difficultyTypeName"
+                  align="center"
+                  width="100"
+                  label="难度">
+                </el-table-column>
+                <el-table-column
+                  prop="score"
+                  align="center"
+                  width="110"
+                  label="分值">
+                  <template slot-scope="scope" >
                      
-                    <span  v-if="scope.row.parentId != '0'">({{scope.row.index}})</span>
-                    <span  v-else>{{scope.row.index}}</span> 
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="point"
-                align="center"
-                label="知识点">
-                <template slot-scope="scope">
-                  {{scope.row.knowledgesPoint.join()}}
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="difficultyTypeName"
-                align="center"
-                width="100"
-                label="难度">
-              </el-table-column>
-              <el-table-column
-                prop="score"
-                align="center"
-                width="110"
-                label="分值">
-                <template slot-scope="scope" >
-                   
-                  <span  v-if="scope.row.smallQuestions && scope.row.smallQuestions.length">{{smallScore(scope.row.smallQuestions)}}</span>
-                  <el-input v-model="scope.row.score" placeholder="请输入内容" style="width:60px;" size="mini" v-else></el-input>分 
-                </template>
-              </el-table-column>
-            </el-table>
+                    <span  v-if="scope.row.smallQuestions && scope.row.smallQuestions.length">{{smallScore(scope.row.smallQuestions)}}</span>
+                    <el-input v-model="scope.row.score" placeholder="请输入内容" style="width:60px;" size="mini" v-else></el-input> 
+                    <span style="margin-left: 10px;">分</span> 
+                  </template>
+                </el-table-column>
+              </el-table>
+          </div>
         </div>
       </div>
       <span slot="footer" class="dialog-footer">
@@ -81,44 +82,14 @@ export default {
     },
     tableData: {
       type: Array,
+    },
+    paperName: {
+      type:String,
     }
   },
   data() {
     return {
-      // tableData: [{
-      //   type: '选择题',
-      //   list: [{
-      //     point: '科学计数法-较大数1',
-      //     diff: '易',
-      //     score: ''
-      //   },{
-      //     point: '直角三角形-较大数2',
-      //     diff: '易',
-      //     score: ''
-      //   }]
-      // },{
-      //   type: '填空题',
-      //   list: [{
-      //     point: '直角三角形-较大数3',
-      //     diff: '易',
-      //     score: '2'
-      //   },{
-      //     point: '科学计数法-较大数4',
-      //     diff: '易',
-      //     score: ''
-      //   }]
-      // },{
-      //   type: '解答题',
-      //   list: [{
-      //     point: '直角三角形-较大数6',
-      //     diff: '易',
-      //     score: ''
-      //   },{
-      //     point: '科学计数法-较大数7',
-      //     diff: '易',
-      //     score: ''
-      //   }]
-      // }]
+
     };
   },
   computed:{
@@ -164,13 +135,42 @@ export default {
       smallQuestions.forEach(list=>{
         score += Number(list.score)
       })
-      console.log(score)
+      // console.log(score)
       return score
     },
 
 
     setScore() {
-      // this.tableData.forEach()
+      let arr = []
+      this.tableData.forEach(item=>{
+        item.list.forEach(item1=>{
+          if(item1.smallQuestions && item1.smallQuestions.length) {
+            item1.smallQuestions.forEach(item2=>{
+              arr.push(`${item2.questionId},${item2.score}`)
+            })
+            
+          }else {
+            arr.push(`${item1.questionId},${item1.score}`)
+          }
+        })
+
+      })
+
+      console.log(arr)
+
+      this.$http.put(`/api/open/paper/${this.paperId}`,{
+        paperId: this.paperId,
+        name: this.paperName,
+        questions: arr
+      })
+      .then(data=>{
+        if(data.status == '200') {
+          return this.$message({
+            message:'分值设定成功',
+            type: 'success'
+          })
+        }
+      })
     }
 
   }
@@ -193,7 +193,12 @@ export default {
 </style>
 <style scoped lang="less">
 .score-setting {
-  height: calc(80vh -20px);
+
+  .score-table-wrap {
+    height: calc(80vh - 240px);
+    overflow-y: auto; 
+  }
+
   .p1 {
     text-align: center;
   }

@@ -142,7 +142,7 @@
                       <p @click="list1.showDetail = false" v-else>隐藏解析</p>
                       <!-- <p @click="onUpItem()">上移</p>
                       <p @click="onDownItem()">下移</p> -->
-                      <p>删除</p>
+                      <p @click="deleteQuestion(list1.questionId)">删除</p>
                       <p>换一题</p>
                     </div>
                   </div>
@@ -213,12 +213,12 @@
     <el-dialog title="清空试题" :visible.sync="cleardialogVisible" width="600px">
       <p style="margin-top:20px;">确定清空试题篮所有试题？</p>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="cleardialogVisible = false" size="mini">确 定</el-button>
+        <el-button type="primary" @click="clearBasket" size="mini">确 定</el-button>
         <el-button @click="cleardialogVisible = false" size="mini">取 消</el-button>
       </span>
     </el-dialog>
 
-    <scoredialog :dialogVisible="scoredialogVisible" :paperId="paperId" @close="closescore" :tableData="questionList"></scoredialog>
+    <scoredialog :dialogVisible="scoredialogVisible" :paperId="paperId" @close="closescore" :paperName="paperName" :tableData="questionList"></scoredialog>
     <analysisdialog :dialogVisible="analysisdialogVisible" :paperId="paperId" @close="closeanalysis"></analysisdialog>
   </div>
 </template>
@@ -301,20 +301,39 @@ export default {
       })
         .then(() => {
           this.downloadVisible = true;
-          this.$message({
-            type: "success",
-            message: "删除成功!"
-          });
+
         })
         .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除"
-          });
+
         });
       
     },
+    clearBasket() {
 
+      this.$http.delete(`/api/open/paper/${this.paperId}`)
+      .then(data=>{
+        if(data.status == '200') {
+
+          this.cleardialogVisible = false
+          this.$confirm("试卷删除成功，是否重新挑题", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            // center: true,
+            //type: "warning"
+          })
+            .then(() => {
+              this.$router.push('/questions/chooseBychapter')
+
+            })
+            .catch(() => {
+
+            });
+        }
+      })
+      
+
+      
+    },
     // 上移
     onUpItem(item, index) {
       this.items.splice(index - 1, 0, item);
@@ -330,6 +349,19 @@ export default {
       if (index == this.items.length - 1) {
         alert("已经是最后一项啦！");
       }
+    },
+
+    deleteQuestion(questionId) {
+      this.$http.delete(`/api/open/paper/${this.paperId}/${questionId}`)
+      .then(data=>{
+        if(data.status == '200') {
+          this.getPaperDetail()
+          this.$message({
+            message: '试题删除成功',
+            type:'success'
+          })
+        }
+      })
     },
 
     getPaperDetail() {
@@ -507,6 +539,7 @@ export default {
     border: 1px solid #e2e2e2;
     padding: 20px;
     line-height: 1.5;
+    min-height: 300px;
 
     .title {
       text-align: center;
