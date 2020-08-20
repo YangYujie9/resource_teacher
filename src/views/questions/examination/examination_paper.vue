@@ -1,35 +1,30 @@
 <template>
   <div class="examination">
-    <!-- <ul><li v-for="i in 89">{{i}}</li></ul> -->
     <left-fixed-nav :isfixTab="isfixTab">
-      <div slot="left">
-        <!-- <div class="tree-wrap" :class="{fixedclass:isfixTab}"> -->
+        <div slot="left">
           <div class="tab-class">
             <div class="tree-class" :class="{treeclassfixed:isfixTab}">
-              <div v-for="(item,index) in list">
+              <div v-for="(item,index) in questionList">
                 <p class="titlep">
-                  {{index+1}}{{item.type}}
-                  <!-- <span>(共{{item.list.length}}小题)</span> -->
+                  <span>{{$changeIndex(index)}}</span>
+                  <span>、</span>
+                  <span>{{item.type}}</span>
                 </p>
                 <div class="btngroup">
                   <p>
-                    <el-button
-                      v-for="(item1,index1) in item.list"
-                      size="mini"
-                      type="primary"
-                      plain
-                    >{{index1+1}}</el-button>
+                    <el-checkbox-group v-model="checkDelete" size="mini">
+                      <el-checkbox-button v-for="(item1,index1) in item.list" :label="item1.questionId" :key="item1.questionId">{{index1+1}}</el-checkbox-button>
+                    </el-checkbox-group>
+
                   </p>
                   <p style="flex-shrink: 0;">
                     <el-button type="text">删除</el-button>
-                    <!-- <el-button type="text">排序</el-button> -->
                   </p>
                 </div>
               </div>
             </div>
           </div>
-        <!-- </div> -->
-      </div>
+      </div>  
 
       <div slot="right">
         <div class="bread-div">
@@ -41,18 +36,18 @@
           <el-button type="primary" size="mini" @click="scoredialogVisible=true">分值设定</el-button>
           <el-button type="primary" size="mini" @click="analysisdialogVisible=true">试卷分析</el-button>
           <el-button type="primary" size="mini" @click="finishExam">保存试卷</el-button>
-          <el-button type="primary" size="mini">继续挑题</el-button>
+          <el-button type="primary" size="mini" @click="$router.push('/questions/chooseBychapter')">继续挑题</el-button>
           <el-button type="primary" size="mini" @click="cleardialogVisible=true">清空试卷</el-button>
         </div>
 
-        <div class="exam-wrap">
+        <div class="exam-wrap" v-if="questionList && questionList.length">
           <p class="title">
-            <el-input v-model="paperName" placeholder="请输入内容" style="width:360px;"></el-input>
+            <el-input v-model="paperName" placeholder="请输入内容" style="width:360px;" @change="setScore"></el-input>
           </p>
           <div class="content">
-            <el-button type="primary" size="mini" class="uploadbtn">试卷下载</el-button>
+            <el-button type="primary" size="mini" class="uploadbtn" @click="downloadVisible = true">试卷下载</el-button>
             <div v-for="(list,index) in questionList" class="singlediv">
-              <p><span>{{changeindex(index)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
+              <p><span>{{$changeIndex(index)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
               <div class="singleques" v-for="(list1,index1) in list.list">
 
                 <div class="pt1">
@@ -131,11 +126,14 @@
                   <div class="wrap">
                     <div class="operate-wrap">
                       <p>
+                        <span v-if="list1.smallQuestions && list1.smallQuestions.length">{{list1.score}}</span>
                         <el-input
                           v-model="list1.score"
                           placeholder="请输入内容"
                           style="width:60px;"
                           size="mini"
+                          @change="setScore(list1)"
+                          v-else
                         ></el-input> 分
                       </p>
                       <p @click="list1.showDetail = true" v-if="!list1.showDetail">查看解析</p>
@@ -153,62 +151,7 @@
         </div>
       </div>
     </left-fixed-nav>
-    <el-dialog
-      title="下载word试卷"
-      :visible.sync="downloadVisible"
-      width="800px"
-      custom-class="down-wrap"
-    >
-      <div class="down-body">
-        <el-form :model="download" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-          <el-form-item label="Word版本：" prop="name">
-            <el-radio-group v-model="download.version">
-              <el-radio label="普通试卷">
-                Word2010/2013，文件扩展名为docx
-                <span class="descclass" style="margin-left:48px;">docx格式文档，可编辑公式</span>
-              </el-radio>
-              <el-radio label="教师用卷">
-                Word2003/2007/WPS，文件扩展名为doc
-                <span class="descclass" style="margin-left:20px;">doc格式文档，公式为图片，不可编辑公式</span>
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label="纸张大小：" prop="region">
-            <el-radio-group v-model="download.size">
-              <el-radio label="A4"></el-radio>
-              <el-radio label="16K"></el-radio>
-              <el-radio label="A4横(双栏)"></el-radio>
-              <el-radio label="A3横(双栏)"></el-radio>
-              <el-radio label="B4横(双栏)"></el-radio>
-              <el-radio label="8K横(双栏)"></el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label="试卷类型：">
-            <el-radio-group v-model="download.type">
-              <el-radio label="普通试卷">
-                普通试卷
-                <span class="descclass">（答案集中在卷尾）</span>
-              </el-radio>
-              <el-radio label="教师用卷">
-                教师用卷
-                <span class="descclass">（每题后面跟答案）</span>
-              </el-radio>
-              <el-radio label="学生用卷">
-                学生用卷
-                <span class="descclass">（无答案）</span>
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label="下载解析：" prop="delivery">
-            <el-checkbox label="美食/餐厅线上活动" name="type" v-model="download.ifparse"></el-checkbox>
-          </el-form-item>
-        </el-form>
-      </div>
 
-      <span slot="footer" class="dialog-footer footbtn">
-        <el-button type="primary" @click="downloadVisible = false" size="mini">确 定 下 载</el-button>
-      </span>
-    </el-dialog>
 
     <el-dialog title="清空试题" :visible.sync="cleardialogVisible" width="600px">
       <p style="margin-top:20px;">确定清空试题篮所有试题？</p>
@@ -218,8 +161,9 @@
       </span>
     </el-dialog>
 
-    <scoredialog :dialogVisible="scoredialogVisible" :paperId="paperId" @close="closescore" :paperName="paperName" :tableData="questionList"></scoredialog>
+    <scoredialog :dialogVisible="scoredialogVisible" :paperId="paperId" @close="closescore" :paperName="paperName" :tableData="questionList" @getData="getPaperDetail"></scoredialog>
     <analysisdialog :dialogVisible="analysisdialogVisible" :paperId="paperId" @close="closeanalysis"></analysisdialog>
+    <downloaddialog :dialogVisible="downloadVisible" :paperId="paperId" @close="closedownload"></downloaddialog>
   </div>
 </template>
 
@@ -228,12 +172,14 @@ import { mapGetters } from 'vuex'
 import leftFixedNav from "@/components/Nav/leftFixedNav";
 import scoredialog from "@/components/Dialog/score_setting";
 import analysisdialog from "@/components/Dialog/analysis";
+import downloaddialog from "@/components/Dialog/download_paper";
 
 export default {
   components: {
     leftFixedNav,
     scoredialog,
-    analysisdialog
+    analysisdialog,
+    downloaddialog
   },
   props: ["isfixTab"],
 
@@ -241,24 +187,14 @@ export default {
     return {
       questionList:[],
       paperName: "",
+      paperType:'',
       items: [],
       scoredialogVisible: false,
       analysisdialogVisible: false,
       downloadVisible: false,
       cleardialogVisible: false,
       score: "",
-      list: [
-        {
-          type: "选择题",
-          list: [
-            { ques: "", check: false },
-            { ques: "", check: false },
-          ]
-        },
-        { type: "填空题", list: [{ ques: "", check: false }] },
-        { type: "解答题", list: [{ ques: "", check: false }] },
-        { type: "判断题", list: [{ ques: "", check: false }] }
-      ],
+      checkDelete:[],
       download: {
         version: "",
         size: "",
@@ -288,45 +224,54 @@ export default {
     closeanalysis() {
       this.analysisdialogVisible = false;
     },
-    changeindex(index) {
-      const list = {'0': '零','1': '一','2': '二','3': '三','4': '四','5': '五','6': '六','7': '七','8': '八','9': '九'};
-      return list[index+1]
+
+    closedownload() {
+      this.downloadVisible = false;
     },
+
     finishExam() {
-      this.$confirm("组卷完成，是否下载", {
-        confirmButtonText: "下载试卷",
-        cancelButtonText: "保存试卷",
-        center: true,
-        //type: "warning"
+
+      this.$http.put(`/api/open/paper/addPaper/${this.paperId}`)
+      .then((data)=>{
+        if(data.status == '200') {
+          this.$confirm("组卷完成，是否下载", {
+            confirmButtonText: "下载试卷",
+            cancelButtonText: "保存试卷",
+            center: true,
+            //type: "warning"
+          })
+            .then(() => {
+              this.downloadVisible = true;
+
+            })
+            .catch(() => {
+
+            });
+        }
       })
-        .then(() => {
-          this.downloadVisible = true;
 
-        })
-        .catch(() => {
-
-        });
       
     },
     clearBasket() {
 
-      this.$http.delete(`/api/open/paper/${this.paperId}`)
+      this.$http.delete(`/api/open/paper/deleteAll/${this.paperId}`)
       .then(data=>{
         if(data.status == '200') {
 
           this.cleardialogVisible = false
-          this.$confirm("试卷删除成功，是否重新挑题", {
+          this.$confirm("试卷清空成功，是否重新挑题", {
             confirmButtonText: "确定",
             cancelButtonText: "取消",
             // center: true,
             //type: "warning"
           })
             .then(() => {
+
               this.$router.push('/questions/chooseBychapter')
 
             })
             .catch(() => {
-
+              this.getPaperDetail()
             });
         }
       })
@@ -369,6 +314,8 @@ export default {
       .then((data)=>{
         if(data.status == '200') {
           this.paperName = data.data.paperName
+          // this.paperType = data.data.paperType
+
 
           let list = []
           if(data.data.questionMap) {
@@ -385,9 +332,14 @@ export default {
                 list[list.length-1].list.push(item)
               })
             }
+          }else {
+            this.$message({
+              message:'试题蓝为空',
+              type: 'warning'
+            })
           }
 
-          console.log(list)
+          // console.log(list)
 
 
           this.questionList = list
@@ -432,7 +384,7 @@ export default {
       if(item.smallQuestions && item.smallQuestions.length) {
         item.children = []
         item.smallQuestions.forEach((item1,index1)=>{
-          item1.index = index1 + 1
+          item1.index = "("+ Number(index1 + 1) + ")"
           item.children.push(item1)
           this.handleQuestion(item1,item)
         })
@@ -441,12 +393,47 @@ export default {
 
       //console.log(item) 
     },
+
+
+    setScore(list) {
+
+
+      let arr = []
+      // console.log(list)
+      if(list && list.questionId) {
+        arr.push(`${list.questionId},${list.score}`)
+      }
+
+      this.$http.put(`/api/open/paper/${this.paperId}`,{
+        paperId: this.paperId,
+        name: this.paperName,
+        questions: arr
+      })
+      .then(data=>{
+        if(data.status == '200') {
+          this.getPaperDetail
+          // return this.$message({
+          //   message:'分值设定成功',
+          //   type: 'success'
+          // })
+        }
+      })
+    }
   }
 };
 </script>
 <style lang="less">
 
 .examination {
+
+  // .left-wrap {
+  //   display: none;
+  // }
+
+  // .content-wrap {
+  //   margin-left: auto !important;
+  //   margin: 0 auto;
+  // }
   .el-checkbox-button__inner {
     margin-top: 10px;
     margin-right: 10px;
@@ -461,7 +448,10 @@ export default {
   .el-checkbox-button__inner {
     background-color: #f2f5fc;
   }
-
+  // .el-checkbox-button.is-focus .el-checkbox-button__inner {
+  //   background-color:#409EFF;
+  //   color: #ffffff;
+  // }
   .el-radio-button__inner {
     background-color: #dbe5fd;
     color: #84a6f7;
@@ -501,16 +491,6 @@ export default {
     }
   }
 
-  .down-wrap {
-    .el-radio {
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-    .el-dialog__footer {
-      background-color: #e3ebff;
-      text-align: center;
-    }
-  }
 
   .el-card__body {
     padding: 0px;
@@ -695,11 +675,6 @@ export default {
     }
   }
 
-  .down-wrap {
-    .descclass {
-      font-size: 12px;
-      color: #9a9a9a;
-    }
-  }
+
 }
 </style>

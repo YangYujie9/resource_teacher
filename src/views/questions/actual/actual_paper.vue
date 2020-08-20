@@ -111,12 +111,12 @@
 
 
         <div v-show="activePage=='真题维护'">
-          <div>
-            <el-form :model="form" size="small">
-              <el-form-item label="设置试卷名称：">
+          <div v-if="!isTemplate">
+            <el-form :model="form" size="small" :rules="rules" ref="ruleForm">
+              <el-form-item label="设置试卷名称：" prop="name">
                 <el-input v-model="form.name" class="input-class"></el-input>
               </el-form-item>
-              <el-form-item label="设置试卷年份：">
+              <el-form-item label="设置试卷年份：" prop="year">
                  <el-select v-model="form.year" placeholder="请选择">
                   <el-option
                     v-for="item in options"
@@ -126,7 +126,7 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="设置试卷学科：">
+              <el-form-item label="设置试卷学科：" prop="subject">
                 <el-select v-model="form.subject" placeholder="请选择">
                   <el-option
                     v-for="item in options"
@@ -136,7 +136,7 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="设置试卷学段：">
+              <el-form-item label="设置试卷学段：" prop="learningSection">
                 <el-select v-model="form.learningSection" placeholder="请选择">
                   <el-option
                     v-for="item in options"
@@ -146,7 +146,7 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="设置试卷年级：">
+              <el-form-item label="设置试卷年级：" prop="grade">
                 <el-select v-model="form.grade" placeholder="请选择">
                   <el-option
                     v-for="item in options"
@@ -156,7 +156,7 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="设置试卷地区：">
+              <el-form-item label="设置试卷地区：" prop="address">
                 <el-select v-model="form.address" placeholder="请选择">
                   <el-option
                     v-for="item in options"
@@ -166,7 +166,7 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="设置试卷题型、数量：">
+              <el-form-item label="设置试卷题型、数量：" prop="questionType">
 
                 <div class="inputgroup title2">
 
@@ -181,7 +181,7 @@
                 </div>
                 
               </el-form-item>
-              <el-form-item label="设置试卷类型：">
+              <el-form-item label="设置试卷类型：" prop="type">
                 <el-radio-group v-model="form.type">
                   <el-radio :label="3">中考模拟</el-radio>
                   <el-radio :label="6">高考模拟</el-radio>
@@ -189,10 +189,14 @@
                 </el-radio-group>
               </el-form-item>
               <el-form-item style="text-align: center;">
-                <el-button type="primary">生成真题模版</el-button>
+                <el-button type="primary" @click="addTemplate">生成真题模版</el-button>
               </el-form-item>
             </el-form>
 
+            
+          </div>
+
+          <div v-else>
             
           </div>
         </div>
@@ -215,7 +219,7 @@ export default {
   data() {
     return {
       activePage: '真题查询',
-      
+      isTemplate: false,
       tableData:[{
           title: "2020届合肥省衡水中学高三高考前密卷（一）数学（理）试卷",
           number:10,
@@ -289,7 +293,29 @@ export default {
       total:0,
       cateageList: ["常考题", "易错题", "好题", "压轴题"],
       isAnswer: false,
-
+      rules: {
+        name: [
+          { required: true, message: '请输入试卷名称', trigger: 'blur' },
+        ],
+        year: [
+          { required: true, message: '请选择试卷年份', trigger: 'change' }
+        ],
+        subject: [
+          { required: true, message: '请选择试卷学科', trigger: 'change' }
+        ],
+        learningSection: [
+          { required: true, message: '请选择试卷学段', trigger: 'change' }
+        ],
+        grade: [
+          { required: true, message: '请选择试卷年级', trigger: 'change' }
+        ],
+        address: [
+          { required: true, message: '请选择试卷地区', trigger: 'change' }
+        ],
+        questionType: [
+          { type: 'array', required: true, message: '请选择试卷题型', trigger: 'change' }
+        ]
+      }
     };
   },
   computed: {
@@ -331,6 +357,19 @@ export default {
       // this.getTableData()
     // },
     },
+
+
+    addTemplate() {
+
+      this.$refs['ruleForm'].validate((valid) => {
+        if (valid) {
+          this.isTemplate = true
+        } else {
+          
+          return false;
+        }
+      });
+    }
   
   }
 };

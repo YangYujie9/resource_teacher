@@ -20,46 +20,15 @@ Vue.use(ElementUI)
 Vue.$http = Vue.prototype.$http = erpAxios
 
 
-//路由拦截
+Vue.$changeIndex = Vue.prototype.$changeIndex = (index) => {
+
+    const list = {'0': '零','1': '一','2': '二','3': '三','4': '四','5': '五','6': '六','7': '七','8': '八','9': '九'};
+    return list[index+1]
 
 
-// router.beforeEach((to, from, next) => { 
-
-//     if( Cookies.get('resource-teacher')) {
-
-//       if (store.state.person.userInfo.person && store.state.person.userInfo.person.fullName) {
-//       } else {
-
-//         store.dispatch('getUserBaseInfo',router)
-//       }
-
-//       if (to.path =='/login') {
+}
 
 
-//         next({
-//           path: '/addquestion/submitQuestions',
-//         })
-//       } else {
-
-//         next()
-//       }
-
-
-//     } else {
-
-//       if (to.path !='/login') {
-//         next({
-//           path: '/login',
-//         })
-//       } else {
-//         next()
-//       }
-
-//     }
-
-
-//     next()
-// })
 
 
 Vue.config.productionTip = false

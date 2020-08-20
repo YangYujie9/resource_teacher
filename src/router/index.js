@@ -76,6 +76,10 @@ Vue.use(VueRouter)
         name: 'uploadResource',
         component: ()=>import('@/views/teacher/home/upload_resource'),
       },{
+        path: 'courseware',
+        name: 'courseware',
+        component: ()=>import('@/views/teacher/resource/courseware'),
+      },{
         path: 'myWarehouse',
         name: 'myWarehouse',
         component: ()=>import('@/views/teacher/warehouse'),

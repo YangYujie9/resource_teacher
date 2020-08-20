@@ -319,7 +319,7 @@ export default {
         difficulty: "",
         grade: "",
         subjectId: "",
-        subjectCode:0,
+        subjectCode:"",
         subjectName:'',
         version: "",
         knowledge: ""

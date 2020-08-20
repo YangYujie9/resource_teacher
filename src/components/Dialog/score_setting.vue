@@ -25,10 +25,8 @@
                   label="题号"
                   align="center"
                   width="80">
-                   <template slot-scope="scope" >
-                       
-                      <span  v-if="scope.row.parentId != '0'">({{scope.row.index}})</span>
-                      <span  v-else>{{scope.row.index}}</span> 
+                   <template slot-scope="scope">  
+                    <span>{{scope.row.index}}</span> 
                   </template>
                 </el-table-column>
                 <el-table-column
@@ -102,6 +100,7 @@ export default {
 
           item.list.forEach(list=>{
             if(list.smallQuestions && list.smallQuestions.length) {
+              
               list.smallQuestions.forEach(list1=>{
                 score += Number(list1.score)
               })
@@ -111,7 +110,7 @@ export default {
           })
 
       })
-      console.log(score)
+      // console.log(score)
       return score
     }
   },
@@ -131,7 +130,7 @@ export default {
     smallScore(smallQuestions) {
       let score = 0
 
-      console.log(smallQuestions)
+      // console.log(smallQuestions)
       smallQuestions.forEach(list=>{
         score += Number(list.score)
       })
@@ -145,9 +144,14 @@ export default {
       this.tableData.forEach(item=>{
         item.list.forEach(item1=>{
           if(item1.smallQuestions && item1.smallQuestions.length) {
+            let smallscore = 0
+            
             item1.smallQuestions.forEach(item2=>{
+              smallscore += item2.score
               arr.push(`${item2.questionId},${item2.score}`)
             })
+
+            arr.push(`${item1.questionId},${smallscore}`)
             
           }else {
             arr.push(`${item1.questionId},${item1.score}`)
@@ -156,7 +160,7 @@ export default {
 
       })
 
-      console.log(arr)
+      // console.log(arr)
 
       this.$http.put(`/api/open/paper/${this.paperId}`,{
         paperId: this.paperId,
@@ -165,6 +169,8 @@ export default {
       })
       .then(data=>{
         if(data.status == '200') {
+          this.$emit('getData')
+          this.$emit('close')
           return this.$message({
             message:'分值设定成功',
             type: 'success'

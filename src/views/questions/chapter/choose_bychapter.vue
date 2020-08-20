@@ -94,7 +94,7 @@ export default {
         version: "",
         grade: "",
         subjectId:"",
-        subjectCode:0,
+        subjectCode:'',
       },
       testBasket:0,
       form: {

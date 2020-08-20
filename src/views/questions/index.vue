@@ -81,6 +81,7 @@ export default {
   },
   mounted() {
     //window.addEventListener('scroll', this.handleTabFix, true)
+    // el-scrollbar需要加上wrap this.$refs.home.wrap.addEventListener("scroll", this.handleTabFix, true);
     this.$refs.home.addEventListener("scroll", this.handleTabFix, true);
 
     this.navList.forEach(list=>{
@@ -118,6 +119,8 @@ export default {
   height: calc(100% - 0px);
   background-color: #f0f3fa;
   overflow-y: auto;
+  width: 100%;
+  min-width: 1400px;
 
 
   &-wrap {

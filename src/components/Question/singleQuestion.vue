@@ -5,7 +5,7 @@
         <div class="qt1">
           <!-- <img src="@/assets/test1.png" /> -->
           <div class="ques-body">
-            <span v-if="!showSimilarity">{{index+1}}、</span>
+            <span v-if="showSimilarity" class="order">{{index+1}}、</span>
             <div v-html="list.name" style="display:flex;flex-wrap: wrap;"></div>
           </div>
         </div>
@@ -144,7 +144,7 @@
             <span>难度：{{list.difficultyTypeName}}</span>
           </p>
           <p class="pt2">
-            <span @click="getSimilarity(list.questionId)" class="foot-icon">
+            <span @click="getSimilarity(list.questionId)" class="foot-icon" v-if="showSimilarity">
               <i class="iconfont iconpaibanguanli iconcolor"></i> 相似题
             </span>
             <!-- <span @click="errorVisible = true" class="foot-icon">
@@ -166,10 +166,10 @@
 
 
             <span class="foot-icon" @click="list.showDetail=true" v-if="!list.showDetail && !showSimilarity">
-              <i class="iconfont iconwenbensousuo iconcolor">显示解析</i>
+              <i class="iconfont iconwenbensousuo iconcolor"></i>显示解析
             </span>
             <span class="foot-icon" @click="list.showDetail=false" v-if="list.showDetail && !showSimilarity">
-              <i class="iconfont iconwenbensousuo iconcolor">隐藏解析</i>
+              <i class="iconfont iconwenbensousuo iconcolor"></i>隐藏解析
             </span>
  <!--          	<span class="foot-icon">
              	<i class="iconfont iconwenbensousuo iconcolor"></i>
@@ -381,6 +381,7 @@ export default {
 
     .content {
       p,div,span {
+        line-height: 1 !important;
         background-color:transparent !important;
         font-size: 1rem;
         font-family: "JyeMath", "JyeMathLetters", "Times New Roman", "微软雅黑",
@@ -450,8 +451,12 @@ export default {
 	      cursor: pointer;
 	      .ques-body {
 	        display: flex;
-	        flex-wrap: wrap;
-	        align-items:center;
+	        // flex-wrap: wrap;
+	        // align-items: flex-end;
+
+          .order {
+            flex-shrink: 0;
+          }
 	      }
 
 

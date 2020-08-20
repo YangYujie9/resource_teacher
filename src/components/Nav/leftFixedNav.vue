@@ -209,7 +209,7 @@ export default {
     width: 80%;
     //margin:0 auto;
     margin-left: 7%;
-    min-width: 1250px;
+    // min-width: 1250px;
     height: 100%;
     display: flex;
     //justify-content: space-between;
@@ -226,7 +226,7 @@ export default {
     }
 
     .right-wrap {
-      width: 90%;
+      width: 100%;
       min-height: calc(100vh - 328px);
     }
 

@@ -52,7 +52,7 @@ export default {
         },
         {
           label: "课件",
-          route: "2",
+          route: "/teacher/courseware",
           check: false
         },
         {
@@ -129,6 +129,47 @@ export default {
 };
 </script>
 <style lang="less">
+.ques-home {
+  .el-radio-costom {
+    .el-radio-button__inner {
+      border: 0px;
+      background-color: #f2f5fc;
+      border-radius: 3px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .el-input__inner {
+      background: transparent;
+    }
+
+    .el-radio-button:first-child .el-radio-button__inner {
+      border-left: 0px;
+      border-radius: 3px;
+    }
+    .el-radio-button:last-child .el-radio-button__inner {
+      border-radius: 3px;
+    }
+    .el-button--primary.is-plain {
+      background: #f2f5fc;
+      border-color: #e2e2e2;
+      color: #7b9ff6;
+
+      &:hover,
+      &:active,
+      &:focus {
+        color: #5182f4;
+      }
+    }
+
+    .el-radio-button__orig-radio:checked+.el-radio-button__inner {
+      color: #FFF;
+      background-color: #409EFF;
+      border-color: #409EFF;
+      box-shadow: -1px 0 0 0 #409EFF;
+    }
+  }
+}
+
   .form-class {
     .el-radio-button__inner {
       border-left: 1px solid #b3d8ff;
@@ -161,10 +202,14 @@ export default {
   height: calc(100% - 0px);
   background-color: #f0f3fa;
   overflow: auto;
+  width: 100%;
+  min-width: 1400px;
 
   &-wrap {
     width: 100%;
+    min-width: 1300px;
     position: relative;
+    min-height: calc(100vh - 298px);
     //height: 100%;
 
     .nav {
@@ -207,9 +252,10 @@ export default {
   }
 
   .footer {
+    margin-top: 30px;
     height: 60px;
     line-height: 60px;
-    //background-color: red;
+    background-color: #75777c;
   }
 }
 </style>

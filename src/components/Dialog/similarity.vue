@@ -92,7 +92,7 @@
             </p>
           </section>
         </el-card> -->
-        <singleQuestion shadow="never" :list="question" :index="1" :isAnswer="isAnswer" @getData="getSimilarity" v-if="question">
+        <singleQuestion shadow="never" :showSimilarity="false" :list="question" :index="1" :isAnswer="isAnswer" @getData="getSimilarity" v-if="question" @addCollectFolder="addCollectFolder" @getmyTestBasket="getmyTestBasket">
           
         </singleQuestion>
         <div v-else style="text-align: center;">暂无数据</div>
@@ -207,6 +207,15 @@ export default {
         
       }
     },
+
+    getmyTestBasket() {
+      this.$emit('getmyTestBasket')
+    },
+
+    addCollectFolder() {
+      this.$emit('addCollectFolder')
+    }
+
 
   }
 };
