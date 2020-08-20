@@ -134,12 +134,12 @@ export default {
 </script>
 <style lang="less">
 .rescoure-center {
-
+  .content-wrap {
+    width: 68% !important;
+    margin:0 auto !important;
+  }
 }
-	.content-wrap {
-		width: 68% !important;
-		margin:0 auto !important;
-	}
+
 </style>
 <style scoped lang="less">
 .rescoure-center {

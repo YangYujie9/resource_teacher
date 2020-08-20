@@ -226,7 +226,7 @@ export default {
     }
 
     .right-wrap {
-      width: 100%;
+      width: 80%;
       min-height: calc(100vh - 328px);
     }
 
