@@ -348,6 +348,7 @@ export default {
       this.search.page = val
       // console.log(`当前页: ${val}`);
       this.getTableData()
+      this.$emit('backToTop')
     },
 
     resetPage() {
@@ -369,13 +370,15 @@ export default {
         difficultyType: this.search.difficulty,
         name: this.search.keyword,
         gradeName: this.filter.grade.value.substr(0,this.filter.grade.value.length-1),
-        knowledgeId: knowledgeIds.join(),
+        
         page: this.search.page - 1,
         size: this.search.size,
         // subject:this.subjectCode
         // knowledgeId: this.search.difficulty,
       }
-      this.$http.get(`/api/open/question/1/questions`,params)
+      this.$http.post(`/api/open/question/1/questions`,{
+        knowledgeId: knowledgeIds,
+      },params)
       .then((data)=>{
         
         data.data.content.forEach(item=>{
@@ -517,7 +520,9 @@ export default {
 </script>
 <style lang="less">
 .knowledge {
-
+  .treeclassfixed {
+    max-height: calc(100vh - 260px) !important;
+  }
 
   .el-badge__content {
     background-color: #ff7f21;

@@ -162,7 +162,7 @@
             </el-form>
             <Ueditor :writeMsg="defaultMsgA" :id="ueditorA" :config="configA" ref="ueA"></Ueditor>
           </div>-->
-          <div class="form-class">
+          <div class="form-class" v-show="questionType=='单选题' ||questionType=='多选题'||questionType=='判断题'">
             <el-form :model="form" style="margin-bottom:10px;">
               <el-form-item label="选项个数" v-show="questionType=='单选题' ||questionType=='多选题'">
                 <el-select
@@ -624,12 +624,12 @@ export default {
     },
     choose_quesnum(list) {
       this.save_prev(true);
-
+      console.log(list)
       //console.log(this.questionOtions)
       this.editable = list.edit ? true : false;
       this.questionType = list.questionType
         ? list.questionType
-        : this.typeList[0].key;
+        : this.typeList[0].value;
       this.form.difficulty = list.difficulty
         ? list.difficulty
         : this.difficultyList[0].value;
@@ -890,6 +890,10 @@ export default {
 </script>
 <style lang="less">
 .addques-home {
+
+  .right-wrap {
+    width: 80% !important;
+  }
   .el-form-item {
     margin-bottom: 0px;
     display: flex;

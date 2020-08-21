@@ -7,9 +7,9 @@
         <!-- <div class="tab-class"> -->
         <!-- <div class="tree-class" :class="{treeclassfixed:isfixTab}"> -->
         <!-- <el-tree
-									:data="treeData.data"
-									:show-checkbox="treeData.showCheckBox"
-									node-key="id" 
+                  :data="treeData.data"
+                  :show-checkbox="treeData.showCheckBox"
+                  node-key="id" 
         ></el-tree>-->
         <slot name="left"></slot>
         <!-- </div> -->
@@ -114,7 +114,7 @@ export default {
   }
 
   .treeclassfixed {
-    max-height: calc(100vh - 230px) !important;
+    max-height: calc(100vh - 280px) !important;
   }
 }
   //  标签页
@@ -196,12 +196,12 @@ export default {
     padding: 10px 20px 20px 20px;
     background-color: #f2f5fc;
 
+
+  }
     .pagination {
       margin-top: 30px;
       text-align: right;
     }
-  }
-
 </style>
 <style scoped lang="less">
 .left-nav {
@@ -209,7 +209,7 @@ export default {
     width: 80%;
     //margin:0 auto;
     margin-left: 7%;
-    // min-width: 1250px;
+    min-width: 1250px;
     height: 100%;
     display: flex;
     //justify-content: space-between;
@@ -226,7 +226,7 @@ export default {
     }
 
     .right-wrap {
-      width: 80%;
+      width: 90%;
       min-height: calc(100vh - 328px);
     }
 
@@ -235,9 +235,9 @@ export default {
     }
   }
   // .fixedNavbar{
-  // 	position: fixed;
-  // 	top: 0;
-  // 	left: 0;
+  //  position: fixed;
+  //  top: 0;
+  //  left: 0;
   //   width: 100%;
   //   margin-bottom: 20px;
 

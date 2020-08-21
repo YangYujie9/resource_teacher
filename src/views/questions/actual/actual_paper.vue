@@ -114,7 +114,7 @@
           <div v-if="!isTemplate">
             <el-form :model="form" size="small" :rules="rules" ref="ruleForm">
               <el-form-item label="设置试卷名称：" prop="name">
-                <el-input v-model="form.name" class="input-class"></el-input>
+                <el-input v-model="form.name" class="input-class" placeholder="请输入试卷名称"></el-input>
               </el-form-item>
               <el-form-item label="设置试卷年份：" prop="year">
                  <el-select v-model="form.year" placeholder="请选择">
@@ -136,7 +136,7 @@
                   </el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="设置试卷学段：" prop="learningSection">
+              <!-- <el-form-item label="设置试卷学段：" prop="learningSection">
                 <el-select v-model="form.learningSection" placeholder="请选择">
                   <el-option
                     v-for="item in options"
@@ -145,14 +145,14 @@
                     :value="item.value">
                   </el-option>
                 </el-select>
-              </el-form-item>
+              </el-form-item> -->
               <el-form-item label="设置试卷年级：" prop="grade">
                 <el-select v-model="form.grade" placeholder="请选择">
                   <el-option
-                    v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
+                    v-for="item in gradeList"
+                    :key="item.key"
+                    :label="item.value"
+                    :value="item.key">
                   </el-option>
                 </el-select>
               </el-form-item>
@@ -209,6 +209,8 @@
 <script>
 import { mapGetters } from 'vuex'
 import leftFixedNav from "@/components/Nav/leftFixedNav";
+import { getquestionType } from '@/utils/basic.service.js';
+
 
 export default {
   components: {
@@ -220,6 +222,8 @@ export default {
     return {
       activePage: '真题查询',
       isTemplate: false,
+      gradeList:[],
+      questionTypeList:[],
       tableData:[{
           title: "2020届合肥省衡水中学高三高考前密卷（一）数学（理）试卷",
           number:10,
@@ -240,7 +244,6 @@ export default {
           year:"2020"
         }
       ],
-      questionTypeList:['单选题','多选题'],
 
       isMulti: false,
       grade: "",
@@ -303,9 +306,9 @@ export default {
         subject: [
           { required: true, message: '请选择试卷学科', trigger: 'change' }
         ],
-        learningSection: [
-          { required: true, message: '请选择试卷学段', trigger: 'change' }
-        ],
+        // learningSection: [
+        //   { required: true, message: '请选择试卷学段', trigger: 'change' }
+        // ],
         grade: [
           { required: true, message: '请选择试卷年级', trigger: 'change' }
         ],
@@ -321,9 +324,9 @@ export default {
   computed: {
 
     ...mapGetters([
-      'gradeList',
       'getuserInfo',
-      'difficultyList'
+      'difficultyList',
+      'subjectList'
 
     ]),
   },
@@ -331,17 +334,11 @@ export default {
 
   watch: {
 
-    gradeList(val) {
-      if(val.length) {
-        this.grade = val[0]
-      }
-
-    },
   },
 
 
   mounted() {
-
+    this.getgradeList()
   },
   methods: {
     // 分页
@@ -358,6 +355,39 @@ export default {
     // },
     },
 
+    getquestionType() {
+      this.questionTypeList = []
+      getquestionType(this.subjectCode)
+      .then((data)=>{
+        if (data.status == "200") {
+            
+ 
+
+            this.questionTypeList = data.data
+            this.form.questionType.push(this.questionTypeList[0]);
+            this.resetPage()
+        } 
+      })
+    },
+
+    getregion() {
+      this.$http.get(`/api/open/common/gradeList/${this.getuserInfo.school.id}`)
+      .then(data=>{
+        if(data.status == '200') {
+          this.gradeList = data.data
+        }
+      })
+    },
+
+
+    getgradeList() {
+      this.$http.get(`/api/open/common/gradeList/${this.getuserInfo.school.id}`)
+      .then(data=>{
+        if(data.status == '200') {
+          this.gradeList = data.data
+        }
+      })
+    },
 
     addTemplate() {
 
@@ -369,7 +399,9 @@ export default {
           return false;
         }
       });
-    }
+    },
+
+
   
   }
 };

@@ -94,8 +94,9 @@ export default {
 <style scoped lang="less">
 .tearch-nav {
   width: 200px;
+  border: 1px solid #e2e2e2;
   // height: 50%;
-  padding: 20px 0;
+  // padding: 20px 0;
   //margin-right: -10px;
 }
 </style>

@@ -155,9 +155,6 @@ export default {
 
     ]),
 
-    subjectName() {
-      return this.getuserInfo.subject.name
-    }
 
   },
 

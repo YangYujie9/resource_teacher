@@ -13,7 +13,7 @@
           </ul>
         </div>
 
-        <router-view :isfixTab="isfixTab"></router-view>
+        <router-view :isfixTab="isfixTab" @backToTop="backToTop"></router-view>
       </div>
       <div class="footer"></div>
     </el-scrollbar>
@@ -124,6 +124,11 @@ export default {
 
       }
       
+    },
+
+
+    backToTop() {
+      this.$refs["quesHome"].$refs["wrap"].scrollTo(0,0)
     }
   }
 };
@@ -209,7 +214,7 @@ export default {
     width: 100%;
     min-width: 1300px;
     position: relative;
-    min-height: calc(100vh - 298px);
+    min-height: calc(100vh - 268px);
     //height: 100%;
 
     .nav {
@@ -252,7 +257,7 @@ export default {
   }
 
   .footer {
-    margin-top: 30px;
+    // margin-top: 30px;
     height: 60px;
     line-height: 60px;
     background-color: #75777c;

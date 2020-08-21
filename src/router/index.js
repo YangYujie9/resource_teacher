@@ -31,7 +31,7 @@ Vue.use(VueRouter)
       component: ()=>import('@/views/teacher/index'),
       children: [    
       {
-        path: 'submitQuestions',
+        path: 'submitQuestions/:id?',
         name: 'submitQuestions',
         component: ()=>import('@/views/teacher/submit_question/addquestion'),
       },]
@@ -60,7 +60,7 @@ Vue.use(VueRouter)
       },{
         path: 'actualPaper',
         name: 'actualPaper',
-        component: ()=>import('@/views/questions/actual/actual_paper'),
+        component: ()=>import('@/views/questions/actual/index'),
       }]
     },
     {
@@ -80,14 +80,25 @@ Vue.use(VueRouter)
         name: 'courseware',
         component: ()=>import('@/views/teacher/resource/courseware'),
       },{
-        path: 'myWarehouse',
-        name: 'myWarehouse',
-        component: ()=>import('@/views/teacher/warehouse'),
-      },{
-        path: 'myExampaper',
-        name: 'myExampaper',
-        component: ()=>import('@/views/teacher/exampaper'),
-      }
+        path: 'personal',
+        name: 'personal',
+        component: ()=>import('@/views/teacher/personal_center/index'),
+        children: [{
+          path: 'myWarehouse',
+          name: 'myWarehouse',
+          component: ()=>import('@/views/teacher/personal_center/collections'),
+        },{
+          path: 'myExampaper',
+          name: 'myExampaper',
+          component: ()=>import('@/views/teacher/personal_center/exampaper'),
+        }]
+      },
+      // {
+      //   path: 'myWarehouse',
+      //   name: 'myWarehouse',
+      //   component: ()=>import('@/views/teacher/warehouse'),
+      // },
+      
       // ,{
       //   path: 'myCollections',
       //   name: 'myCollections',

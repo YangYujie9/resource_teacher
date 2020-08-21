@@ -55,7 +55,7 @@
           </div>
         </div>
         <div class="tab-div">
-          <test-question :chapterList="chapterList" :gradeName="filter.grade.value" :grade="filter.grade.key" :subjectCode="filter.subjectCode"></test-question>
+          <test-question :chapterList="chapterList" :gradeName="filter.grade.value" :grade="filter.grade.key" :subjectCode="filter.subjectCode" @backToTop="backToTop"></test-question>
 <!-- 
           <el-tabs v-model="activeName" stretch>
             <el-tab-pane label="同步题" name="question">
@@ -147,7 +147,9 @@ export default {
 
     },
 
-
+    backToTop() {
+      this.$emit('backToTop')
+    },
   }
 };
 </script>

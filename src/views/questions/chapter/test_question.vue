@@ -283,7 +283,9 @@ export default {
   methods: {
 
     
-
+    backToTop() {
+      this.$emit('backToTop')
+    },
     getquestionType() {
       this.typeList = []
       getquestionType(this.subjectCode)
@@ -321,12 +323,14 @@ export default {
       this.search.size = val
       // console.log(`每页 ${val} 条`);
       this.resetPage()
+      
     },
     // 分页
     handleCurrentChange(val) {
       this.search.page = val
       // console.log(`当前页: ${val}`);
       this.getTableData()
+      this.$emit('backToTop')
     },
 
     resetPage() {
@@ -348,13 +352,15 @@ export default {
         name: this.search.keyword,
         // gradeName: this.gradeName.substr(0,this.gradeName.length-1),
         grade: this.grade.substr(0,this.grade.length-2),
-        chapterId: chapterIds.join(),
+        
         page: this.search.page - 1,
         size: this.search.size,
         // subject:this.subjectCode
         // knowledgeId: this.search.difficulty,
       }
-      this.$http.get(`/api/open/question/1/questions`,params)
+      this.$http.post(`/api/open/question/1/questions`,{
+        chapterId: chapterIds,
+      },params)
       .then((data)=>{
         window.scrollTo(0,0)
         data.data.content.forEach(item=>{

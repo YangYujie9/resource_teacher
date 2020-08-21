@@ -12,6 +12,7 @@ const state = {
     Authorization: ''
   },
   gradeList: [],
+  subjectList:[],
   difficultyList: [],
   partDifficultyList: [],
   paperId:'',
@@ -34,7 +35,10 @@ const getters = {
 
     return state.gradeList
   },
+  subjectList: state => {
 
+    return state.subjectList
+  },
   difficultyList: state => {
 
     return state.difficultyList
@@ -49,7 +53,7 @@ const getters = {
 
     return state.paperId
   },
-  
+
 }
 
 const mutations = {
@@ -74,7 +78,11 @@ const mutations = {
     state.gradeList = data
     
   },
+  setsubjectList(state, data) {
 
+    state.subjectList = data
+    
+  },
   setdifficultyList(state, data) {
 
     state.difficultyList = data
@@ -92,8 +100,10 @@ const mutations = {
     
   },
 
+
+
 }
-function getGradeList(id,context) {
+function getBasicList(id,context) {
 
 
     Vue.$http.get(`/api/open/common/grades/${id}`)
@@ -105,6 +115,17 @@ function getGradeList(id,context) {
           
         } 
       })
+
+    Vue.$http.get(`/api/open/common/${id}/subjects`)
+    .then(data => {
+      if (data.status == "200") {
+        
+        context.commit('setsubjectList',data.data)
+
+        
+      } 
+    })
+      
 
 }
 
@@ -123,10 +144,8 @@ const actions = {
             context.commit('setstaffVO', {Authorization: Cookies.get('resource-teacher')})
 
             // context.commit('setloading',false)
-            getGradeList(data.data.school.id,context)
+            getBasicList(data.data.school.id,context)
 
-
-            console.log(Cookies.get('paperId'))
             context.commit('setpaperId',Cookies.get('paperId'))
 
           }

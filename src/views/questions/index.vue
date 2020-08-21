@@ -13,7 +13,7 @@
           </ul>
         </div>
 
-        <router-view :isfixTab="isfixTab"></router-view>
+        <router-view :isfixTab="isfixTab" @backToTop="backToTop"></router-view>
 
       </div>
       <div class="footer"></div>
@@ -106,6 +106,11 @@ export default {
       });
       list.check = true;
       this.$router.push(list.route);
+    },
+
+    backToTop() {
+
+      this.$refs['home'].scrollTo(0,0)
     }
   }
 };
