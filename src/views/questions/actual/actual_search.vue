@@ -3,23 +3,42 @@
     <div class="search-div el-radio-costom">
       <ul>
         <li>
-          <p>题型</p>
+          <p>年级</p>
           <div class="div2">
-            <el-radio-group v-model="search.type" size="mini">
-              <el-radio-button :label="item.label" v-for="item in list"></el-radio-button>
+            <el-radio-group v-model="search.grade" size="mini" @change="getTruePaperList">
+              <el-radio-button :label="list.key" :key="list.key" v-for="list in gradeList1">{{list.value}}</el-radio-button>
             </el-radio-group>
           </div>
         </li>
-         <li>
-          <p>难度</p>
+        <li>
+          <p>年份</p>
           <div class="div2">
-            <el-radio-group v-model="search.difficulty" size="mini">
-              <el-radio-button :label="item.label" v-for="item in list"></el-radio-button>
+            <el-radio-group v-model="search.year" size="mini" @change="getTruePaperList">
+              <el-radio-button :label="list" :key="list" v-for="list in yearList1"></el-radio-button>
             </el-radio-group>
           </div>
         </li>
-
-
+        <li>
+          <p>类型</p>
+          <div class="div2">
+            <el-radio-group v-model="search.type" size="mini" @change="getTruePaperList">
+              <el-radio-button :label="list.key" :key="list.key" v-for="list in testPaperTypeList1">{{list.value}}</el-radio-button>
+            </el-radio-group>
+          </div>
+        </li>
+        <li>
+          <p>地区</p>
+          <div class="div2">
+             <el-select v-model="search.region" placeholder="请选择" size="mini" clearable @change="getTruePaperList">
+              <el-option
+                v-for="item in regionList"
+                :key="item"
+                :label="item"
+                :value="item">
+              </el-option>
+            </el-select>
+          </div>
+        </li>
       </ul>
     </div>
     
@@ -35,7 +54,7 @@
               <p style="color: #bcbec2;">
                 <span>{{scope.row.gradeName}}</span>
                 <el-divider direction="vertical"></el-divider>
-                <span>{{scope.row.type}}</span>
+                <span>{{scope.row.testPaperTypeName}}</span>
                 <el-divider direction="vertical"></el-divider>
                 <span>{{scope.row.region}}</span>
                 <el-divider direction="vertical"></el-divider>
@@ -66,11 +85,12 @@
           prop="address"
           label="操作"
           align="center"
-          width="100">
+          width="120">
           <template slot-scope="scope">
-            <el-button type="text" size="small" v-if="!isComplete" @click="continueUpload">继续上传</el-button>
-            <el-button type="text" size="small" v-if="isComplete">收藏</el-button>
-            <el-button type="text" size="small" v-if="isComplete">下载</el-button>
+            <el-button type="text" size="small" v-if="isComplete=='false'" @click="continueUpload(scope.row)">继续上传</el-button>
+            <el-button type="text" size="small" v-if="isComplete=='true'" @click="previewPaper(scope.row)">预览</el-button>
+            <el-button type="text" size="small" v-if="isComplete=='true'">收藏</el-button>
+            <el-button type="text" size="small" v-if="isComplete=='true'">下载</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -96,70 +116,25 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import leftFixedNav from "@/components/Nav/leftFixedNav";
 import { getquestionType } from '@/utils/basic.service.js';
 
 
 export default {
-  components: {
-    leftFixedNav,
-
-  },
-  props: {
-  	isComplete:Boolean
-  },
+  props: ['regionList','gradeList','yearList','testPaperTypeList'],
   data() {
     return {
-      activePage: '真题查询',
-      isTemplate: false,
-      gradeList:[],
       questionTypeList:[],
       paperList:[],
       tableData:[],
-      // tableData:[{
-      //     title: "2020届合肥省衡水中学高三高考前密卷（一）数学（理）试卷",
-      //     number:10,
-      //     finish: 3,
-      //     update: '2020-9-8',
-      //     grade:'高三',
-      //     type:'月考',
-      //     address: '河北省',
-      //     year:"2020"
-      //   },{
-      //     title: "2020届合肥省衡水中学高三高考前密卷（一）数学（理）试卷",
-      //     number:10,
-      //     finish: 3,
-      //     update: '2020-9-8',
-      //     grade:'高三',
-      //     type:'月考',
-      //     address: '河北省',
-      //     year:"2020"
-      //   }
-      // ],
-      list: [
-        { label: "选择题", number: "" },
-        { label: "填空题", number: "" },
-        { label: "解答题", number: "" },
-        { label: "判断题", number: "" }
-      ],
-      title: "",
       search: {
         type: '',
-        difficulty: "",
-        cateage: "",
+        grade: "",
+        year: "全部",
+        region:'',
         page: 1,
         size: 20,
       },
-      form: {
-        name:'',
-        year:'',
-        subject:'',
-        learningSection:'',
-        grade:'',
-        address:'',
-        questionType:[],
-        type:'',
-      },
+
       total:0,
     };
   },
@@ -171,20 +146,72 @@ export default {
       'subjectList'
 
     ]),
+    isComplete() {
+
+      return this.$route.params.isComplete
+
+
+
+    },
+
+    gradeList1() {
+      let arr1 = []
+      arr1.push({key:'',value:'全部'})
+      this.gradeList.forEach(item=>{
+        arr1.push(item)
+      })
+      return arr1    
+    },
+
+
+    yearList1() {
+      let arr2 = []
+      arr2.push('全部')
+      this.yearList.forEach(item=>{
+        arr2.push(item)
+      })
+      return arr2
+    },
+
+    testPaperTypeList1() {
+      let arr3 = []
+      arr3.push({key:'',value:'全部'})
+      this.testPaperTypeList.forEach(item=>{
+        arr3.push(item)
+      })
+      return arr3
+    }
   },
 
 
   watch: {
+    isComplete(val) {
+      this.getTruePaperList()
+      this.search.type = ''
+      this.search.grade = ''
+      this.search.year = "全部"
+      this.search.region = ''
+      this.search.page = 1
+      this.search.size = 20
+    },
+
+
+
+
+
 
   },
 
 
   mounted() {
-    // this.getgradeList()
 
     this.getTruePaperList()
   },
   methods: {
+
+    init() {
+
+    },
     // 分页
     handleSizeChange(val) {
       this.search.size = val
@@ -213,28 +240,33 @@ export default {
     },
 
 
-
-    getgradeList() {
-      this.$http.get(`/api/open/common/gradeList/${this.getuserInfo.school.id}`)
-      .then(data=>{
-        if(data.status == '200') {
-          this.gradeList = data.data
-        }
-      })
-    },
-
     getTruePaperList() {
-      this.$http.get(`/api/open/paper/getTruePaperList/${this.isComplete}`)
+
+      let params = {
+        // name
+        grade: this.search.grade,
+        testPaperType: this.search.type,
+        year:this.search.year == '全部'?'':this.search.year,
+        region: this.search.region,
+        page: this.search.page - 1,
+        size: this.search.size
+      }
+      this.$http.get(`/api/open/paper/getTruePaperList/${this.$route.params.isComplete}`,params)
       .then(data=>{
         if(data.status == '200') {
           this.tableData = data.data.content
+          this.total = data.data.totalElements
         }
       })
     },
 
 
+    previewPaper(row) {
+      this.$router.push({path: `/questions/actualPreview`,query: row})
+    },
+
     continueUpload(row) {
-      this.$router.push(`/addquestion/submitQuestions/${row.paperId}`)
+      this.$router.push(`/questions/actualPaper/maintain/${row.paperId}`)
     }
 
 
@@ -274,7 +306,9 @@ export default {
     background-color: #f0f3fa;
     
   }
-
+  .el-table__empty-block {
+    background-color: #f0f3fa;
+  }
   .el-table td, .el-table th.is-leaf {
     border-bottom: 1px solid #e2e2e2;
   }

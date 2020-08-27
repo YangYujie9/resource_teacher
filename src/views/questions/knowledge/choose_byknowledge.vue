@@ -423,10 +423,10 @@ export default {
       }
 
       //知识点
-      item.chaptersPoint = []
-      if(item.chapters && item.chapters.length) {
-        item.chapters.forEach(item1=>{
-          item.chaptersPoint.push(item1.name)
+      item.knowledgesPoint = []
+      if(item.knowledges && item.knowledges.length) {
+        item.knowledges.forEach(item1=>{
+          item.knowledgesPoint.push(item1.name)
         })
       }
 

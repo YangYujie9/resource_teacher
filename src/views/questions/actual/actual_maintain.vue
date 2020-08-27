@@ -73,7 +73,7 @@
         <el-form-item label="设置试卷类型：" prop="type">
           <div class="inputgroup title2">
           <el-radio-group v-model="form.type">
-            <p><el-radio :label="list.key" :key="list.key" v-for="list in typeList">{{list.value}}</el-radio></p>
+            <p><el-radio :label="list.key" :key="list.key" v-for="list in testPaperTypeList">{{list.value}}</el-radio></p>
 
           </el-radio-group>
           </div>
@@ -87,7 +87,23 @@
     </div>
 
     <div v-else>
-      
+      <div v-for="(list,index) in tableData">
+        <p style="line-height: 36px;">
+          <span>{{$changeIndex(index+1)}}</span>、
+          <span>{{list.questionTypeName}}</span>
+          <span>（共{{list.total}}小题）</span> 
+        </p>
+        <div class="btngroup">
+          <el-radio-group v-model="submitdIndex" size="small" @change="submitQuestion">
+            <el-radio-button :label="`${list.questionTypeName}-${list1.sort}-${list.subjectCode}-${list.grade}`" v-for="list1 in list.list" :class="{active: list1.isComplete}" :disabled="list1.isComplete">{{list1.sort}}</el-radio-button>
+            
+          </el-radio-group>
+        </div>
+
+      </div>
+      <p style="text-align: center;margin-top: 20px;" v-if="isCompleted">
+        <el-button type="primary" size="mini" @click="finishSubmit">完成组卷</el-button>
+      </p>
     </div>
   </div>
 
@@ -96,27 +112,22 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import leftFixedNav from "@/components/Nav/leftFixedNav";
 import { getquestionType } from '@/utils/basic.service.js';
 
 
 export default {
-  components: {
-    leftFixedNav,
 
-  },
-  props: ["isfixTab"],
+  props: ['regionList','gradeList','yearList','testPaperTypeList'],
   data() {
     return {
+      paperId:'',
       activePage: '真题查询',
       isTemplate: false,
-      gradeList:[],
       questionTypeList:[],
-      regionList:[],
-      yearList:[],
-      typeList:[],
-      title: "",
 
+      tableData:[],
+      isCompleted: false,
+      submitdIndex:'',
       form: {
         name:'',
         year:'',
@@ -170,11 +181,7 @@ export default {
   watch: {
     
 
-    getuserInfo(val) {
-      if(val.school) {
-        this.getgradeList()
-      }
-    },
+
 
     subjectList(val) {
      
@@ -195,12 +202,17 @@ export default {
   methods: {
 
     init() {
-      this.getuserInfo.school?this.getgradeList():null
-      this.getregion()
-      this.getyearList()
-      this.gettypeList()
-      this.form.subject = this.subjectList.length?(this.getuserInfo.userType=='Teacher'? this.getuserInfo.subjectCode:this.subjectList[0].code):''
-      this.form.subject?this.getquestionType():null
+
+      this.paperId = this.$route.params.paperId
+      if(this.paperId) {
+        this.isTemplate = true
+        this.getTruePaperTemplate()
+      }else {
+
+        this.form.subject = this.subjectList.length?(this.getuserInfo.userType=='Teacher'? this.getuserInfo.subjectCode:this.subjectList[0].code):''
+        this.form.subject?this.getquestionType():null
+      }
+
     },
 
     getquestionType() {
@@ -213,48 +225,11 @@ export default {
               item.number = ''
             })
             this.questionTypeList = data.data
-            console.log(this.questionTypeList)
         } 
       })
     },
 
-    getregion() {
-      this.$http.get(`/api/open/common/region`)
-      .then(data=>{
-        if(data.status == '200') {
-          this.regionList = data.data
-        }
-      })
-    },
 
-
-    getgradeList() {
-      this.$http.get(`/api/open/common/gradeList/${this.getuserInfo.school.id}`)
-      .then(data=>{
-        if(data.status == '200') {
-          this.gradeList = data.data
-        }
-      })
-    },
-    getyearList() {
-      this.$http.get(`/api/open/common/yearList`)
-      .then(data=>{
-        if(data.status == '200') {
-          this.yearList = data.data
-        }
-      })
-    },
-
-
-    gettypeList() {
-      this.$http.get(`/api/open/common/testPaperType`)
-      .then(data=>{
-        if(data.status == '200') {
-          this.typeList = data.data
-        }
-      })
-      
-    },
 
 
     addTemplate() {
@@ -287,7 +262,9 @@ export default {
           })
           .then((data)=>{
             if(data.status == '200') {
-              this.isTemplate = true
+              // 
+              this.$router.push(`/questions/actualPaper/maintain/${data.data.id}`)
+              this.init()
             }
           })
           // console.log(this.form.questionType)
@@ -298,6 +275,57 @@ export default {
         }
       });
     },
+
+
+    getTruePaperTemplate() {
+      this.$http.get(`/api/open/paper/getTruePaperTemplate/${this.paperId}`)
+      .then((data)=>{
+        if(data.status == '200') {
+          data.data.dtoList.forEach(item=>{
+            item.list = []
+            for(let i=1;i<=item.total;i++) {
+              let flag = false
+              for(let j=0;j<item.completList.length;j++) {
+                if(i == item.completList[j]) {
+                  flag = true
+                  break
+                }
+              }
+
+              // if(flag) {
+                item.list.push({sort:i, isComplete: flag})
+              // }
+            }
+          })
+
+
+          this.tableData = data.data.dtoList
+          this.isCompleted = data.data.isOk
+        }
+      })
+    },
+
+
+    submitQuestion() {
+      
+      let submitInfo = this.submitdIndex.split('-')
+
+      
+      // this.$router.push(`/addquestion/submitQuestions/${this.paperId}-${this.submitdIndex}`)
+      this.$router.push({ path: '/addquestion/submitQuestions', query: { paperId: this.paperId, questionType:submitInfo[0], sort: submitInfo[1], subjectCode:submitInfo[2], grade:submitInfo[3]}});
+      
+    },
+
+
+    finishSubmit() {
+      this.$http.put(`/api/open/paper/addPaper/${this.paperId}`)
+      .then((data)=>{
+        if(data.status == '200') {
+          this.getTruePaperTemplate()
+          
+        }
+      })
+    }
 
 
   
@@ -328,6 +356,35 @@ export default {
     }
   }
 
+  .btngroup {
+    .el-radio-button__inner {
+      background-color: #ffffff ;
+      border:1px solid #DCDFE6;
+      margin-right: 20px;
+      border-radius:4px;
+    }
+    .el-radio-button:last-child .el-radio-button__inner,
+    .el-radio-button:first-child .el-radio-button__inner {
+      // 
+      border-radius:4px;
+    }
+    .el-radio-button:first-child .el-radio-button__inner {
+      border-left:1px solid #DCDFE6;
+    }
+
+    .el-radio-button__orig-radio:checked+.el-radio-button__inner {
+      border-color: #409EFF; 
+      background-color: #409EFF;
+    }
+
+  }
+
+  .active {
+    .el-radio-button__inner {
+      background-color: #32c55c;
+      color: #ffffff;
+    }
+  }
   .inputgroup {
     .el-radio {
       vertical-align: middle;

@@ -50,7 +50,14 @@ export default {
 </script>
 <style lang="less">
 .left-nav {
+
   .el-radio-costom {
+    .el-input__inner {
+      background: transparent;
+    }
+    .el-textarea__inner {
+      background: transparent;
+    }
     .el-radio-button__inner {
       border: 0px;
       background-color: #f2f5fc;
@@ -63,7 +70,7 @@ export default {
     }
 
     .el-radio-button:first-child .el-radio-button__inner {
-      border-left: 0px;
+      // border-left: 0px;
       border-radius: 3px;
     }
     .el-radio-button:last-child .el-radio-button__inner {
@@ -191,7 +198,7 @@ export default {
 
 
   .card-wrap {
-    margin-top: 20px;
+    margin: 20px 0;
     border: 1px solid #e2e2e2;
     padding: 10px 20px 20px 20px;
     background-color: #f2f5fc;

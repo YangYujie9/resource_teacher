@@ -32,13 +32,13 @@ export const axiosService = axios.create({
 axiosService.interceptors.request.use(
   config => {
 
-    NProgress.start()
+    
     // 超时
     if(config.httpConfig.timeout) {
       config.timeout = config.httpConfig.timeout;
     }
     //顶部 LoadingBar
-    config.httpConfig.loading //&& iView.LoadingBar.start();
+    config.httpConfig.loading && NProgress.start()
 
     //body加参数
     if(!config.data) {

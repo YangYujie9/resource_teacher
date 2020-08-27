@@ -53,7 +53,7 @@
           <div class="middle">
             <div>
               <p class="title">【知识点】</p>
-              <p>{{list.chaptersPoint.join()}}</p>
+              <p>{{list.knowledgesPoint.join()}}</p>
             </div>
 
             <div  v-if="list.fillAnswers.length ||list.smallQuestions.length">
@@ -84,7 +84,7 @@
           <div class="middle">
             <div>
               <p class="title">【知识点】</p>
-              <p>{{list.chaptersPoint.join()}}</p>
+              <p>{{list.knowledgesPoint.join()}}</p>
             </div>
 
             <div  v-if="list.fillAnswers.length ||list.smallQuestions.length">
@@ -92,7 +92,7 @@
               <p>
                 <span v-for="(item,index1) in list.answers">
                  <span  v-if="list.smallQuestions.length" style="margin-left: 0px;">{{index1+1}}、</span>
-                 <span style="margin-left: 0px;">{{item}}</span>
+                 <span style="margin-right: 5px;" v-html="item"></span>
                 </span>
               </p>
             </div>
@@ -143,7 +143,7 @@
             <span>组卷：{{list.groupCount}}</span>
             <span>难度：{{list.difficultyTypeName}}</span>
           </p>
-          <p class="pt2">
+          <p class="pt2" v-if="showAction">
             <span @click="getSimilarity(list.questionId)" class="foot-icon" v-if="showSimilarity">
               <i class="iconfont iconpaibanguanli iconcolor"></i> 相似题
             </span>
@@ -216,6 +216,10 @@ export default {
   		type:String,
   		default:'hover'
   	},
+    showAction: {
+      type: Boolean,
+      default: true
+    }
 
   },
   components: {
@@ -247,6 +251,7 @@ export default {
   mounted() {
     // console.log(this.gradeName)
     // this.gradeName?this.getmyTestBasket():null
+
   },
   methods: {
 
@@ -273,10 +278,10 @@ export default {
       }
 
       //知识点
-      item.chaptersPoint = []
+      item.knowledgesPoint = []
       if(item.chapters && item.chapters.length) {
         item.chapters.forEach(item1=>{
-          item.chaptersPoint.push(item1.name)
+          item.knowledgesPoint.push(item1.name)
         })
       }
 
@@ -360,7 +365,9 @@ export default {
 </script>
 <style lang="less">
 .single-question {
-  
+    .el-card__body {
+      padding: 0px;
+    }
 
   // .el-radio-button:first-child .el-radio-button__inner, .el-radio-button:last-child .el-radio-button__inner   
     .el-radio-button__inner {
@@ -381,7 +388,7 @@ export default {
 
     .content {
       p,div,span {
-        line-height: 1 !important;
+        // line-height: 1 !important;
         background-color:transparent !important;
         font-size: 1rem;
         font-family: "JyeMath", "JyeMathLetters", "Times New Roman", "微软雅黑",
@@ -389,9 +396,12 @@ export default {
       }
     }
 
-  .el-card img {
-    vertical-align: middle;
-    height: 30px;
+  .el-card {
+    border: 1px solid #e2e2e2;
+    img {
+      vertical-align: middle;
+      height: 30px;
+    }
   }
 }
 </style>
@@ -434,6 +444,7 @@ export default {
 	    font-family: "JyeMath", "JyeMathLetters", "Times New Roman", "微软雅黑",
 	      Arial, "宋体";
 	    -webkit-font-smoothing: antialiased;
+      background-color: #f0f3f9;
 
 	    // border-radius: 50% 0;
 
@@ -501,6 +512,7 @@ export default {
 
 	      div {
 	        display: flex;
+          // line-height: 32px;
 
 	        .title {
 	          flex-shrink: 0;

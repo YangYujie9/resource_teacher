@@ -37,10 +37,10 @@ export default {
 
   methods: {
 
-    getmyTestBasket(gradeName) {
+    getmyTestBasket() {
 
 
-    	this.$http.get(`/api/open/paper/${gradeName.substr(0,gradeName.length-1)}/myTestBasket`)
+    	this.$http.get(`/api/open/paper/myTestBasket`)
 
     	.then((data)=>{
 

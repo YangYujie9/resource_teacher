@@ -47,7 +47,7 @@ export default {
       default:true,
     },
     subjectCode: {
-      type:String,
+      type:String
     },
     grade: {
       type:String

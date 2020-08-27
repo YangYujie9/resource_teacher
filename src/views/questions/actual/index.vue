@@ -2,10 +2,9 @@
   <div class="actual-paper">
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left" class="el-radio-costom left">
-        <el-radio-group v-model="activePage" size="small">
-          <el-radio-button label="真题查询"></el-radio-button>
-          <el-radio-button label="真题维护" ></el-radio-button>
-          <el-radio-button label="未完成"></el-radio-button>
+        <el-radio-group v-model="activePage" size="small" @change="changeType">
+          <el-radio-button :label="list.label" :key="list.route" v-for="list in typeList"></el-radio-button>
+
         </el-radio-group>
       </div>
 
@@ -15,8 +14,8 @@
             <i class="iconfont iconshouye iconclass"></i>当前位置：真题试卷 > {{activePage}}
           </div>
         </div>
-
-<!--         <div  v-show="activePage=='真题查询'">
+        <router-view :regionList="regionList" :gradeList="gradeList" :yearList="yearList" :testPaperTypeList="testPaperTypeList"></router-view>
+        <!-- <div  v-show="activePage=='真题查询'">
 
           <actualSearch :isComplete="true"></actualSearch>
         </div>
@@ -53,8 +52,22 @@ export default {
   props: ["isfixTab"],
   data() {
     return {
-      activePage: '真题查询',
+      activePage: '',
       isTemplate: false,
+      typeList: [{
+        label:'真题查询',
+        route:'/questions/actualPaper/search/true'
+      },{
+        label:'真题维护',
+        route:'/questions/actualPaper/maintain'
+      },{
+        label:'未完成',
+        route:'/questions/actualPaper/search/false'
+      }],
+      regionList:[],
+      gradeList:[],
+      yearList:[],
+      testPaperTypeList:[],
 
 
 
@@ -73,48 +86,59 @@ export default {
 
 
   watch: {
+    getuserInfo(val) {
+      if(val.school) {
+        this.getgradeList()
+      }
+    },
 
+    $route(val) {
+      this.typeList.forEach(item=>{
+        if(this.$route.fullPath.indexOf(item.route)>-1) {
+          this.activePage = item.label
+        }
+      })
+    }
   },
 
-
+  created() {
+    this.getuserInfo.school?this.getgradeList():null
+    this.getregion()
+    this.getyearList()
+    this.gettypeList()
+  },
   mounted() {
-    this.getgradeList()
+    this.typeList.forEach(item=>{
+      if(this.$route.fullPath.indexOf(item.route)>-1) {
+        this.activePage = item.label
+      }
+    })
+    // this.getuserInfo.school?this.getgradeList():null
+    // this.getregion()
+    // this.getyearList()
+    // this.gettypeList()
   },
   methods: {
-    // 分页
-    handleSizeChange(val) {
-      this.search.size = val
-      // console.log(`每页 ${val} 条`);
-      // this.resetPage()
-    },
-    // 分页
-    handleCurrentChange(val) {
-      this.search.page = val
-      // console.log(`当前页: ${val}`);
-      // this.getTableData()
-    // },
-    },
-
-    getquestionType() {
-      this.questionTypeList = []
-      getquestionType(this.subjectCode)
-      .then((data)=>{
-        if (data.status == "200") {
-            
- 
-
-            this.questionTypeList = data.data
-            this.form.questionType.push(this.questionTypeList[0]);
-            this.resetPage()
-        } 
+    changeType() {
+      // if(this.activePage == '真题查询') {
+      //   this.$router.push(`/questions/actualPaper/search/${true}`)
+      // }else if(this.activePage == '未完成') {
+      //   this.$router.push(`/questions/actualPaper/search/${false}`)
+      // }else {
+      //   this.$router.push(`/questions/actualPaper/maintain`)
+      // }
+      let checked = this.typeList.filter(item=>{
+        return item.label == this.activePage
       })
+
+      this.$router.push(checked[0].route)
     },
 
     getregion() {
-      this.$http.get(`/api/open/common/gradeList/${this.getuserInfo.school.id}`)
+      this.$http.get(`/api/open/common/region`)
       .then(data=>{
         if(data.status == '200') {
-          this.gradeList = data.data
+          this.regionList = data.data
         }
       })
     },
@@ -128,17 +152,24 @@ export default {
         }
       })
     },
-
-    addTemplate() {
-
-      this.$refs['ruleForm'].validate((valid) => {
-        if (valid) {
-          this.isTemplate = true
-        } else {
-          
-          return false;
+    getyearList() {
+      this.$http.get(`/api/open/common/yearList`)
+      .then(data=>{
+        if(data.status == '200') {
+          this.yearList = data.data
         }
-      });
+      })
+    },
+
+
+    gettypeList() {
+      this.$http.get(`/api/open/common/testPaperType`)
+      .then(data=>{
+        if(data.status == '200') {
+          this.testPaperTypeList = data.data
+        }
+      })
+      
     },
 
 

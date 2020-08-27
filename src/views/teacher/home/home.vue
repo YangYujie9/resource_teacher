@@ -4,7 +4,7 @@
     <div class="home-part-warp">
       
 
-      <div class="part-one">
+      <div class="part-one home-content">
         <div class="top-left">
        
           <div class="search-wrap">
@@ -200,18 +200,7 @@ export default {
 </style>
 <style lang="less" scoped>
 .tearch-home {
-  // .home-content {
-  //   height: 400px;
-  //   text-align: center;
-  //   .search-class {
-  //     display: flex;
-  //     height: 36px;
-  //     line-height: 36px;
-  //     color: #409EFF;
-  //     justify-content: space-around;
-  //     cursor: pointer;
-  //   }
-  // }
+
 
     .home-nav {
       height: 40px;
@@ -240,7 +229,7 @@ export default {
       vertical-align: middle;
     }
     .home-content {
-      width: 67%;
+      width: 75%;
       margin: 0 auto;
       // background-color:red;
       // height: 300px;
@@ -248,13 +237,13 @@ export default {
 
       // justify-content: space-between;
       .resource-wrap {
-        margin-right: -3%;
+        margin-right: -4%;
         display: flex;
         flex-wrap: wrap;
         .one-resource {
-          width: 17%;
+          width: 16%;
           margin-bottom: 20px;
-          margin-right: 3%;
+          margin-right: 4%;
           cursor: pointer;
           // height: 300px;
 
@@ -283,14 +272,14 @@ export default {
       .top-left {
         // position:absolute;
         height: 100%;
-        width: 14%;
+        width: 20%;
         min-width: 200px;
         // left: -20%;
         padding: 20px 5px;
         border: 1px solid #e2e2e2;
         // background-color:blue;
 
-        margin-left: 1.5%;
+        // margin-left: 1.5%;
         margin-right: 1%;
 
 
@@ -305,7 +294,7 @@ export default {
       }
 
       .top-middle {
-        width: 53%;
+        width: 58%;
         // border: 1px solid #e2e2e2;
         margin-right: 1%;
       }
@@ -313,7 +302,7 @@ export default {
 
       .top-right {
         padding: 20px;
-        width: 13%;
+        width: 20%;
         height: 100%;
         background-color:#ebeff3;
         border: 1px solid #e2e2e2;

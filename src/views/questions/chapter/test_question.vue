@@ -88,7 +88,6 @@
 
     <div class="card-wrap">
 
-      <div> \(\rm{K_{3}[Fe(C_{2}O_{4})_{3}]⋅3H_{2}O(}\)三草酸合铁酸钾\(\rm{)}\)为亮绿色品体，可用于晒制蓝图，回答下列问题： <br />\(\rm{(1)}\)晒制蓝图时，用\(\rm{K_{3}[Fe(C_{2}O_{4})_{3}]⋅3H_{2}O}\)作感光剂，以\(\rm{K_{3}Fe[(CN)_{6}]}\)溶液为显色剂。其光解反应的化学方程式为\(\rm{2k_{3}[Fe(C_{2}O_{4})_{3}] \dfrac { \overset{\;{光照}\;}{ -}}{\;}2FeC_{2}O_{4}+3K_{2}C_{2}O_{4}+2CO_{2}↑}\)；显色反应的化学方程式为 <!--BA-->______ <!--EA-->。 <br />\(\rm{(2)}\)某小组为探究三草酸合铁酸钾的热分解产物，按如图所示装置进行实验。 <br />< img alt="" src="/zximages/question/2018/6/11/9/31/b88c7022-f3f0-4caf-81ea-cdabde6bb8d0.png" style="vertical-align:middle" w="544px" h="148px" /> <br />\(\rm{①}\)通入氮气的目的是 <!--BA-->______ <!--EA-->。 <br />\(\rm{②}\)实验中观察到装置\(\rm{B}\)、\(\rm{F}\)中澄清石灰水均变浑浊，装置\(\rm{E}\)中固体变为红色，由此判断热分解产物中一定含有 <!--BA-->______ <!--EA-->、 <!--BA-->______ <!--EA-->。 <br />\(\rm{③}\)为防止倒吸，停止实验时应进行的操作是 <!--BA-->______ <!--EA-->。 <br />\(\rm{④}\)样品完全分解后，装置\(\rm{A}\)中的残留物含有\(\rm{FeO}\)和\(\rm{Fe_{2}O_{3}}\)，检验\(\rm{Fe_{2}O_{3}}\)存在的方法是： <!--BA-->______ <!--EA-->。 <br />\(\rm{(3)}\)测定三草酸合铁酸钾中铁的含量。 <br />\(\rm{①}\)称量\(\rm{mg}\)样品于锥形瓶中，溶解后加稀\(\rm{H_{2}SO_{4}}\)酸化，用\(\rm{cmol⋅L^{-1}KMnO_{4}}\)溶液滴定至终点。滴定终点的现象是 <!--BA-->______ <!--EA-->。 <br />\(\rm{②}\)向上述溶液中加入过量锌粉至反应完全后，过滤、洗涤，将滤液及洗涤液全部收集到锥形瓶中。加稀\(\rm{H_{2}SO_{4}}\)酸化，用\(\rm{cmol⋅L^{-1}KMnO_{4}}\)溶液滴定至终点，消耗\(\rm{KMnO_{4}}\)溶液\(\rm{VmL.}\)该晶体中铁的质量分数的表达式为 <!--BA-->______ <!--EA-->。 </div>
        <div v-for="(list,index) in tableData">
           <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder">
             
@@ -404,10 +403,10 @@ export default {
       }
 
       //知识点
-      item.chaptersPoint = []
+      item.knowledgesPoint = []
       if(item.chapters && item.chapters.length) {
         item.chapters.forEach(item1=>{
-          item.chaptersPoint.push(item1.name)
+          item.knowledgesPoint.push(item1.name)
         })
       }
 

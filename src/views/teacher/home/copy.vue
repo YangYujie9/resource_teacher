@@ -54,7 +54,7 @@
                   <el-radio-button :label="item.id" :value="item.id" v-for="item in resourceTypeList">{{item.name}}</el-radio-button>
                 </el-radio-group>
               </el-form-item>
-              <el-form-item prop="resourceSite" :label="resourceFileName" :required="true" >
+              <el-form-item prop="resourceSite" label="文件上传" :required="true" >
                 <el-upload
                   class="upload-demo"
                   ref="resourceSite"
@@ -77,7 +77,7 @@
                 </div>
               </el-form-item>
 
-              <el-form-item prop="surface" :label="resourceFileAttach">
+              <el-form-item prop="surface" label="封面上传">
                 <el-upload
                   class="upload-demo"
                   accept="image/jpeg,image/png,image/jpg,image/gif"
@@ -253,14 +253,7 @@ export default {
     },
 
     getuserInfo(val) {
-      if(val) {
-        this.resourceObject.subjectId = this.getuserInfo.subject.id
-        this.resourceObject.subjectName = this.getuserInfo.subject.name
-        this.resourceObject.subjectCode = this.getuserInfo.subjectCode
-        this.resourceForm.learningSection = this.getuserInfo.learningSection
-        this.resourceForm.schoolId = this.getuserInfo.school.id
-        this.resourceForm.subjectId = this.getuserInfo.subject.id
-      }
+      console.log(val)
     },
   },
   computed: {
@@ -268,31 +261,17 @@ export default {
       'gradeList',
       'getuserInfo',
     ]),
-
-    resourceFileName() {
-      return this.resourceForm.resourceType == 'ExaminationPaper' ? '试卷上传':'资源上传'
-    },
-
-    resourceFileAttach() {
-      return this.resourceForm.resourceType == 'ExaminationPaper' ? '答案上传':'资源封面'
-    }
   },
   mounted() {
-    if(this.getuserInfo && this.getuserInfo.subject) {
-      this.resourceObject.subjectId = this.getuserInfo.subject.id
-      this.resourceObject.subjectName = this.getuserInfo.subject.name
-      this.resourceObject.subjectCode = this.getuserInfo.subjectCode 
-      this.resourceForm.learningSection = this.getuserInfo.learningSection
-      this.resourceForm.schoolId = this.getuserInfo.school.id
-      this.resourceForm.subjectId = this.getuserInfo.subject.id
-    }
-    if(this.gradeList.length) {
-      this.resourceObject.gradeId = this.gradeList[0].key;
-      this.resourceObject.gradeName = this.gradeList[0].value;
-    }
+    this.resourceObject.subjectId = this.getuserInfo.subject.id
+    this.resourceObject.subjectName = this.getuserInfo.subject.name
+    this.resourceObject.subjectCode = this.getuserInfo.subjectCode
+    this.resourceObject.gradeId = this.gradeList[0].key;
+    this.resourceObject.gradeName = this.gradeList[0].value;
 
-
-
+    this.resourceForm.learningSection = this.getuserInfo.learningSection
+    this.resourceForm.schoolId = this.getuserInfo.school.id
+    this.resourceForm.subjectId = this.getuserInfo.subject.id
 
     this.getGradeSectionList(this.resourceForm.learningSection);
   },
@@ -343,7 +322,6 @@ export default {
         .then((result)=>{
           if(result.status == '200') {
             this.resourceTypeList = result.data
-            this.resourceForm.resourceType = this.resourceTypeList[0].id
           }
         })
 
@@ -544,16 +522,6 @@ export default {
   .el-tag--small {
     margin-left: 10px;
     margin-bottom: 10px;
-  }
-
-  .el-upload-list__item {
-    width: 90%;
-    &:hover {
-      background-color:transparent;
-    }
-    &:focus {
-      outline:0px;
-    }
   }
 }
 

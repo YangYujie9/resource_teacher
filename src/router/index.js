@@ -31,7 +31,7 @@ Vue.use(VueRouter)
       component: ()=>import('@/views/teacher/index'),
       children: [    
       {
-        path: 'submitQuestions/:id?',
+        path: 'submitQuestions',
         name: 'submitQuestions',
         component: ()=>import('@/views/teacher/submit_question/addquestion'),
       },]
@@ -58,9 +58,22 @@ Vue.use(VueRouter)
         name: 'examinationPaper',
         component: ()=>import('@/views/questions/examination/examination_paper'),
       },{
+        path: 'actualPreview',
+        name: 'actualPreview',
+        component: ()=>import('@/views/questions/actual/actual_preview'),
+      },{
         path: 'actualPaper',
         name: 'actualPaper',
         component: ()=>import('@/views/questions/actual/index'),
+        children: [{
+          path: 'search/:isComplete',
+          name: 'actualSearch',
+          component: ()=>import('@/views/questions/actual/actual_search'),
+        },{
+          path: 'maintain/:paperId?',
+          name: 'actualMaintain',
+          component: ()=>import('@/views/questions/actual/actual_maintain'),
+        }]
       }]
     },
     {
@@ -75,10 +88,21 @@ Vue.use(VueRouter)
         path: 'uploadResource',
         name: 'uploadResource',
         component: ()=>import('@/views/teacher/home/upload_resource'),
-      },{
-        path: 'courseware',
-        name: 'courseware',
-        component: ()=>import('@/views/teacher/resource/courseware'),
+      },
+      {
+        path: 'resource/:resourceType',
+        name: 'resource',
+        component: ()=>import('@/views/teacher/resource/resourceList'),
+      },
+      // {
+      //   path: 'courseware',
+      //   name: 'courseware',
+      //   component: ()=>import('@/views/teacher/resource/courseware'),
+      // },
+      {
+        path: 'resourceRreview',
+        name: 'resourceRreview',
+        component: ()=>import('@/views/teacher/resource/resource_preview'),
       },{
         path: 'personal',
         name: 'personal',

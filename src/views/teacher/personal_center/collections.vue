@@ -77,6 +77,10 @@
               </section>
             </el-card>
 
+          <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder">
+            
+          </singleQuestion>
+
             <div class="pagination">
               <el-pagination
                 background
@@ -97,10 +101,10 @@
 </template>
 
 <script>
-
+import singleQuestion from '@/components/Question/singleQuestion'
 export default {
   components: {
-
+    singleQuestion
   },
   data() {
     return {

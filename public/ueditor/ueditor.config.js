@@ -32,7 +32,7 @@
         UEDITOR_HOME_URL: URL
 
         // 服务器统一请求接口路径
-        , serverUrl:  "http://192.168.2.21:8888/api/open/ueditor/config"
+        , serverUrl:  "http://192.168.2.79:8989/api/open/ueditor/config"
         
         //URL + "jsp/controller.jsp"
 

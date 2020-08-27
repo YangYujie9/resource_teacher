@@ -52,32 +52,32 @@ export default {
         },
         {
           label: "课件",
-          route: "/teacher/courseware",
+          route: "/teacher/resource/CourseWare",
           check: false
         },
         {
           label: "教案",
-          route: "2",
+          route: "/teacher/resource/TeachPlan",
           check: false
         },
         {
           label: "学案",
-          route: "2",
+          route: "/teacher/resource/LearningCase",
           check: false
         },
         {
           label: "套题试卷",
-          route: "2",
+          route: "/teacher/resource/ExaminationPaper",
           check: false
         },
         {
           label: "教学反思",
-          route: "2",
+          route: "/teacher/resource/TeachReflection",
           check: false
         },
         {
           label: "微课",
-          route: "2",
+          route: "/teacher/resource/VideoLesson",
           check: false
         },
         {
@@ -196,8 +196,14 @@ export default {
     }
     .el-radio-button:first-child .el-radio-button__inner,
     .el-radio-button:last-child .el-radio-button__inner {
-      border-left: 1px solid #b3d8ff;
+      // border-left: 1px solid #b3d8ff;
       border-radius: 3px;
+    }
+
+
+    .el-radio-button__orig-radio:disabled:checked+.el-radio-button__inner {
+      background-color: #409eff;
+      color: #ffffff;
     }
   }
 </style>

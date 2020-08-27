@@ -15,7 +15,7 @@
               <div>
                 <p>年级：</p>
                  <el-radio-group v-model="form.grade" size="mini">
-                    <el-radio-button :label="item" :key="item.key" v-for="item in gradeList">{{item.value}}</el-radio-button>
+                    <el-radio-button :label="item" :key="item.key" v-for="item in gradeDetailList">{{item.value}}</el-radio-button>
                 </el-radio-group>
               </div>
               <!-- <div>
@@ -26,7 +26,7 @@
               </div> -->
             </div>
           </top-popover>
-          <div class="tab-class">
+          <div class="tree-content">
             <el-tabs stretch v-model="activeType" @tab-click="handleClick">
               <el-tab-pane label="按章节" name="chapter">
                 <div class="tree-class" :class="{treeclassfixed:isfixTab}">
@@ -67,7 +67,7 @@
           </div>
 
           <div class="form-class">
-            <el-form :model="form">
+            <el-form :model="form" label-width="80px;">
               <el-form-item label="题数：">
                 <el-select
                   v-model="form.questionNum"
@@ -84,7 +84,7 @@
                   ></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item label="序号：">
+              <el-form-item label="序号："  class="custom-form">
                 <el-button
                   v-for="(list,index) in questionOtions"
                   v-if="index<form.questionNum"
@@ -96,12 +96,12 @@
                 >第{{list.label}}题</el-button>
               </el-form-item>
               <el-form-item label="题型：">
-                <el-radio-group v-model="questionType" size="mini" @change="changeType()">
+                <el-radio-group v-model="questionType" size="mini" :disabled="typeDisable" @change="changeType()">
                   <el-radio-button
                     v-for="list in typeList"
-                    :label="list.value"
+                    :label="list.key"
                     :key="list.key"
-                  ></el-radio-button>
+                  >{{list.value}}</el-radio-button>
                 </el-radio-group>
               </el-form-item>
 
@@ -117,7 +117,7 @@
               </el-form-item>-->
               <el-form-item label="难度：">
                 <el-radio-group v-model="form.difficulty" size="mini">
-                  <el-radio-button v-for="list in difficultyList" :label="list.value" :key="list.key"></el-radio-button>
+                  <el-radio-button v-for="list in difficultyList" :label="list.key" :key="list.key">{{list.value}}</el-radio-button>
                 </el-radio-group>
               </el-form-item>
             </el-form>
@@ -162,9 +162,9 @@
             </el-form>
             <Ueditor :writeMsg="defaultMsgA" :id="ueditorA" :config="configA" ref="ueA"></Ueditor>
           </div>-->
-          <div class="form-class" v-show="questionType=='单选题' ||questionType=='多选题'||questionType=='判断题'">
+          <div class="form-class" v-show="questionType=='SingleChoose' ||questionType=='MultipleChoose'||questionType=='BoolenQuestion'">
             <el-form :model="form" style="margin-bottom:10px;">
-              <el-form-item label="选项个数" v-show="questionType=='单选题' ||questionType=='多选题'">
+              <el-form-item label="选项个数" v-show="questionType=='SingleChoose' ||questionType=='MultipleChoose'">
                 <el-select
                   v-model="form.optionNum"
                   placeholder="请选择"
@@ -175,7 +175,17 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="选项内容">
-                <el-button
+                <el-radio-group v-model="currentOption" size="mini"  @change="choose_qusoption">
+                  <el-radio-button
+                    v-for="(list,index) in optionList"
+                    v-if="index<form.optionNum"
+                    :label="list"
+                    :key="list.label"
+                  >{{list.label}}</el-radio-button>
+                </el-radio-group>
+
+
+                 <!--<el-button
                   v-for="(item,index) in optionList"
                   v-if="index<form.optionNum"
                   size="mini"
@@ -183,14 +193,21 @@
                   plain
                   :class="{active: item.check}"
                   @click="choose_qusoption(item)"
-                >{{item.label}}</el-button>
+                >{{item.label}}</el-button> -->
               </el-form-item>
             </el-form>
-            <Ueditor :writeMsg="defaultMsgA" :id="ueditorA" :config="configA" ref="ueA"></Ueditor>
+            <Ueditor :writeMsg="defaultMsgA" :id="ueditorA" :config="configA" ref="ueA" v-show="currentOption.label == 'A'"></Ueditor>
+            <Ueditor :writeMsg="defaultMsgA" :id="ueditorB" :config="configA" ref="ueB" v-show="currentOption.label == 'B'"></Ueditor>
+            <Ueditor :writeMsg="defaultMsgA" :id="ueditorC" :config="configA" ref="ueC" v-show="currentOption.label == 'C'"></Ueditor>
+            <Ueditor :writeMsg="defaultMsgA" :id="ueditorD" :config="configA" ref="ueD" v-show="currentOption.label == 'D'"></Ueditor>
+            <Ueditor :writeMsg="defaultMsgA" :id="ueditorE" :config="configA" ref="ueE" v-show="currentOption.label == 'E'"></Ueditor>
+            <Ueditor :writeMsg="defaultMsgA" :id="ueditorF" :config="configA" ref="ueF" v-show="currentOption.label == 'F'"></Ueditor>
+            <Ueditor :writeMsg="defaultMsgA" :id="ueditorG" :config="configA" ref="ueG" v-show="currentOption.label == 'G'"></Ueditor>
+            <Ueditor :writeMsg="defaultMsgA" :id="ueditorH" :config="configA" ref="ueH" v-show="currentOption.label == 'H'"></Ueditor>
           </div>
           <div
             style="display:flex;margin-top:20px;"
-            v-show="(questionType=='单选题' ||questionType=='多选题'||questionType=='判断题'||questionType=='填空题')"
+            v-show="(questionType=='SingleChoose' ||questionType=='MultipleChoose'||questionType=='BoolenQuestion'||questionType=='FillingQuestion')"
           >
             <p>
               <span>答案个数：</span>
@@ -199,12 +216,12 @@
                 placeholder="请选择"
                 style="width:60px;"
                 size="mini"
-                :disabled="questionType=='单选题'||questionType=='判断题'"
+                :disabled="questionType=='SingleChoose'||questionType=='BoolenQuestion'"
               >
                 <el-option v-for="item in relOptions" :key="item" :label="item" :value="item"></el-option>
               </el-select>
             </p>
-            <p v-show="questionType=='单选题' ||questionType=='多选题'||questionType=='判断题'">
+            <p v-show="questionType=='SingleChoose' ||questionType=='MultipleChoose'||questionType=='BoolenQuestion'">
               <span style="margin-left:20px;">正确选项:</span>
               <el-select
                 v-model="answers[index]"
@@ -223,7 +240,7 @@
                 ></el-option>
               </el-select>
             </p>
-            <p style="margin-right:10px;" v-show="questionType=='填空题'">
+            <p style="margin-right:10px;" v-show="questionType=='FillingQuestion'">
               <span style="margin-left:20px;">正确答案:</span>
               <el-button
                 v-for="(item,index) in answers"
@@ -246,7 +263,7 @@
       :modal-append-to-body="false"
       :close-on-click-modal="false">
       <div>
-        <Ueditor :writeMsg="defaultMsgB" :id="ueditorB" :config="configB" ref="ueB"></Ueditor>
+        <Ueditor :writeMsg="defaultMsgB" :id="ueditorFill" :config="configB" ref="ueFill"></Ueditor>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="fillanswerVisible = false" size="mini">取 消</el-button>
@@ -289,13 +306,30 @@ export default {
         { label: 5, check: false, ques: "", analyze: "", answ: "" },
         { label: 6, check: false, ques: "", analyze: "", answ: "" },
         { label: 7, check: false, ques: "", analyze: "", answ: "" },
-        { label: 8, check: false, ques: "", analyze: "", answ: "" }
+        { label: 8, check: false, ques: "", analyze: "", answ: "" },
+        { label: 9, check: false, ques: "", analyze: "", answ: "" },
+        { label: 10, check: false, ques: "", analyze: "", answ: "" },
+        { label: 11, check: false, ques: "", analyze: "", answ: "" },
+        { label: 12, check: false, ques: "", analyze: "", answ: "" },
+        { label: 13, check: false, ques: "", analyze: "", answ: "" },
+        { label: 14, check: false, ques: "", analyze: "", answ: "" },
+        { label: 15, check: false, ques: "", analyze: "", answ: "" },
+        { label: 16, check: false, ques: "", analyze: "", answ: "" },
+        { label: 17, check: false, ques: "", analyze: "", answ: "" },
+        { label: 18, check: false, ques: "", analyze: "", answ: "" },
+        { label: 19, check: false, ques: "", analyze: "", answ: "" },
+        { label: 20, check: false, ques: "", analyze: "", answ: "" },
+        { label: 21, check: false, ques: "", analyze: "", answ: "" },
+        { label: 22, check: false, ques: "", analyze: "", answ: "" },
+        { label: 23, check: false, ques: "", analyze: "", answ: "" },
+        { label: 24, check: false, ques: "", analyze: "", answ: "" },
+        { label: 25, check: false, ques: "", analyze: "", answ: "" },
       ],
       //chooseAns: "A",
-      ansOptions: [2, 3, 4, 5, 6, 7, 8],
+      ansOptions: [ 2, 3, 4, 5, 6, 7, 8],
       optionList: [
         { label: "A", check: true, content: "" },
-        { label: "B", check: false, content: "" },
+        { label: "B", check: false, content: ""  },
         { label: "C", check: false, content: "" },
         { label: "D", check: false, content: "" },
         { label: "E", check: false, content: "" },
@@ -303,12 +337,13 @@ export default {
         { label: "G", check: false, content: "" },
         { label: "H", check: false, content: "" }
       ],
+      currentOption:'',
       // judgmentoptionList: [
       //   { label: "对", check: true, content: "" },
       //   { label: "错", check: false, content: "" }
       // ],
       //ansCotent:[],
-      relOptions: [2, 3, 4, 5, 6, 7, 8],
+      relOptions: [1, 2, 3, 4, 5, 6, 7, 8],
       answers: ["A", "A", "A", "A", "A", "A", "A", "A"],
       questionType: "",
       form: {
@@ -339,6 +374,7 @@ export default {
       ueditor1: "ueditor1",
       ueditor2: "ueditor2",
       ueditor3: "ueditor3",
+
       config1: {
         initialContent: "", //初始化编辑器的内容,也可以通过textarea/script给值，看官网例子
         BaseUrl: ""
@@ -356,6 +392,14 @@ export default {
       },
       defaultMsgA: "",
       ueditorA: "ueditorA",
+      ueditorB: "ueditorB",
+      ueditorC: "ueditorC",
+      ueditorD: "ueditorD",
+      ueditorE: "ueditorE",
+      ueditorF: "ueditorF",
+      ueditorG: "ueditorG",
+      ueditorH: "ueditorH",
+      ueditorFill:'ueditorFill',
       configA: {
         initialContent: "", //初始化编辑器的内容,也可以通过textarea/script给值，看官网例子
         BaseUrl: ""
@@ -371,13 +415,18 @@ export default {
       tagsList:[],
       chapterTags:[],
       knowledgeTags:[],
+      isActual: false,
+      gradeDetailList: [],
+      typeDisable: false,
+      actualPaper:{},
+      query:{}
     };
   },
 
   watch: {
     gradeList(val) {
       if(val.length) {
-        this.form.grade = val[0]
+        this.init()
       }
 
     },
@@ -387,7 +436,7 @@ export default {
 
         this.changeOption()
 
-        // if (val == "单选题" || val == "多选题") {
+        // if (val == "SingleChoose" || val == "MultipleChoose") {
         //   this.optionList = [
         //     { label: "A", check: true, content: "" },
         //     { label: "B", check: false, content: "" },
@@ -401,12 +450,12 @@ export default {
         //   this.form.optionNum = 4;
         //   this.answers = ["A", "A", "A", "A", "A", "A", "A", "A"];
 
-        //   if (val == "单选题") {
+        //   if (val == "SingleChoose") {
         //     this.form.relOptionNum = 1;
         //   }else {
         //     this.form.relOptionNum = 2;
         //   }
-        // } else if (val == "判断题") {
+        // } else if (val == "BoolenQuestion") {
         //   this.optionList = [
         //     { label: "对", check: true, content: "" },
         //     { label: "错", check: false, content: "" }
@@ -415,7 +464,7 @@ export default {
         //   this.form.optionNum = 2;
         //   this.form.relOptionNum = 1;
         //   this.answers = ["对"];
-        // } else if (val == "填空题") {
+        // } else if (val == "FillingQuestion") {
         //   this.answers = ["答案","答案","答案","答案","答案","答案","答案","答案","答案"];
         // }
       }
@@ -431,11 +480,13 @@ export default {
     ]),
 
 
+    
+
     showQuestonOptions() {
       if (
-        this.questionType == "单选题" ||
-        this.questionType == "多选题" ||
-        this.questionType == "判断题"
+        this.questionType == "SingleChoose" ||
+        this.questionType == "MultipleChoose" ||
+        this.questionType == "BoolenQuestion"
       ) {
         if (this.activeName == "stems" || this.form.questionNum == 1) {
           return true;
@@ -448,7 +499,7 @@ export default {
     }
 
     // showjudgmentOptions() {
-    //   if(this.questionType=='判断题') {
+    //   if(this.questionType=='BoolenQuestion') {
     //     if(this.form.questionNum == 1 || this.activeName=='stems') {
     //       return true
     //     }else {
@@ -464,18 +515,50 @@ export default {
   mounted() {
 
 
-    this.form.subjectId = this.getuserInfo.subject.id
-    this.form.subjectCode = this.getuserInfo.subjectCode
-    this.gradeList.length? this.form.grade = this.gradeList[0]:null
-    console.log(this.form.subjectId,this.form.subjectCode)
-    this.getquestionType();
-    this.getdifficultyType();
+
+    
+    // console.log(this.form.subjectId,this.form.subjectCode)
+    this.init()
 
 
     
     
   },
   methods: {
+
+    init() {
+
+      this.currentOption = this.optionList[0]
+      this.query = this.$route.query
+      if(this.query && this.query.paperId) {
+        this.actualPaper = this.query
+        this.isActual = true
+        this.typeDisable = true
+        this.form.subjectCode = this.actualPaper.subjectCode
+        
+        if(this.gradeList.length) {
+
+          let grade = this.gradeList.filter(item=>{
+            return item.key.substr(0,item.key.length-2) == this.actualPaper.grade
+          })
+
+          this.gradeDetailList = grade
+          this.form.grade = grade[0]
+        }
+      }else {
+        this.activeType = this.query.activeType?this.query.activeType:'chapter'
+        this.isActual = false
+        // this.form.subjectId = this.getuserInfo.subject.id
+        this.form.subjectCode = this.getuserInfo.subjectCode
+        if(this.gradeList.length) {
+          this.gradeDetailList = this.gradeList
+          this.form.grade = this.gradeList[0]
+        }
+      } 
+
+      this.getquestionType();
+      this.getdifficultyType();   
+    },
     handleClick(tab, event) {
       if(tab.name == "chapter") {
         this.tagsList = this.chapterTags
@@ -497,7 +580,7 @@ export default {
 
 
     changeOption() {
-        if (this.questionType == "单选题" || this.questionType == "多选题") {
+        if (this.questionType == "SingleChoose" || this.questionType == "MultipleChoose") {
           this.optionList = [
             { label: "A", check: true, content: "" },
             { label: "B", check: false, content: "" },
@@ -511,12 +594,13 @@ export default {
           this.form.optionNum = 4;
           this.answers = ["A", "A", "A", "A", "A", "A", "A", "A"];
 
-          if (this.questionType == "单选题") {
+          if (this.questionType == "SingleChoose") {
             this.form.relOptionNum = 1;
           }else {
             this.form.relOptionNum = 2;
+            this.relOptions = [ 2, 3, 4, 5, 6, 7, 8]
           }
-        } else if (this.questionType == "判断题") {
+        } else if (this.questionType == "BoolenQuestion") {
 
           this.optionList = [
             { label: "对", check: true, content: "" },
@@ -526,8 +610,9 @@ export default {
           this.form.optionNum = 2;
           this.form.relOptionNum = 1;
           this.answers = ["对"];
-        } else if (this.questionType == "填空题") {
+        } else if (this.questionType == "FillingQuestion") {
           this.answers = ["答案","答案","答案","答案","答案","答案","答案","答案","答案"];
+          this.relOptions = [1, 2, 3, 4, 5, 6, 7, 8]
         } else {
           this.form.optionNum = 0
           this.form.relOptionNum = 0
@@ -538,7 +623,7 @@ export default {
 
       if(this.editable) {
         this.changeOption()
-        // if (this.questionType == "单选题" || this.questionType == "多选题") {
+        // if (this.questionType == "SingleChoose" || this.questionType == "MultipleChoose") {
         //   this.optionList = [
         //     { label: "A", check: true, content: "" },
         //     { label: "B", check: false, content: "" },
@@ -552,12 +637,12 @@ export default {
         //   this.form.optionNum = 4;
         //   this.answers = ["A", "A", "A", "A", "A", "A", "A", "A"];
 
-        //   if (this.questionType == "单选题") {
+        //   if (this.questionType == "SingleChoose") {
         //     this.form.relOptionNum = 1;
         //   }else {
         //     this.form.relOptionNum = 2;
         //   }
-        // } else if (this.questionType == "判断题") {
+        // } else if (this.questionType == "BoolenQuestion") {
 
         //   this.optionList = [
         //     { label: "对", check: true, content: "" },
@@ -567,7 +652,7 @@ export default {
         //   this.form.optionNum = 2;
         //   this.form.relOptionNum = 1;
         //   this.answers = ["对"];
-        // } else if (this.questionType == "填空题") {
+        // } else if (this.questionType == "FillingQuestion") {
         //   this.answers = ["答案","答案","答案","答案","答案","答案","答案","答案","答案"];
         // }
       }
@@ -576,30 +661,40 @@ export default {
     },
 
     choose_qusoption(list) {
-      let str = this.$refs.ueA.getUEContent();
-      this.optionList.forEach(item => {
-        item.check ? (item.content = str) : "";
-        item.check = false;
-      });
-      list.check = true;
-      this.$refs.ueA.setUEContent(list.content);
-      //console.log(this.optionList);
+    //   let str = this.$refs.ueA.getUEContent();
 
-      //this.chooseAns = list.label;
+    //   console.log(this.currentOption)
+    //   this.optionList.forEach(item => {
+    //     item.check ? (item.content = str) : "";
+    //     item.check = false;
+    //   });
+    //   list.check = true;
+    //   this.$refs.ueA.setUEContent(list.content);
+    //   //console.log(this.optionList);
+
+    //   //this.chooseAns = list.label;
     },
 
     save_prev(flag) {
-      let option = this.$refs.ueA.getUEContent();
-      this.optionList.forEach(item => {
-        item.check ? (item.content = option) : "";
-        item.check = false;
-      });
+      // let option = this.$refs.ueA.getUEContent();
+      // this.optionList.forEach(item => {
+      //   item.check ? (item.content = option) : "";
+      //   item.check = false;
+      // });
 
+      this.optionList.forEach(item=>{
+        let str = this.$refs[`ue${item.label}`].getUEContent()
+        item.content = str?str:''
+      })
+
+
+      
       let ques = ''
       if(this.form.questionNum!=1){
         ques = this.$refs.ue1.getUEContent()
         
       }
+
       let analyze = this.$refs.ue2.getUEContent();
       let answ = this.$refs.ue3.getUEContent();
       this.questionOtions.forEach(item => {
@@ -620,19 +715,20 @@ export default {
       });
 
 
-      this.$refs.ueA.setUEContent("");
+      // this.$refs.ueA.setUEContent("");
     },
     choose_quesnum(list) {
       this.save_prev(true);
-      console.log(list)
-      //console.log(this.questionOtions)
+
+      
+      
       this.editable = list.edit ? true : false;
       this.questionType = list.questionType
         ? list.questionType
-        : this.typeList[0].value;
+        : this.typeList[0].key;
       this.form.difficulty = list.difficulty
         ? list.difficulty
-        : this.difficultyList[0].value;
+        : this.difficultyList[0].key;
         list.ques = list.ques?list.ques:''
         list.analyze = list.analyze?list.analyze:''
         list.answ = list.answ?list.answ:''
@@ -641,36 +737,40 @@ export default {
         this.$refs.ue2.setUEContent(list.analyze);
         this.$refs.ue3.setUEContent(list.answ);
 
-      
       if(list.edit) {
-        //this.optionList[0].check = 
         this.optionList = list.selectOptions
-        this.optionList[0].check = true
-        this.$refs.ueA.setUEContent(this.optionList[0].content);
+        // this.optionList[0].check = true
+        this.optionList.forEach(item=>{
+          this.$refs[`ue${item.label}`].setUEContent(item.content)
+        })
+        // this.$refs.ueA.setUEContent(this.optionList[0].content);
         this.form.optionNum = list.optionNum;
         this.form.relOptionNum = list.relOptionNum
         this.answers = list.answers
 
       }else {
+        this.optionList.forEach(item=>{
+          this.$refs[`ue${item.label}`].setUEContent('')
+        })
         this.changeOption()
       }
       //console.log(this.questionOtions,this.optionList)
 
-
+      this.currentOption = this.optionList[0]
       list.check = true;
     },
 
     getfillAnswer(index) {
       let ans = this.answers[index] == "答案" ? "" : this.answers[index];
-      //console.log(this.answers,ans)
+      console.log(this.answers,ans)
 
       this.fillanswerVisible = true;
-      ans?this.$refs.ueB.setUEContent(ans):null
+      this.$refs.ueFill.setUEContent(ans)
       this.fillindex = index;
     },
 
     setfillAnswer() {
-      let answ = this.$refs.ueB.getUEContent();
+      let answ = this.$refs.ueFill.getUEContent();
       this.answers[this.fillindex] = answ;
       this.fillanswerVisible = false;
     },
@@ -715,8 +815,23 @@ export default {
             item.value != '综合题'?arr.push(item):null
           })
           this.typeList = arr;
+          if(this.isActual) {
 
-          this.questionType = this.typeList[0].value;
+            if(this.actualPaper.questionType == '综合题') {
+              this.form.questionNum = 2
+              this.typeDisable = false
+              this.questionType = this.typeList[0].key;
+
+            }else {
+              this.questionType = this.typeList.filter(item=>{
+                return item.value == this.actualPaper.questionType
+              })[0].key            
+            }
+            
+          }else {
+             this.questionType = this.typeList[0].key;
+          }
+         
         } 
       })
     },
@@ -728,7 +843,7 @@ export default {
           if (data.status == "200") {
             this.difficultyList = data.data;
 
-            this.form.difficulty = this.difficultyList[0].value;
+            this.form.difficulty = this.difficultyList[0].key;
           }
         })
  
@@ -765,9 +880,9 @@ export default {
         let selectOption = []
         let answerOption =[]
         let type = this.questionOtions[i].questionType
-        if ( type == "单选题" ||type == "多选题" ||type == "判断题" ||type == "填空题") {
+        if ( type == "SingleChoose" ||type == "MultipleChoose" ||type == "BoolenQuestion" ||type == "FillingQuestion") {
           // console.log(type,this.questionOtions)
-          if(type == "单选题" ||type == "多选题" ||type == "判断题") {
+          if(type == "SingleChoose" ||type == "MultipleChoose" ||type == "BoolenQuestion") {
             for (let j = 0; j < this.questionOtions[i].optionNum; j++) {
               if(this.questionOtions[i].selectOptions[j].content) {
                 selectOption.push({word:this.questionOtions[i].selectOptions[j].label,content:this.questionOtions[i].selectOptions[j].content});
@@ -807,13 +922,13 @@ export default {
           //answer: this.optionList[i].,
           analysis: this.questionOtions[i].analyze,
           detailedAnalysis:this.questionOtions[i].answ,
-          difficultyTypeName: this.questionOtions[i].difficulty,
+          difficulty: this.questionOtions[i].difficulty,
           knowledgeId: knowledgeIds,
           chapterId: chapterIds,
-          subjectId: this.form.subjectId,
+          subject: this.form.subjectCode,
           // subjectName: this.form.subjectName,
           //schoolId:'',
-          gradeName: this.form.grade.value.substr(0,this.form.grade.value.length-1),
+          grade: this.form.grade.key.substr(0,this.form.grade.key.length-2),
           //learningSection:'',
           //userId:'',
           //edition:'',
@@ -843,11 +958,11 @@ export default {
       }else {
         requestBody = {
           name: name,
-          gradeName: this.form.grade.value.substr(0,this.form.grade.value.length-1),
+          grade: this.form.grade.key.substr(0,this.form.grade.key.length-2),
           knowledgeId: knowledgeIds,
           chapterId: chapterIds,
-          subjectId: this.form.subjectId,
-          subjectName: this.form.subjectName,
+          subject: this.form.subjectCode,
+          // subjectName: this.form.subjectName,
           parentId: 0,
           questions: questions
         }
@@ -855,30 +970,70 @@ export default {
       // console.log(requestBody);
 
 
-
-      this.$http.post(`/api/open/question/questions`,requestBody)
-      .then((data)=>{
-        if(data.status == '200') {
-          this.$confirm('单题上传成功，继续上传试题？', '', {
-            confirmButtonText: '继续上传',
-            cancelButtonText: '取消',
-            type: '',
-            center: true
-          }).then(() => {
-
-            this.reload()
-            // this.$router.push('/addquestion/submitQuestions')
+      //区分是录题还是真题上传
 
 
-          }).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消继续上传'
+      if(this.isActual) {
+
+        this.$http.post(`/api/open/paper/addTruePaperQuestion/${this.actualPaper.paperId}/${this.actualPaper.sort}`,requestBody)
+        .then((data)=>{
+          if(data.status == '200') {
+            this.$confirm('单题上传成功，继续上传试题？', '', {
+              confirmButtonText: '继续上传',
+              cancelButtonText: '取消',
+              type: '',
+              center: true
+            }).then(() => {
+
+              
+              this.$router.push(`/questions/actualPaper/maintain/${this.actualPaper.paperId}`)
+
+
+            }).catch(() => {
+              this.$message({
+                type: 'info',
+                message: '已取消继续上传'
+              });
             });
-          });
-        }
+          }
 
-      })
+        })
+
+      } 
+      else{
+
+        this.$http.post(`/api/open/question/questions`,requestBody)
+        .then((data)=>{
+          if(data.status == '200') {
+
+
+
+            this.$confirm('单题上传成功，继续上传试题？', '', {
+              confirmButtonText: '继续上传',
+              cancelButtonText: '取消',
+              type: '',
+              center: true
+            }).then(() => {
+              this.$router.replace({
+                path:`/addquestion/submitQuestions`,
+                query:{
+                  activeType:this.activeType
+                }
+              },()=>{
+                this.reload()
+              })
+              
+              // this.$router.push('/addquestion/submitQuestions')
+
+
+            }).catch(() => {
+              this.reload()
+            });
+          }
+
+        })      
+      }
+
 
 
 
@@ -890,6 +1045,18 @@ export default {
 </script>
 <style lang="less">
 .addques-home {
+  .custom-form {
+    .el-form-item__label {
+      flex-shrink: 0;
+    }
+    .el-button--mini, .el-button--mini.is-round {
+      margin-left: 10px;
+    }
+
+    .el-form-item__content {
+      margin-left: -10px
+    }
+  }
 
   .right-wrap {
     width: 80% !important;

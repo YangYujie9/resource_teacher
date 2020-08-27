@@ -6,7 +6,7 @@
             <div class="tree-class" :class="{treeclassfixed:isfixTab}">
               <div v-for="(item,index) in questionList">
                 <p class="titlep">
-                  <span>{{$changeIndex(index)}}</span>
+                  <span>{{$changeIndex(index+1)}}</span>
                   <span>、</span>
                   <span>{{item.type}}</span>
                 </p>
@@ -47,7 +47,7 @@
           <div class="content">
             <el-button type="primary" size="mini" class="uploadbtn" @click="downloadVisible = true">试卷下载</el-button>
             <div v-for="(list,index) in questionList" class="singlediv">
-              <p><span>{{$changeIndex(index)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
+              <p><span>{{$changeIndex(index+1)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
               <div class="singleques" v-for="(list1,index1) in list.list">
 
                 <div class="pt1">
@@ -515,7 +515,7 @@ export default {
   }
 
   .exam-wrap {
-    margin-top: 20px;
+    margin: 20px 0px;
     border: 1px solid #e2e2e2;
     padding: 20px;
     line-height: 1.5;

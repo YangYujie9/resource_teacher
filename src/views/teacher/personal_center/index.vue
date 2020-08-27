@@ -23,7 +23,7 @@
               </div>
             </div>
           </top-popover>
-          <div class="tab-class">
+          <div class="tree-content">
             <el-tabs stretch v-model="activeType" @tab-click="handleClick">
               <el-tab-pane label="按章节" name="chapter">
                 <div class="tree-class" :class="{treeclassfixed:isfixTab}">

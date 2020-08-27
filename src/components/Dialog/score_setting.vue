@@ -13,7 +13,7 @@
         </p>
         <div class="score-table-wrap">
           <div v-for="(list,index) in tableData">
-            <p class="p2">{{changeindex(index)}}、{{list.type}}</p>
+            <p class="p2">{{$changeIndex(index+1)}}、{{list.type}}</p>
 
               <el-table
                 :data="list.list"
@@ -34,7 +34,7 @@
                   align="center"
                   label="知识点">
                   <template slot-scope="scope">
-                    {{scope.row.knowledgesPoint.join()}}
+                     <!-- {{scope.row.knowledgesPoint.join()}} -->
                   </template>
                 </el-table-column>
                 <el-table-column
@@ -119,11 +119,6 @@ export default {
   methods: {
     closeDialog() {
       this.$emit('close')
-    },
-
-    changeindex(index) {
-      const list = {'0': '零','1': '一','2': '二','3': '三','4': '四','5': '五','6': '六','7': '七','8': '八','9': '九'};
-      return list[index+1]
     },
 
 

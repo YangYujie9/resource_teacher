@@ -53,7 +53,7 @@ export default {
         },
         {
           label: "真题试卷",
-          route: "/questions/actualPaper",
+          route: "/questions/actualPaper/search/true",
           check: false
         },
         {
