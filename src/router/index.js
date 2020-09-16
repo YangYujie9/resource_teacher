@@ -25,22 +25,27 @@ Vue.use(VueRouter)
     component:  ()=>import('@/views/login'),
 
   },
-    {
-      path: '/addquestion',
-      name: '/addquestion',
-      component: ()=>import('@/views/teacher/index'),
-      children: [    
-      {
-        path: 'submitQuestions',
-        name: 'submitQuestions',
-        component: ()=>import('@/views/teacher/submit_question/addquestion'),
-      },]
-    },
+    // {
+    //   path: '/addquestion',
+    //   name: '/addquestion',
+    //   component: ()=>import('@/views/teacher/index'),
+    //   children: [    
+    //   {
+    //     path: 'submitQuestions',
+    //     name: 'submitQuestions',
+    //     component: ()=>import('@/views/teacher/submit_question/addquestion'),
+    //   },]
+    // },
     {
       path: '/questions',
       name: 'questions',
       component: ()=>import('@/views/questions/index'),
       children:[
+      {
+        path: 'submitQuestions',
+        name: 'submitQuestions',
+        component: ()=>import('@/views/questions/submit_question/addquestion'),
+      },
       {
         path: 'chooseBychapter',
         name: 'chooseBychapter',
@@ -58,12 +63,13 @@ Vue.use(VueRouter)
         name: 'examinationPaper',
         component: ()=>import('@/views/questions/examination/examination_paper'),
       },{
-        path: 'actualPreview',
+        path: 'actualPaper/actualPreview',
         name: 'actualPreview',
         component: ()=>import('@/views/questions/actual/actual_preview'),
       },{
         path: 'actualPaper',
         name: 'actualPaper',
+        redirect: '/questions/actualPaper/search/true',
         component: ()=>import('@/views/questions/actual/index'),
         children: [{
           path: 'search/:isComplete',
@@ -104,17 +110,42 @@ Vue.use(VueRouter)
         name: 'resourceRreview',
         component: ()=>import('@/views/teacher/resource/resource_preview'),
       },{
+        path: 'resourceInfo',
+        name: 'resourceInfo',
+        component: ()=>import('@/views/teacher/resource/resourceInfo'),
+      },{
         path: 'personal',
         name: 'personal',
+        redirect:'personal/myResources',
         component: ()=>import('@/views/teacher/personal_center/index'),
         children: [{
+          path: 'profile',
+          name: 'profile',
+          component: ()=>import('@/views/teacher/personal_center/profile'),
+        },,{
+          path: 'myResources',
+          name: 'myResources',
+          component: ()=>import('@/views/teacher/personal_center/resource'),
+        },{
+          path: 'myCollections',
+          name: 'myCollections',
+          component: ()=>import('@/views/teacher/personal_center/collections'),
+        },{
           path: 'myWarehouse',
           name: 'myWarehouse',
-          component: ()=>import('@/views/teacher/personal_center/collections'),
+          component: ()=>import('@/views/teacher/personal_center/warehouse'),
         },{
           path: 'myExampaper',
           name: 'myExampaper',
           component: ()=>import('@/views/teacher/personal_center/exampaper'),
+        },{
+          path: 'mySharing',
+          name: 'mySharing',
+          component: ()=>import('@/views/teacher/personal_center/sharing'),
+        },{
+          path: 'myDownload',
+          name: 'myDownload',
+          component: ()=>import('@/views/teacher/personal_center/download'),
         }]
       },
       // {
@@ -155,7 +186,7 @@ router.beforeEach((to, from, next) => {
 
 
         next({
-          path: '/addquestion/submitQuestions',
+          path: '/questions/chooseBychapter',
         })
       } else {
 

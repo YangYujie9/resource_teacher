@@ -5,22 +5,17 @@
       <div slot="left">
         <!-- <div class="tree-wrap" :class="{fixedclass:isfixTab}"> -->
           <div class="tab-class">
-                        <top-popover>
+            <top-popover v-if="isReady" chooseType="knowledge" ref="filter" @setparams="setparams">
               <div slot="reference">
                 <p class="top-title">
-                  <span>人教版：</span>
-                  <span v-if="filter.grade.value">{{filter.grade.value}}</span>
+                  <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
+                  <!-- <span v-if="$refs.filter" >{{$refs.filter.volume.name}}</span> -->
+                  
                   <i class="iconfont iconshezhi settingicon"></i>
                 </p>
               </div>
               <div slot="popover">
-                <div>
 
-                  <p>年级：</p>
-                  <el-radio-group v-model="filter.grade" size="mini"  @change="resetPage">
-                    <el-radio-button :label="item" :key="item.key" v-for="item in gradeList">{{item.value}}</el-radio-button>
-                  </el-radio-group>
-                </div>
               </div>
             </top-popover>
             <div class="top-p">
@@ -31,7 +26,7 @@
               </p>
             </div>
             <div class="tree-class" :class="{treeclassfixed:isfixTab}">
-              <pointTree chooseType="knowledge" :grade="filter.grade.key" :subjectCode="getuserInfo.subjectCode"  @getCheckedNodes="getCheckedNodes" ref="knowledgeTree" :showCheckbox="isMulti"></pointTree>
+              <pointTree chooseType="knowledge"  :subjectCode="subjectCode"  @getCheckedNodes="getCheckedNodes" ref="knowledgeTree" :showCheckbox="isMulti"></pointTree>
             </div>
             <!-- <el-scrollbar
               :wrap-class="{treeclassfixed:isfixTab}"
@@ -64,7 +59,7 @@
             <el-button
               type="danger"
               size="mini"
-              @click="$router.push('/addquestion/submitQuestions')"
+              @click="$router.push('/questions/submitQuestions')"
             >上传试题</el-button>
             <!-- <el-button type="danger" size="mini" :class="{upbutton: isfixTab}">上传试题</el-button> -->
           </div>
@@ -77,7 +72,7 @@
                 <p>题型</p>
                 <div class="div2">
                   <el-radio-group v-model="search.type" size="mini" @change="resetPage">
-                    <el-radio-button :label="item.key" :key="item.key" v-for="item in typeList">{{item.value}}</el-radio-button>
+                    <el-radio-button :label="item.id" :key="item.id" v-for="item in typeList">{{item.name}}</el-radio-button>
                   </el-radio-group>
                 </div>
               </li>
@@ -154,11 +149,10 @@
             </p>
           </div>
         <div class="card-wrap">
-          <div v-for="(list,index) in tableData">
-            <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder">
-              
-            </singleQuestion>
-          </div>
+          <!-- <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" :tableData="tableData">
+            
+          </singleQuestion> -->
+          <questionList :isAnswer="isAnswer" :tableData="tableData" knowledgeType="knowledge" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" ></questionList>
 
 
           <div class="pagination">
@@ -196,6 +190,7 @@ import similarityDialog from '@/components/Dialog/similarity'
 import errorDialog from '@/components/Dialog/error'
 import favoriteDialog from '@/components/Dialog/favorite'
 import singleQuestion from '@/components/Question/singleQuestion'
+import questionList from '@/components/Question/questionList'
 import { getquestionType } from '@/utils/basic.service.js'
 // import { getmyTestBasket } from '@/utils/basic.service.js'
 
@@ -207,7 +202,8 @@ export default {
     similarityDialog,
     errorDialog,
     favoriteDialog,
-    singleQuestion
+    singleQuestion,
+    questionList
   },
   props: ["isfixTab"],
   data() {
@@ -242,6 +238,7 @@ export default {
       favoriteVisible:false,
       subjectCode:'',
       knowledgeList:[],
+      volumeId:'',
     };
   },
   computed: {
@@ -250,6 +247,7 @@ export default {
         'gradeList',
         'getuserInfo',
         'paperId',
+        'isReady'
 
       ]),
   },
@@ -259,11 +257,13 @@ export default {
     gradeList(val) {
       if(val.length) {
         this.filter.grade = val[0]
-        this.getmyTestBasket()
+        
       }
       
 
     },
+
+
 
   },
   mounted() {
@@ -271,20 +271,28 @@ export default {
     MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
     if(this.gradeList.length) {
       this.filter.grade = this.gradeList[0]
-      console.log(this.filter.grade.value)
-      this.getmyTestBasket()
+      
       // this.resetPage()
     }
     this.search.difficulty = this.difficultyList[0].key
-    this.subjectCode = this.getuserInfo.subjectCode
+    // this.subjectCode = this.getuserInfo.subjectCode
 
-    this.getquestionType()
+    
+    this.getmyTestBasket()
 
 
   },
 
   methods: {
+    setparams(volumeId,subjectCode) {
 
+      this.volumeId = volumeId
+
+      this.subjectCode = subjectCode
+
+      this.getquestionType()
+      
+    },
     close_similarity() {
       this.similarityVisible = false
       this.getTableData()
@@ -311,7 +319,7 @@ export default {
 
     getquestionType() {
 
-      if(!this.subjectCode) {return false}
+      // if(!this.subjectCode) {return false}
 
       this.typeList = []
       getquestionType(this.subjectCode)
@@ -319,13 +327,13 @@ export default {
           if (data.status == "200") {
             
             let arr = []
-            arr.push({key:'',value:'全部'})
+            arr.push({id:'',name:'全部'})
             data.data.forEach(item=>{
               arr.push(item)
             })
 
             this.typeList = arr
-            this.search.type = this.typeList[0].key;
+            this.search.type = this.typeList[0].id;
             this.resetPage()
           } 
         })
@@ -357,7 +365,7 @@ export default {
     },
     getTableData() {
       // console.log(this.filter.grade.value)
-      if(!this.filter.grade.value) {return false}
+      if(!this.filter.grade.key) {return false}
       let knowledgeIds = []
       this.knowledgeList.forEach(item=>{
         knowledgeIds.push(item.id)
@@ -369,7 +377,7 @@ export default {
         questionType: this.search.type,
         difficultyType: this.search.difficulty,
         name: this.search.keyword,
-        gradeName: this.filter.grade.value.substr(0,this.filter.grade.value.length-1),
+        grade: this.filter.grade.key,
         
         page: this.search.page - 1,
         size: this.search.size,
@@ -381,14 +389,14 @@ export default {
       },params)
       .then((data)=>{
         
-        data.data.content.forEach(item=>{
+        // data.data.content.forEach(item=>{
 
-          item.showDetail = false
-          item.answers = []
-          this.handleQuestion(item,item)
+        //   item.showDetail = false
+        //   item.answers = []
+        //   this.handleQuestion(item,item)
 
 
-        })
+        // })
 
         this.tableData = data.data.content
         // console.log(this.tableData)

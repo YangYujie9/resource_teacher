@@ -14,7 +14,7 @@
             <i class="iconfont iconshouye iconclass"></i>当前位置：真题试卷 > {{activePage}}
           </div>
         </div>
-        <router-view :regionList="regionList" :gradeList="gradeList" :yearList="yearList" :testPaperTypeList="testPaperTypeList"></router-view>
+        <router-view :regionList="regionList" :yearList="yearList" :testPaperTypeList="testPaperTypeList"></router-view>
         <!-- <div  v-show="activePage=='真题查询'">
 
           <actualSearch :isComplete="true"></actualSearch>
@@ -65,7 +65,6 @@ export default {
         route:'/questions/actualPaper/search/false'
       }],
       regionList:[],
-      gradeList:[],
       yearList:[],
       testPaperTypeList:[],
 
@@ -79,18 +78,15 @@ export default {
     ...mapGetters([
       'getuserInfo',
       'difficultyList',
-      'subjectList'
+      'subjectList',
+      'gradeList'
 
     ]),
   },
 
 
   watch: {
-    getuserInfo(val) {
-      if(val.school) {
-        this.getgradeList()
-      }
-    },
+
 
     $route(val) {
       this.typeList.forEach(item=>{
@@ -102,7 +98,6 @@ export default {
   },
 
   created() {
-    this.getuserInfo.school?this.getgradeList():null
     this.getregion()
     this.getyearList()
     this.gettypeList()
@@ -144,14 +139,7 @@ export default {
     },
 
 
-    getgradeList() {
-      this.$http.get(`/api/open/common/gradeList/${this.getuserInfo.school.id}`)
-      .then(data=>{
-        if(data.status == '200') {
-          this.gradeList = data.data
-        }
-      })
-    },
+
     getyearList() {
       this.$http.get(`/api/open/common/yearList`)
       .then(data=>{

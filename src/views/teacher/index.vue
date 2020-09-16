@@ -13,7 +13,7 @@
           </ul>
         </div>
 
-        <router-view :isfixTab="isfixTab" @backToTop="backToTop"></router-view>
+        <router-view :isfixTab="isfixTab" @backToTop="backToTop" :resourceTypeList="resourceTypeList"  v-if="resourceTypeList.length"></router-view>
       </div>
       <div class="footer"></div>
     </el-scrollbar>
@@ -31,6 +31,7 @@ export default {
 
     ...mapGetters([
       'gradeList',
+      'isReady'
 
     ]),
 
@@ -39,11 +40,46 @@ export default {
     }
 
   },
+  watch: {
+    $route(to,from){
+      this.NavList.forEach(list=>{
+        to.path.indexOf(list.route)>-1?list.check=true:list.check=false
+      })
+
+    }
+  },
+
   data() {
     return {
       isfixTab: false,
-
-      //isfixLeft: false,
+      resourceTypeList:[],
+      resource: [
+        {
+          value: '课件',
+          key:'CourseWare',
+        },{
+          value: '教案',
+          key:'TeachPlan',
+        },{
+          value: '学案',
+          key:'LearningCase',
+        },{
+          value: '套题试卷',
+          key:'ExaminationPaper',
+        },{
+          value: '教学反思',
+          key:'TeachReflection',
+        },{
+          value: '微课',
+          key:'VideoLesson',
+        },{
+          value: '素材',
+          key:'Material',
+        },{
+          value: '电子教材',
+          key:'ElectronicMaterials',
+        }
+      ],
       NavList: [
         {
           label: "首页",
@@ -96,10 +132,15 @@ export default {
       true
     );
 
+    
 
     this.NavList.forEach(list=>{
       this.$route.fullPath.indexOf(list.route)>-1?list.check=true:list.check=false
     })
+
+
+    this.getResourceType()
+
   },
   methods: {
     // 先分别获得id为testNavBar的元素距离顶部的距离和页面滚动的距离
@@ -123,9 +164,28 @@ export default {
         this.$router.push(list.route);
 
       }
-      
-    },
 
+
+    },
+    /**获取资源类型*/
+    getResourceType(){
+      this.$http.get(`/api/open/common/getResourceType`)
+        .then((result)=>{
+          if(result.status == '200') {
+            result.data.forEach(item=>{
+              for(let i=0;i<this.resource.length;i++) {
+                if(item.name == this.resource[i].value) {
+                  item.key = this.resource[i].key
+                }
+              }
+            })
+            // this.resourceForm.resourceType = this.resourceTypeList[0].id
+
+            this.resourceTypeList = result.data
+          }
+        })
+
+    },
 
     backToTop() {
       this.$refs["quesHome"].$refs["wrap"].scrollTo(0,0)

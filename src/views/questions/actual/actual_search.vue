@@ -29,12 +29,12 @@
         <li>
           <p>地区</p>
           <div class="div2">
-             <el-select v-model="search.region" placeholder="请选择" size="mini" clearable @change="getTruePaperList">
+             <el-select v-model="search.regionId" placeholder="请选择" size="mini" clearable @change="getTruePaperList">
               <el-option
                 v-for="item in regionList"
-                :key="item"
-                :label="item"
-                :value="item">
+                :key="item.key"
+                :label="item.value"
+                :value="item.key">
               </el-option>
             </el-select>
           </div>
@@ -85,11 +85,12 @@
           prop="address"
           label="操作"
           align="center"
-          width="120">
+          width="160">
           <template slot-scope="scope">
             <el-button type="text" size="small" v-if="isComplete=='false'" @click="continueUpload(scope.row)">继续上传</el-button>
             <el-button type="text" size="small" v-if="isComplete=='true'" @click="previewPaper(scope.row)">预览</el-button>
-            <el-button type="text" size="small" v-if="isComplete=='true'">收藏</el-button>
+            <el-button type="text" size="small" v-if="isComplete=='true' && !scope.row.isCollect" @click="collectPaper(scope.row.paperId)">收藏</el-button>
+            <el-button type="text" size="small" v-if="isComplete=='true' && scope.row.isCollect" @click="cancelCollect(scope.row.paperId)">取消收藏</el-button>
             <el-button type="text" size="small" v-if="isComplete=='true'">下载</el-button>
           </template>
         </el-table-column>
@@ -120,7 +121,7 @@ import { getquestionType } from '@/utils/basic.service.js';
 
 
 export default {
-  props: ['regionList','gradeList','yearList','testPaperTypeList'],
+  props: ['regionList','yearList','testPaperTypeList'],
   data() {
     return {
       questionTypeList:[],
@@ -130,7 +131,7 @@ export default {
         type: '',
         grade: "",
         year: "全部",
-        region:'',
+        regionId:'',
         page: 1,
         size: 20,
       },
@@ -143,7 +144,8 @@ export default {
     ...mapGetters([
       'getuserInfo',
       'difficultyList',
-      'subjectList'
+      'subjectList',
+      'gradeList'
 
     ]),
     isComplete() {
@@ -247,7 +249,7 @@ export default {
         grade: this.search.grade,
         testPaperType: this.search.type,
         year:this.search.year == '全部'?'':this.search.year,
-        region: this.search.region,
+        regionId: this.search.regionId,
         page: this.search.page - 1,
         size: this.search.size
       }
@@ -262,12 +264,31 @@ export default {
 
 
     previewPaper(row) {
-      this.$router.push({path: `/questions/actualPreview`,query: row})
+      this.$router.push({path: `/questions/actualPaper/actualPreview`,query: row})
     },
 
     continueUpload(row) {
       this.$router.push(`/questions/actualPaper/maintain/${row.paperId}`)
-    }
+    },
+
+    collectPaper(paperId) {
+      this.$http.post(`/api/open/collect/paper/${paperId}`)
+      .then((data)=>{
+        if(data.status == '200') {
+          this.$message.success('收藏成功')
+          this.getTruePaperList()
+        }
+      })
+    },
+    cancelCollect(paperId) {
+      this.$http.delete(`/api/open/collect/paper/${paperId}`)
+      .then((data)=>{
+        if(data.status == '200') {
+          this.$message.success('取消收藏成功')
+          this.getTruePaperList()
+        }
+      })
+    },
 
 
   

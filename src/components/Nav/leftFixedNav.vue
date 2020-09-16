@@ -104,7 +104,7 @@ export default {
   min-height: 300px;
   padding: 20px 0px;
   border: 1px solid #e2e2e2;
-  z-index:1;
+  z-index:1000;
 
   .tab-class {
     padding: 0 30px;
@@ -238,7 +238,7 @@ export default {
     }
 
     .fixedright {
-      min-height: calc(100vh - 50px);
+      min-height: calc(100vh - 100px);
     }
   }
   // .fixedNavbar{

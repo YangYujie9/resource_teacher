@@ -5,32 +5,24 @@
       <div slot="left">
         <!-- <div class="tree-wrap" :class="{fixedclass:isfixTab}" style="z-index: 1000;"> -->
 
-            <top-popover>
-              <div slot="reference">
-                <p class="top-title">
-                  <span>人教版：</span>
-                  <span v-if="filter.grade">{{filter.grade.value}}</span>
-                  <i class="iconfont iconshezhi settingicon"></i>
-                </p>
-              </div>
-              <div slot="popover">
-                <div>
-                  <!-- <p>版本：</p>
-                  <el-radio-group v-model="filter.version" size="mini">
-                    <el-radio-button :label="item" v-for="item in visionList"></el-radio-button>
-                  </el-radio-group>
- -->
-                  <p>年级：</p>
-                  <el-radio-group v-model="filter.grade" size="mini">
-                    <el-radio-button :label="item" :key="item.key" v-for="item in gradeList">{{item.value}}</el-radio-button>
-                  </el-radio-group>
-                </div>
-              </div>
-            </top-popover>
+          <top-popover v-if="isReady" ref="filter" @setparams="setparams">
+            <div slot="reference">
+              <p class="top-title">
+                <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
+                <span v-if="$refs.filter">{{$refs.filter.oese.name}}</span>
+                <!-- <span v-if="$refs.filter" >{{$refs.filter.volume.name}}</span> -->
+                
+                <i class="iconfont iconshezhi settingicon"></i>
+              </p>
+            </div>
+            <div slot="popover">
+
+            </div>
+          </top-popover>
 
           <div class="tree-content">
-            <div class="tree-class" :class="{treeclassfixed:isfixTab}">
-              <pointTree chooseType="chapter" :grade="filter.grade.key" :subjectCode="filter.subjectCode"  @getCheckedNodes="getCheckedChapters" ref="chapterTree"></pointTree>
+            <div class="tree-class" :class="{treeclassfixed:isfixTab}" v-if="getuserInfo.learningSection">
+              <pointTree chooseType="chapter" :volumeId="volumeId" :subjectCode="subjectCode"  @getCheckedNodes="getCheckedChapters" ref="chapterTree"></pointTree>
             </div>
           </div>
 
@@ -40,6 +32,7 @@
       <div slot="right">
         <div class="bread-div">
           <div>
+
             <i class="iconfont iconshouye iconclass"></i>当前位置：章节挑题
           </div>
 
@@ -49,13 +42,13 @@
               type="danger"
               size="mini"
               v-show="activeName == 'question'"
-              @click="$router.push('/addquestion/submitQuestions')"
+              @click="$router.push('/questions/submitQuestions')"
             >上传试题</el-button>
             <!-- <el-button type="danger" size="mini" :class="{upbutton: isfixTab}">上传试题</el-button> -->
           </div>
         </div>
         <div class="tab-div">
-          <test-question :chapterList="chapterList" :gradeName="filter.grade.value" :grade="filter.grade.key" :subjectCode="filter.subjectCode" @backToTop="backToTop"></test-question>
+          <test-question :chapterList="chapterList" :gradeName="filter.grade.value" :grade="filter.grade.key" :subjectCode="subjectCode" @backToTop="backToTop"></test-question>
 <!-- 
           <el-tabs v-model="activeName" stretch>
             <el-tab-pane label="同步题" name="question">
@@ -103,6 +96,8 @@ export default {
       },
       chapterList:[],
       visionList:[],
+      volumeId:'',
+      subjectCode: '',
 
 
     };
@@ -121,6 +116,7 @@ export default {
       ...mapGetters([
         'gradeList',
         'getuserInfo',
+        'isReady'
 
       ]),
   },
@@ -139,7 +135,13 @@ export default {
   },
   methods: {
 
+    setparams(volumeId,subjectCode) {
 
+      this.volumeId = volumeId
+
+      this.subjectCode = subjectCode
+      
+    },
     getCheckedChapters(list) {
 
       this.chapterList = list

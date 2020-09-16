@@ -18,7 +18,7 @@
           </el-form-item>
           <el-form-item label="错误描述：">
             <el-input type="textarea" v-model="error.desc" :rows="4" placeholder="请输入相关纠错内容"></el-input>
-            <p style="color:a7a9ae;">您的纠错审核通过后将会获得一定的奖励</p>
+            <p style="color:#a7a9ae;">您的纠错审核通过后将会获得一定的奖励</p>
           </el-form-item>
         </el-form>
       </div>

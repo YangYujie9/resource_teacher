@@ -31,6 +31,10 @@
           <div>
             <i class="iconfont iconshouye iconclass"></i>当前位置：试卷中心
           </div>
+          <div>
+            <el-button type="text" size="mini" @click="$router.go(-1)"><i class="iconfont iconfanhui"></i> 返回</el-button>
+            
+          </div>
         </div>
         <div style="margin-left:20px;">
           <el-button type="primary" size="mini" @click="scoredialogVisible=true">分值设定</el-button>
@@ -149,6 +153,10 @@
             </div>
           </div>
         </div>
+
+        <div v-else style="text-align: center;margin-top: 60px;">
+          该试卷暂无数据
+        </div>
       </div>
     </left-fixed-nav>
 
@@ -245,7 +253,7 @@ export default {
 
             })
             .catch(() => {
-
+              this.getPaperDetail()
             });
         }
       })
@@ -310,7 +318,8 @@ export default {
     },
 
     getPaperDetail() {
-      this.$http.get(`/api/open/paper/${this.paperId}`)
+      this.$http.get(`/api/open/paper/myTestBasket`)
+      //this.$http.get(`/api/open/paper/${this.paperId}`)
       .then((data)=>{
         if(data.status == '200') {
           this.paperName = data.data.paperName
@@ -352,7 +361,7 @@ export default {
       item.selectoption = []
       if(item.options && item.options.length) {
         item.options.forEach(item1=>{
-          item.selectoption.push(item1)
+          item.selectoption.push({key:item1.key,id:item1.value.id,value:item1.value.name})
           // for(let key in item1) {
           //   item.selectoption.push({key:key,value:item1[key]})
           // }

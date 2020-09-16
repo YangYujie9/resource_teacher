@@ -75,7 +75,7 @@ export default {
 						this.$store.dispatch('getUserBaseInfo', this.$router)
 						
 						
-						this.$router.push("/addquestion/submitQuestions")
+						this.$router.push("/questions/chooseBychapter")
 						
 
 						

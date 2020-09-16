@@ -2,40 +2,31 @@
   <div class="Intelligent">
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left">
-            <top-popover>
-              <div slot="reference">
-                <p class="top-title">
-                  <span>人教版：</span>
-                  <span v-if="filter.grade">{{filter.grade.value}}</span>
-                  <i class="iconfont iconshezhi settingicon"></i>
-                </p>
-              </div>
-              <div slot="popover">
-                <div>
-                  <!-- <p>版本：</p>
-                  <el-radio-group v-model="filter.version" size="mini">
-                    <el-radio-button :label="item" v-for="item in visionList"></el-radio-button>
-                  </el-radio-group> -->
-
-                  <p>年级：</p>
-                  <el-radio-group v-model="filter.grade" size="mini">
-                    <el-radio-button :label="item" :key="item.key" v-for="item in gradeList">{{item.value}}</el-radio-button>
-                  </el-radio-group>
-                </div>
-              </div>
-            </top-popover>
+          <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
+            <div slot="reference">
+              <p class="top-title">
+                <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
+                <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
+                <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span>
+                
+                <i class="iconfont iconshezhi settingicon"></i>
+              </p>
+            </div>
+            <div slot="popover">
+            </div>
+          </top-popover>
 
 
           <div class="tab-class">
             <el-tabs stretch v-model="activeType" @tab-click="handleClick">
               <el-tab-pane label="按章节" name="chapter">
                 <div class="tree-class" :class="{treeclassfixed:isfixTab}">
-                  <pointTree chooseType="chapter" :grade="filter.grade.key" :subjectCode="getuserInfo.subjectCode"  @getCheckedNodes="getCheckedChapters" ref="chapterTree"></pointTree>
+                  <pointTree chooseType="chapter" :volumeId="volumeId" @getCheckedNodes="getCheckedChapters" ref="chapterTree"></pointTree>
                 </div>
               </el-tab-pane>
-              <el-tab-pane label="按考点" name="detial">
+              <el-tab-pane label="按考点" name="knowledge">
                 <div class="tree-class">
-                  <pointTree chooseType="knowledge" :grade="filter.grade.key" :subjectCode="getuserInfo.subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree"></pointTree>
+                  <pointTree chooseType="knowledge" :subjectCode="subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree"></pointTree>
                 </div>
               </el-tab-pane>
             </el-tabs>
@@ -74,14 +65,14 @@
                   <el-checkbox-button
                     v-for="item in typeList"
                     :label="item"
-                    :key="item.key"
-                  >{{item.value}}</el-checkbox-button>
+                    :key="item.id"
+                  >{{item.name}}</el-checkbox-button>
                 </el-checkbox-group>
               </div>
               <p class="title2">题量设置</p>
               <div class="inputgroup title2">
                 <p v-for="type in search.type" style="margin-right:20px;margin-bottom:10px;">
-                  <label class="label1">{{type.value}}</label>
+                  <label class="label1">{{type.name}}</label>
                   <el-input
                     v-model="type.number"
                     placeholder="请输入题量"
@@ -96,7 +87,7 @@
               <p class="title1">难度设置</p>
               <div class="btngroup">
                 <el-radio-group v-model="search.difficulty" size="mini">
-                  <el-radio-button v-for="item in partDifficultyList" :label="item.value" :key="item.key">{{item.value}}</el-radio-button>
+                  <el-radio-button v-for="item in partDifficultyList" :label="item.key" :key="item.key">{{item.value}}</el-radio-button>
                 </el-radio-group>
               </div>
             </li>
@@ -174,6 +165,7 @@ export default {
       },
       cateageList: ["常考题", "易错题", "好题", "压轴题"],
       isAnswer: false,
+      volumeId:'',
 
     };
   },
@@ -182,7 +174,8 @@ export default {
     ...mapGetters([
       'gradeList',
       'getuserInfo',
-      'partDifficultyList'
+      'partDifficultyList',
+      'isReady'
 
     ]),
   },
@@ -201,10 +194,10 @@ export default {
 
   mounted() {
     this.gradeList.length? this.filter.grade = this.gradeList[0]: null
-    this.subjectCode = this.getuserInfo.subjectCode
-    this.search.difficulty = this.partDifficultyList[0].value
     // this.subjectCode = this.getuserInfo.subjectCode
-    this.getquestionType()
+    this.search.difficulty = this.partDifficultyList[0].key
+    // this.subjectCode = this.getuserInfo.subjectCode
+    // this.getquestionType()
     
     //console.log(this.form.type);
   },
@@ -218,7 +211,15 @@ export default {
       }
     },
 
+    setparams(volumeId,subjectCode) {
 
+      this.volumeId = volumeId
+
+      this.subjectCode = subjectCode
+
+      this.getquestionType()
+      
+    },
 
     closeTag(index) {
 
@@ -235,7 +236,7 @@ export default {
 
     getquestionType() {
       this.typeList = []
-      if(!this.subjectCode) {return false}
+      // if(!this.subjectCode) {return false}
 
       getquestionType(this.subjectCode)
       .then((data)=>{
@@ -263,6 +264,13 @@ export default {
           type:'warning'
         })
       }
+
+      if(!this.tagsList.length) {
+        return this.$message({
+          message: '必须选择章节或者知识点！',
+          type:'warning'
+        })
+      }
       let tagIds = []
       let questions = []
 
@@ -270,23 +278,39 @@ export default {
         tagIds.push(item.id)
       })
 
+      let flag = false;
       this.search.type.forEach(item=>{
-        questions.push(`${item.value},${item.number}`)
+        if(!item.number) {
+          flag = true
+          this.$message({
+            message:`${item.value}题量不可以为空`,
+            type: 'warning'
+          })
+          return
+        }
+
+        questions.push({questionType:item.key, number:item.number})
+        
+        
       })
+
+      if(flag) {
+        return false
+      }
 
       let params = {
         name: this.name,
         questions: questions,
         difficultyType: this.search.difficulty,
-        chapterIds: '',
-        knowledgeIds:'',
-        gradeName:this.filter.grade.value.substr(0,this.filter.grade.value.length-1)
+        chapterIds: [],
+        knowledgeIds:[],
+        grade:this.filter.grade.key
       }
 
       if(this.activeType == "chapter") {
-        params.chapterIds = tagIds.join()
+        params.chapterIds = tagIds
       }else {
-        params.knowledgeIds = tagIds.join()
+        params.knowledgeIds = tagIds
       }
 
       // console.log(params)
@@ -309,10 +333,7 @@ export default {
 
 
           }).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消继续上传'
-            });
+            this.reload()
           });
         }
 

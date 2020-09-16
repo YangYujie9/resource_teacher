@@ -16,6 +16,7 @@ const state = {
   difficultyList: [],
   partDifficultyList: [],
   paperId:'',
+  isReady: false,
 }
 
 const getters = {
@@ -52,6 +53,10 @@ const getters = {
   paperId: state => {
 
     return state.paperId
+  },
+  isReady: state => {
+
+    return state.isReady
   },
 
 }
@@ -99,7 +104,11 @@ const mutations = {
     state.paperId = data
     
   },
+  setisReady(state, data) {
 
+    state.isReady = data
+    
+  },
 
 
 }
@@ -112,7 +121,7 @@ function getBasicList(id,context) {
           
           context.commit('setgradeList',data.data)
 
-          
+          localStorage.setItem('gradeList',JSON.stringify(data.data))
         } 
       })
 
@@ -122,7 +131,8 @@ function getBasicList(id,context) {
         
         context.commit('setsubjectList',data.data)
 
-        
+        localStorage.setItem('subjectList',JSON.stringify(data.data))
+        context.commit('setisReady', true)
       } 
     })
       
@@ -134,43 +144,75 @@ const actions = {
 
   getUserBaseInfo(context,router) {//注意参数的传递
 
-      Vue.$http.get(`/api/open/teacher/info`)
-      .then((data) => {
-          if (data.status == "200") {
 
-            context.commit('setUserInfo', data.data)
+      // let user = JSON.parse(localStorage.getItem("userInfo"))
+      // let subjectList = JSON.parse(localStorage.getItem("subjectList"))
+      // let gradeList = JSON.parse(localStorage.getItem("subjectList"))
+      
+      // if(user) {
+      //   context.commit('setUserInfo', user)
+      //   context.commit('setgradeList',gradeList)
+      //   context.commit('setsubjectList',subjectList)
+      //   context.commit('setpaperId',Cookies.get('paperId'))
 
+      //   context.commit('setdifficultyList', JSON.parse(localStorage.getItem("difficultyList")))
+      //   context.commit('setpartDifficultyList',JSON.parse(localStorage.getItem("partDifficultyList")))
 
-            context.commit('setstaffVO', {Authorization: Cookies.get('resource-teacher')})
-
-            // context.commit('setloading',false)
-            getBasicList(data.data.school.id,context)
-
-            context.commit('setpaperId',Cookies.get('paperId'))
-
-          }
+      // }else {
+          
         
-      })
+        Vue.$http.get(`/api/open/teacher/info`)
+        .then((data) => {
+            if (data.status == "200") {
+
+              context.commit('setUserInfo', data.data)
+
+              localStorage.setItem('userInfo',JSON.stringify(data.data))
 
 
+              context.commit('setstaffVO', {Authorization: Cookies.get('resource-teacher')})
 
+              // context.commit('setloading',false)
+              getBasicList(data.data.school.id,context)
 
+              context.commit('setpaperId',Cookies.get('paperId'))
 
-      Vue.$http.get(`/api/open/common/difficultyType`)
-        .then(data => {
-          if (data.status == "200") {
-            let arr = []
-            arr.push({key:'',value:"全部"}) 
-            data.data.forEach(item=>{
-              arr.push(item) 
-            })
-            context.commit('setdifficultyList', arr)
-            context.commit('setpartDifficultyList',data.data)
-
-
+            }
+          
+        })
+        .catch((err)=>{
+          if(err.status == '404') {
             
+            Cookies.remove("resource-teacher")
+            localStorage.clear()
+            this.$router.replace("/login")        
           }
-      })
+
+        })
+
+
+
+
+
+        Vue.$http.get(`/api/open/common/difficultyType`)
+          .then(data => {
+            if (data.status == "200") {
+              let arr = []
+              arr.push({key:'',value:"全部"}) 
+              data.data.forEach(item=>{
+                arr.push(item) 
+              })
+              context.commit('setdifficultyList', arr)
+              context.commit('setpartDifficultyList',data.data)
+
+              localStorage.setItem('difficultyList',JSON.stringify(arr))
+
+              localStorage.setItem('partDifficultyList',JSON.stringify(data.data))
+
+
+            }
+        })
+      // }
  
 
     

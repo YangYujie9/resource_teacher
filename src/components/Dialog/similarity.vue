@@ -92,9 +92,11 @@
             </p>
           </section>
         </el-card> -->
-        <singleQuestion shadow="never" :showSimilarity="false" :list="question" :index="1" :isAnswer="isAnswer" @getData="getSimilarity" v-if="question" @addCollectFolder="addCollectFolder" @getmyTestBasket="getmyTestBasket">
-          
-        </singleQuestion>
+        <div v-if="similarityList.length">
+          <singleQuestion shadow="never" :showSimilarity="false" :list="question" :index="1" :isAnswer="isAnswer" @getData="getSimilarity" @addCollectFolder="addCollectFolder" @getmyTestBasket="getmyTestBasket">
+            
+          </singleQuestion>
+        </div>
         <div v-else style="text-align: center;">暂无数据</div>
       </div>
       <span slot="footer" class="dialog-footer">
@@ -108,7 +110,7 @@
 
 <script>
 export default {
-  props: ['dialogVisible','questionId'],
+  props: ['dialogVisible','questionId','knowledgeType'],
   components: {
     singleQuestion: () => import('@/components/Question/singleQuestion')
     
@@ -134,7 +136,8 @@ export default {
       if(val) {
         this.getSimilarity()
       }
-    }
+    },
+
   },
   methods: {
     choose_similarity() {
@@ -164,9 +167,12 @@ export default {
           // console.log(data.data.content)
 
           this.similarityList = data.data.content
+          if(this.similarityList.length) {
+            this.questionIndex = 0
+            this.question = this.similarityList[this.questionIndex]
+                    
+          }
 
-          this.questionIndex = this.questionIndex?this.questionIndex:0
-          this.question = this.similarityList[this.questionIndex]
         }
       })
     },
@@ -176,7 +182,7 @@ export default {
       item.selectoption = []
       if(item.options && item.options.length) {
         item.options.forEach(item1=>{
-          item.selectoption.push(item1)
+          item.selectoption.push({key:item1.key,id:item1.value.id,value:item1.value.name})
           // for(let key in item1) {
           //   item.selectoption.push({word:key,value:item1[key]})
           // }
@@ -186,18 +192,35 @@ export default {
       //item.answers = []
       if(item.fillAnswers && item.fillAnswers.length) {
         item.fillAnswers.forEach(item1=>{
-          for(let key in item1) {
-            item0.answers.push(item1[key])
-          }
+          item0.answers.push(item1.value.name)
+
         })
       }
 
       //知识点
-      item.chaptersPoint = []
-      if(item.chapters && item.chapters.length) {
-        item.chapters.forEach(item1=>{
-          item.chaptersPoint.push(item1.name)
-        })
+      item.knowledgesPoint = []
+      if(this.knowledgeType == 'chapter') {
+        if(item.chapters && item.chapters.length) {
+          item.chapters.forEach(item1=>{
+            item.knowledgesPoint.push(item1.name)
+          })
+        }      
+      }else if(this.knowledgeType == 'knowledge') {
+        if(item.knowledges && item.knowledges.length) {
+          item.knowledges.forEach(item1=>{
+            item.knowledgesPoint.push(item1.name)
+          })
+        }     
+      }else {
+        if(item.chapters && item.chapters.length) {
+          item.chapters.forEach(item1=>{
+            item.knowledgesPoint.push(item1.name)
+          })
+        }else if(item.knowledges && item.knowledges.length) {
+          item.knowledges.forEach(item1=>{
+            item.knowledgesPoint.push(item1.name)
+          })
+        }
       }
 
       if(item.smallQuestions && item.smallQuestions.length) {

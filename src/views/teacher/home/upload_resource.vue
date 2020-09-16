@@ -3,32 +3,28 @@
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left">
         <div class="resource-wrap-left">
-          <top-popover>
-              <div slot="reference">
-                <p class="top-title">
-                  <span>{{resourceObject.gradeName}}</span>
-                  <i class="iconfont iconshezhi settingicon"></i>
-                </p>
-              </div>
-              <div slot="popover">
-                <div>
-                  <p>年级：</p>
-                   <el-radio-group v-model="resourceObject.gradeId" size="mini">
-                      <el-radio-button :label="item.key" :key="item.key" v-for="item in gradeList">{{item.value}}</el-radio-button>
-                  </el-radio-group>
-                </div>
-              </div>
+          <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
+            <div slot="reference">
+              <p class="top-title">
+                <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
+                <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span>
+                <span v-if="$refs.filter && activeType=='knowledge'" >{{$refs.filter.subject.subjectName}}</span>
+                <i class="iconfont iconshezhi settingicon"></i>
+              </p>
+            </div>
+            <div slot="popover">
+            </div>
           </top-popover>
           <div class="tab-class">
             <el-tabs stretch v-model="activeType" @tab-click="handleClick">
               <el-tab-pane label="按章节" name="chapter">
                 <div class="tree-class" >
-                  <pointTree chooseType="chapter" :grade="resourceObject.gradeId" :subjectCode="resourceObject.subjectCode"  @getCheckedNodes="getCheckedChapters" ref="chapterTree"></pointTree>
+                  <pointTree chooseType="chapter" :volumeId="volumeId" @getCheckedNodes="getCheckedChapters" ref="chapterTree"></pointTree>
                 </div>
               </el-tab-pane>
-              <el-tab-pane label="按考点" name="detial">
+              <el-tab-pane label="按考点" name="knowledge">
                 <div class="tree-class">
-                  <pointTree chooseType="knowledge" :grade="resourceObject.gradeId" :subjectCode="resourceObject.subjectCode" @getCheckedNodes="getCheckedKnows" ref="knowledgeTree"></pointTree>
+                  <pointTree chooseType="knowledge" :subjectCode="subjectCode" @getCheckedNodes="getCheckedKnows" ref="knowledgeTree"></pointTree>
                 </div>
               </el-tab-pane>
             </el-tabs>
@@ -50,7 +46,7 @@
             <el-form :model="resourceForm" ref="resourceForm" :rules="resourceRules"  size="small" label-width="100px" class="demo-ruleForm" :show-message='false'>
               <p class="top-p">1、选择资源</p>
               <el-form-item label="资源类型" :required="true" >
-                <el-radio-group v-model="resourceForm.resourceType">
+                <el-radio-group v-model="resourceForm.resourceType" @change="resourceTypeChange">
                   <el-radio-button :label="item.id" :value="item.id" v-for="item in resourceTypeList">{{item.name}}</el-radio-button>
                 </el-radio-group>
               </el-form-item>
@@ -64,39 +60,38 @@
                   :before-remove="beforeRemove"
                   :before-upload="handleBeforeUploadSite"
                   :http-request="defaultUpload"
-                  :disabled="uploadSiteList.uploadList.length>0"
-                  :limit="1">
+                  :limit="1"
+                  :on-exceed="exceedFile">
                   <el-button size="mini" type="primary">点击上传</el-button>
                 </el-upload>
                 <div v-for="(item, index) in uploadSiteList.uploadList" :key="index">
                     <el-progress 
                       :percentage="item.percent || 0"
                       :stroke-width="5" 
-                      :status="item.status"/>
+                      :status="item.status" >
                     </el-progress>
                 </div>
               </el-form-item>
 
-              <el-form-item prop="surface" :label="resourceFileAttach">
+              <el-form-item prop="surface" v-show="showAnswerUpload" :label="resourceFileAttach">
                 <el-upload
                   class="upload-demo"
-                  accept="image/jpeg,image/png,image/jpg,image/gif"
+                  accept="file"
                   ref="surface"
                   action="/api/open/common/file/initUpload"
                   :before-remove="beforeRemove"
                   :on-remove="beforeRemoveSurface"
                   :before-upload="handleBeforeUploadSurface"
                   :http-request="defaultUpload"
-                  :disabled="uploadSurfaceList.uploadList.length>0"
-                  :limit="1">
+                  :limit="1"
+                  :on-exceed="exceedFile">
                   <el-button size="mini" type="primary">点击上传</el-button>
-                  <div slot="tip" class="el-upload__tip">只能上传png、jpeg、jpg、gif格式的图片</div>
                 </el-upload>
                 <div v-for="(item, index) in uploadSurfaceList.uploadList" :key="index">
                     <el-progress 
                       :percentage="item.percent || 0"
                       :stroke-width="5" 
-                      :status="item.status"/>
+                      :status="item.status">
                     </el-progress>
                 </div>
               </el-form-item>
@@ -124,15 +119,15 @@
                 </el-select>
               </el-form-item>
 
-              <el-form-item label="科目" prop="subjectId" :required="true" >
+              <el-form-item label="科目" prop="subjectId" >
                   <el-select v-model="resourceForm.subjectId" placeholder="请选择" class="input-class" disabled >
                     <el-option :label="resourceObject.subjectName" :value="resourceObject.subjectId" >{{resourceObject.subjectName}}</el-option>
                   </el-select>
               </el-form-item>
 
-              <el-form-item label="年级" prop="grade" :required="true" >
-                <el-select v-model="resourceForm.grade" placeholder="请选择" class="input-class">
-                  <el-option :label="item.name" :value="item.id" v-for="item in gradeSectionList">{{item.name}}</el-option>
+              <el-form-item label="年级" prop="grade" >
+                <el-select v-model="resourceObject.gradeId" placeholder="请选择" class="input-class" disabled>
+                  <el-option :label="item.value" :value="item.key" v-for="item in gradeList" >{{item.value}}</el-option>
                 </el-select>
               </el-form-item>
 
@@ -186,18 +181,16 @@
 
 export default {
   props:['isfixTab'],
+  inject: ['reload'],
   data() {
     return {
       resourceForm:{
         name:'',
         resourceSite:null,
-        surface:null,
         synopsis:'',
-        oeseType:'',
+        oeseType:null,
         resourceType:'Courseware',
         grade:'',
-        schoolId:'',
-        subjectId:'',
         learningSection:'',
         chapterIdList:[],
         knowledgeIdList:[],
@@ -209,10 +202,8 @@ export default {
           { required: true, message: '请输入资源名称', trigger: 'blur' },
           { max: 30, message: "允许的最大长度是30位", trigger: "blur" }
         ],
-        synopsis:[{ max: 30, message: "允许的最大长度是200位", trigger: "blur" }],
-        grade: [{required: true, message: '请选择年级', trigger: 'change' }],
-        openState: [{required: true, message: '请设置权限', trigger: 'change' }],
-        subjectId: [{required: true, message: '请选择学科', trigger: 'change' }]
+        synopsis:[{ max: 200, message: "允许的最大长度是200位", trigger: "blur" }],
+        openState: [{required: true, message: '请设置权限', trigger: 'change' }]
       },
       resourceObject:{
         gradeId:'',
@@ -230,13 +221,17 @@ export default {
           name: '',
           uploadList:[]
       },
+      showAnswerUpload: false,
       activeType:"chapter",
       resourceTypeList:[],
       gradeSectionList:[],
       tagsList:[],
       chapterTags:[],
       knowledgeTags:[],
-      bytesPerPiece: 50 * 1024 * 1024
+      bytesPerPiece: 50 * 1024 * 1024,
+      volumeId:'',
+      subjectCode:'',
+
       
     };
   },
@@ -249,6 +244,7 @@ export default {
       if(val.length) {
         this.resourceObject.gradeId = val[0].key;
         this.resourceObject.gradeName = val[0].value;
+        this.resourceForm.grade = val[0].key;
       }
     },
 
@@ -258,7 +254,6 @@ export default {
         this.resourceObject.subjectName = this.getuserInfo.subject.name
         this.resourceObject.subjectCode = this.getuserInfo.subjectCode
         this.resourceForm.learningSection = this.getuserInfo.learningSection
-        this.resourceForm.schoolId = this.getuserInfo.school.id
         this.resourceForm.subjectId = this.getuserInfo.subject.id
       }
     },
@@ -267,14 +262,15 @@ export default {
     ...mapGetters([
       'gradeList',
       'getuserInfo',
+      'isReady'
     ]),
 
     resourceFileName() {
-      return this.resourceForm.resourceType == 'ExaminationPaper' ? '试卷上传':'资源上传'
+      return this.resourceForm.resourceType === '4' ? '试卷上传':'资源上传'
     },
 
     resourceFileAttach() {
-      return this.resourceForm.resourceType == 'ExaminationPaper' ? '答案上传':'资源封面'
+      return this.resourceForm.resourceType === '4' ? '答案上传':'资源封面'
     }
   },
   mounted() {
@@ -283,12 +279,12 @@ export default {
       this.resourceObject.subjectName = this.getuserInfo.subject.name
       this.resourceObject.subjectCode = this.getuserInfo.subjectCode 
       this.resourceForm.learningSection = this.getuserInfo.learningSection
-      this.resourceForm.schoolId = this.getuserInfo.school.id
       this.resourceForm.subjectId = this.getuserInfo.subject.id
     }
     if(this.gradeList.length) {
       this.resourceObject.gradeId = this.gradeList[0].key;
       this.resourceObject.gradeName = this.gradeList[0].value;
+      this.resourceForm.grade = this.gradeList[0].key;
     }
 
 
@@ -300,6 +296,20 @@ export default {
     this.getResourceType();
   },
   methods: {
+    setparams(volumeId,subjectCode) {
+
+      this.volumeId = volumeId
+
+      this.subjectCode = subjectCode
+
+      
+    },
+    exceedFile(files, fileList) {
+      return this.$message({
+        message:'只允许上传一个文件！',
+        type:'warning'
+      })
+    },
     closeTag(index) {
 
       if(this.activeType == "chapter") {
@@ -318,6 +328,10 @@ export default {
       }else {
         this.tagsList = this.knowledgeTags
       }
+    },
+
+    resourceTypeChange(){
+      this.showAnswerUpload = this.resourceForm.resourceType === '4'
     },
 
     toPageBack() {
@@ -366,7 +380,7 @@ export default {
         this.resourceForm.resourceSite = {id:this.uploadSiteList.uploadList[0].id};
       }
       if (this.uploadSurfaceList.uploadList.length > 0){
-        this.resourceForm.surface = {id:this.uploadSurfaceList.uploadList[0].id};
+        this.resourceForm.answerFile = {id:this.uploadSurfaceList.uploadList[0].id};
       }
       let knowledgeIds = []
       let chapterIds = []
@@ -378,6 +392,7 @@ export default {
       })
       this.resourceForm.chapterIdList = chapterIds;
       this.resourceForm.knowledgeIdList = knowledgeIds;
+      this.resourceForm.grade = this.resourceObject.gradeId
 
       this.$refs.resourceForm.validate((valid)=>{
           if(valid){
@@ -385,7 +400,9 @@ export default {
               .then((result)=>{
                 if(result.status == '200') {
                   this.$message({message:'添加成功',type:'success'});
-                  this.toPageBack();
+
+                  this.reload()
+                  // this.toPageBack();
                 }
               })
    
@@ -420,10 +437,6 @@ export default {
     },
 
     handleBeforeUploadSurface(file) {
-      if(!/\.(png|jpe?g|gif|svg|PNG|JPE?G|GIF|SVG)(\?.*)?$/.test(file.name)) {
-        this.$message({message:'仅支持png、jpeg、jpg、gif格式的图片！',type:'error'});
-        return false;
-      }
       this.handleBeforeUpload(file,'surface');
     },
 
@@ -438,7 +451,7 @@ export default {
             name: file.name,
             percent: 10,
             id: '',
-            status: 'active'
+            status: ''
           }]
         } else {
           this.uploadSurfaceList.name = file.name.split('.')[0];
@@ -446,7 +459,7 @@ export default {
             name: file.name,
             percent: 10,
             id: '',
-            status: 'active'
+            status: ''
           }]
         }
         
@@ -495,11 +508,9 @@ export default {
               this.confirmUpload(uploadResponse[0].id, currentKey,curUpload);
             }
           }).catch((uploadError)=>{
-            console.error(uploadError);
             this.$message({message:'网络状况不佳，请删除并重新上传',type:'error'});
           })
         }).catch((initErr)=>{
-          console.log(initErr);
           if (curUpload === 'site'){
             this.uploadSiteList.uploadList[currentKey].status = 'exception';
           } else {
@@ -527,7 +538,6 @@ export default {
             this.uploadSurfaceList.uploadList[currentKey].status = 'success';
           }
         }).catch((completeErr)=>{
-          console.log(completeErr);
           this.$message({message:completeErr || '上传失败',type:'warning'});
           if (curUpload === 'site'){
             this.uploadSiteList.uploadList[currentKey].status = 'exception';

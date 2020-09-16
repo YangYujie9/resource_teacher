@@ -32,7 +32,7 @@ export default {
   //     ]),
   // },
   mounted() {
-  	//getmyTestBasket()
+  	// getmyTestBasket()
   },
 
   methods: {
@@ -66,6 +66,7 @@ export default {
           // })
         }
         this.testBasket = count
+        this.$emit('gettestBasket',this.testBasket)
 
       })
     },

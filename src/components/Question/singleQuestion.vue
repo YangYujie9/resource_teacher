@@ -3,7 +3,6 @@
     <el-card class="box-card" :shadow="shadow" >
       <section class="content">
         <div class="qt1">
-          <!-- <img src="@/assets/test1.png" /> -->
           <div class="ques-body">
             <span v-if="showSimilarity" class="order">{{index+1}}、</span>
             <div v-html="list.name" style="display:flex;flex-wrap: wrap;"></div>
@@ -14,7 +13,6 @@
             <li style="width: 100%;" class="selectoption" v-for="list1 in list.selectoption">
               <span style="margin-right: 10px;font-style: italic;">{{list1.key}}.</span>
               <div v-html="list1.value"></div>
-              <!-- <img src="@/assets/test1.png" /> -->
             </li>
 
           </ul>
@@ -25,7 +23,6 @@
           <div v-for="(list1,index1) in list.smallQuestions">
 
             <div class="qt1">
-              <!-- <img src="@/assets/test1.png" /> -->
               <span>{{index1+1}}</span><span>、</span>
               <span v-html="list1.name"></span>
             </div>
@@ -36,7 +33,6 @@
                   <span>{{item.key}}</span>
                   <span>、</span>
                   <span v-html="item.value"></span> 
-                  <!-- <img src="@/assets/test1.png" /> -->
                 </li>
 
 
@@ -53,14 +49,14 @@
           <div class="middle">
             <div>
               <p class="title">【知识点】</p>
-              <p>{{list.knowledgesPoint.join()}}</p>
+              <p v-if="list.knowledgesPoint">{{list.knowledgesPoint.join()}}</p>
             </div>
 
             <div  v-if="list.fillAnswers.length ||list.smallQuestions.length">
               <p class="title">【答案】</p>
               <p>
                 <span v-for="(item,index1) in list.answers">
-                 <span  v-if="list.smallQuestions.length" style="margin-left: 0px;">{{index1+1}}、</span>
+                 <span  v-if="list.smallQuestions.length" style="margin-left: 0px;">{{index1+1}}.</span>
                  <span style="margin-left: 0px;">{{item}}</span>
                 </span>
               </p>
@@ -79,19 +75,18 @@
       </div>
       <div v-show="isAnswer">
         <section class="content" style="border-top: 1px dashed #dbdee4;">
-          <!-- <div class="qt2 top"></div> -->
 
           <div class="middle">
             <div>
               <p class="title">【知识点】</p>
-              <p>{{list.knowledgesPoint.join()}}</p>
+              <p v-if="list.knowledgesPoint">{{list.knowledgesPoint.join()}}</p>
             </div>
 
             <div  v-if="list.fillAnswers.length ||list.smallQuestions.length">
               <p class="title">【答案】</p>
               <p>
                 <span v-for="(item,index1) in list.answers">
-                 <span  v-if="list.smallQuestions.length" style="margin-left: 0px;">{{index1+1}}、</span>
+                 <span  v-if="list.smallQuestions.length" style="margin-left: 0px;">{{index1+1}}.</span>
                  <span style="margin-right: 5px;" v-html="item"></span>
                 </span>
               </p>
@@ -243,10 +238,10 @@ export default {
       ]),
   },
   watch: {
-    list(val) {
-      val.answers = []
-      this.handleQuestion(val,val)
-    }
+    // list(val) {
+    //   val.answers = []
+    //   this.handleQuestion(val,val)
+    // }
   },
   mounted() {
     // console.log(this.gradeName)
@@ -257,40 +252,40 @@ export default {
 
     handleQuestion(item,item0) {
 
-      item.selectoption = []
-      if(item.options && item.options.length) {
-        item.options.forEach(item1=>{
-          item.selectoption.push(item1)
-          // for(let key in item1) {
-          //   item.selectoption.push({key:key,value:item1[key]})
-          // }
-        })
-      }
-      //答案
-      //item.answers = []
-      if(item.fillAnswers && item.fillAnswers.length) {
-        item.fillAnswers.forEach(item1=>{
-          item0.answers.push(item1.value)
-          // for(let key in item1) {
-          //   item0.answers.push(item1[key])
-          // }
-        })
-      }
+      // item.selectoption = []
+      // if(item.options && item.options.length) {
+      //   item.options.forEach(item1=>{
+      //     item.selectoption.push(item1)
+      //     // for(let key in item1) {
+      //     //   item.selectoption.push({key:key,value:item1[key]})
+      //     // }
+      //   })
+      // }
+      // //答案
+      // //item.answers = []
+      // if(item.fillAnswers && item.fillAnswers.length) {
+      //   item.fillAnswers.forEach(item1=>{
+      //     item0.answers.push(item1.value)
+      //     // for(let key in item1) {
+      //     //   item0.answers.push(item1[key])
+      //     // }
+      //   })
+      // }
 
-      //知识点
-      item.knowledgesPoint = []
-      if(item.chapters && item.chapters.length) {
-        item.chapters.forEach(item1=>{
-          item.knowledgesPoint.push(item1.name)
-        })
-      }
+      // //知识点
+      // item.knowledgesPoint = []
+      // if(item.chapters && item.chapters.length) {
+      //   item.chapters.forEach(item1=>{
+      //     item.knowledgesPoint.push(item1.name)
+      //   })
+      // }
 
-      if(item.smallQuestions && item.smallQuestions.length) {
-        item.smallQuestions.forEach(item1=>{
-          this.handleQuestion(item1,item)
-        })
+      // if(item.smallQuestions && item.smallQuestions.length) {
+      //   item.smallQuestions.forEach(item1=>{
+      //     this.handleQuestion(item1,item)
+      //   })
         
-      }
+      // }
 
       //console.log(item) 
     },

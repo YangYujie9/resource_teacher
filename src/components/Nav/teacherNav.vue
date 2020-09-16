@@ -3,49 +3,14 @@
     <el-menu
       class="el-menu-vertical-demo"
       background-color="#f2f5fc"
+      :default-active="activeIndex"
       @select="handleSelect"
     >
-      <el-menu-item index="1">
-        <i class="el-icon-menu"></i>
-        <span slot="title">个人信息</span>
-      </el-menu-item>
-      <el-menu-item index="2">
-        <i class="el-icon-document"></i>
-        <span slot="title">我的资源</span>
-      </el-menu-item>
-      <el-menu-item index="3">
-        <i class="el-icon-setting"></i>
-        <span slot="title">我的分享</span>
-      </el-menu-item>
-      <el-menu-item index="4">
-        <i class="el-icon-setting"></i>
-        <span slot="title">我的收藏</span>
-      </el-menu-item>
-      <el-menu-item index="5">
-        <i class="el-icon-setting"></i>
-        <span slot="title">我的下载</span>
-      </el-menu-item>
-      <el-menu-item index="/teacher/myExampaper">
-        <i class="el-icon-setting"></i>
-        <span slot="title">我的组卷</span>
+      <el-menu-item :index="list.index" v-for="list in meauList">
+        <i :class="list.icon"></i>
+        <span slot="title">{{list.name}}</span>
       </el-menu-item>
 
-      <el-menu-item index="/teacher/myWarehouse">
-        <i class="el-icon-setting"></i>
-        <span slot="title">我的题库</span>
-      </el-menu-item>
-      <el-menu-item index="8">
-        <i class="el-icon-setting"></i>
-        <span slot="title">我的组课</span>
-      </el-menu-item>
-      <el-menu-item index="9">
-        <i class="el-icon-setting"></i>
-        <span slot="title">我的消息</span>
-      </el-menu-item>
-      <el-menu-item index="10">
-        <i class="el-icon-setting"></i>
-        <span slot="title">我的班级</span>
-      </el-menu-item>
     </el-menu>
   </div>
 </template>
@@ -53,9 +18,65 @@
 <script>
 export default {
   data() {
-    return {};
+    return {
+      activeIndex:'',
+      meauList: [{
+          index:'/teacher/personal/profile',
+          icon:'el-icon-user',
+          name:'个人信息'
+        },{
+          index:'/teacher/personal/myResources',
+          icon:'el-icon-paperclip',
+          name:'我的资源'
+        },{
+          index:'/teacher/personal/mySharing',
+          icon:'el-icon-share',
+          name:'我的分享'
+        },{
+          index:'/teacher/personal/myCollections',
+          icon:'el-icon-star-off',
+          name:'我的收藏'
+        },{
+          index:'/teacher/personal/myDownload',
+          icon:'el-icon-download',
+          name:'我的下载'
+        },{
+          index:'/teacher/personal/myExampaper',
+          icon:'el-icon-document',
+          name:'我的组卷'
+        },{
+          index:'/teacher/personal/myWarehouse',
+          icon:'el-icon-menu',
+          name:'我的题库'
+        },
+        // {
+        //   index:'8',
+        //   icon:'el-icon-menu',
+        //   name:'我的组课'
+        // },{
+        //   index:'9',
+        //   icon:'el-icon-menu',
+        //   name:'我的消息'
+        // },{
+        //   index:'10',
+        //   icon:'el-icon-menu',
+        //   name:'我的班级'
+        // },
+
+      ]
+    };
   },
-  mounted() {},
+  watch: {
+
+  },
+  mounted() {
+
+      this.meauList.forEach(list=>{
+        this.$route.fullPath.indexOf(list.index)>-1?this.activeIndex = list.index:null
+      })
+
+
+  },
   methods: {
     handleSelect(key, keyPath) {
       if (key.indexOf("/") == 0) {

@@ -22,13 +22,13 @@
             <el-input v-model="collection.name" style="width:675px;"></el-input>
           </el-form-item> -->
           <el-form-item label="收藏夹：">
-            <el-select v-model="collection.folderName" placeholder="请选择" style="width:560px;margin-right: 20px;">
+            <el-select v-model="collection.folderId" placeholder="请选择" style="width:560px;margin-right: 20px;">
               <span slot="prefix"><i class="iconfont iconwenjianjia iconclass" style="color:#faca10;margin-left:4px;"></i></span>
               <el-option
                 v-for="item in folderNameList"
                 :key="item.id"
                 :label="item.folderName"
-                :value="item.folderName">
+                :value="item.folderId">
 
                 <span style="float: left"><i class="iconfont iconwenjianjia iconclass" style="color:#faca10;"></i> {{ item.folderName }}</span>
                 <!-- <span style="float: right; color: #8492a6; font-size: 13px"><i class="iconfont iconshanchu-copy"></i></span>  -->
@@ -49,8 +49,8 @@
       :visible.sync="newfavoriteVisible"
       :close-on-click-modal="false"
       width="600px"
-      custom-class="favorite">
-      <div class="favorite">
+      custom-class="newfavorite">
+      <div class="newfavorite">
         <span>名称：</span><el-input v-model="newfolderName" style="width:380px;" size="small"></el-input>
 
         </el-form>
@@ -60,7 +60,7 @@
         <el-button @click="newfavoriteVisible = false" size="small">取 消</el-button>
       </span>
     </el-dialog>
-    <!-- <newFavorite :dialogVisible="newfavoriteVisible" @close="close_newfavorite"></newFavorite> -->
+    <!-- <newFavorite :dialogVisible="newfavoriteVisible" @close="close_newfavorite" @getData="getFolderNameList"></newFavorite> -->
   </div>
 </template>
 
@@ -80,7 +80,7 @@ export default {
       newfolderName:'',
       collection: {
         name: '',
-        folderName: ""
+        folderId: ""
       },
       folderNameList: [],
       // list: ["全部", "选择题", "填空题", "解答题", "判断题", "全部"],
@@ -112,10 +112,10 @@ export default {
         this.folderNameList = data.data
         if(this.folderNameList.length) {
           if(this.isAdd) {
-            this.collection.folderName = this.folderNameList[this.folderNameList.length-1].folderName
+            this.collection.folderId = this.folderNameList[this.folderNameList.length-1].folderId
             this.isAdd = false
           }else {
-            this.collection.folderName = this.folderNameList[0].folderName
+            this.collection.folderId = this.folderNameList[0].folderId
           }
         }
 
@@ -127,7 +127,7 @@ export default {
 
     addCollectFolder() {
       this.$http.post(`/api/open/collectFolder/addCollectFolder`,{
-        folderName: this.collection.folderName,
+        folderId: this.collection.folderId,
         questionId: this.questionId
       })
 
@@ -161,7 +161,10 @@ export default {
     },
 
     addFolder() {
-      this.$http.post(`/api/open/collectFolder/addFolder/${this.newfolderName}`)
+      this.$http.post(`/api/open/collectFolder/addFolder`,{
+        folderName: this.newfolderName
+      })
+      
 
       .then((data)=>{
         if(data.status == '200') {
@@ -182,6 +185,8 @@ export default {
   .el-dialog__footer {
     text-align: center;
   }
+
+  
 }
 </style>
 <style scoped lang="less">
@@ -204,5 +209,11 @@ export default {
       font-size: 18px;
     }
   }
+
+
 }
+  .newfavorite {
+    margin-top: 20px;
+    text-align: center;
+  }
 </style>

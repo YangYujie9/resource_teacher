@@ -49,9 +49,9 @@ export default {
     subjectCode: {
       type:String
     },
-    grade: {
-      type:String
-    },
+    // grade: {
+    //   type:String
+    // },
     // treeData: {
     //   type: [Object, Array],
     //   default: {}
@@ -71,6 +71,9 @@ export default {
     defaultRoot:{
       type:Boolean,
       default:true
+    },
+    volumeId: {    //册别
+      type: String,
     }
   },
   data() {
@@ -122,7 +125,8 @@ export default {
 
       this.getTreeData()
     },
-    grade(val) {
+    volumeId(val) {
+      
       this.getTreeData()
     },
     treeData: {
@@ -161,11 +165,9 @@ export default {
 
 
     getTreeData() {
-      if(!this.subjectCode || !this.grade) {
-        return false
-      }
       if(this.chooseType == 'chapter') {
-        this.$http.get(`/api/open/chapterOrKnowledge/chapterTree?subjectCode=${this.subjectCode}&grade=${this.grade}`)
+        if(!this.volumeId) {return false}
+        this.$http.get(`/api/open/chapterOrKnowledge/chapterTree/${this.volumeId}`)
         .then(data => {
           if (data.status == "200") {
 
@@ -176,7 +178,8 @@ export default {
 
 
       }else if(this.chooseType == 'knowledge') {
-        this.$http.get(`/api/open/chapterOrKnowledge/knowledgeTree?subjectCode=${this.subjectCode}&grade=${this.grade}`)
+        
+        this.$http.get(`/api/open/chapterOrKnowledge/knowledgeTree?learningSection=${this.getuserInfo.learningSection}&subjectCode=${this.subjectCode}`)
         .then(data => {
           if (data.status == "200") {
 
@@ -290,6 +293,11 @@ export default {
       // }
       
     },
+
+    clearNodeCheck() {
+      this.$refs.tree.setCheckedKeys([]);
+      this.$emit('getCheckedNodes',[]) ;
+    }
 
   }
 };

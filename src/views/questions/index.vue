@@ -53,7 +53,7 @@ export default {
         },
         {
           label: "真题试卷",
-          route: "/questions/actualPaper/search/true",
+          route: "/questions/actualPaper",
           check: false
         },
         {
@@ -63,7 +63,7 @@ export default {
         },
         {
           label: "资源中心",
-          route: "/questions/resourceCenter",
+          route: "/teacher/home",
           check: false
         }
       ]
@@ -116,7 +116,37 @@ export default {
 };
 </script>
 <style lang="less">
+  .form-class {
+    .el-radio-button__inner {
+      border-left: 1px solid #b3d8ff;
+      border-radius: 3px;
+      color: #409eff;
+      background: #ecf5ff;
+      border-color: #b3d8ff;
 
+      &:hover {
+        color: #fff;
+        background-color: #409eff;
+        border-color: #409eff;
+      }
+    }
+
+    .el-radio-button__orig-radio:checked + .el-radio-button__inner {
+      -webkit-box-shadow: 0px 0 0 0 #409eff;
+      box-shadow: 0px 0 0 0 #409eff;
+    }
+    .el-radio-button:first-child .el-radio-button__inner,
+    .el-radio-button:last-child .el-radio-button__inner {
+      // border-left: 1px solid #b3d8ff;
+      border-radius: 3px;
+    }
+
+
+    .el-radio-button__orig-radio:disabled:checked+.el-radio-button__inner {
+      background-color: #409eff;
+      color: #ffffff;
+    }
+  }
 </style>
 <style scoped lang="less">
 .home {

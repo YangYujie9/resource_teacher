@@ -5,17 +5,27 @@
         <p>{{getuserInfo.person.fullName}}您好，欢迎来到教育云资源平台！</p>
         <div class="fr">
           <ul>
-            <li>
-              <!-- <img src="@/assets/images/user.png" alt /> -->
+            <li>              
+              <el-dropdown @command="handleCommand">
+                <span class="el-dropdown-link">
+                  <i class="iconfont iconrenyuan icontouxiang1"></i>
+                  <span style=""> {{getuserInfo.person.fullName}}</span>
+                  <i class="el-icon-arrow-down el-icon--right"></i>
+                </span>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item command="personal">我的资源</el-dropdown-item>
+                  <el-dropdown-item command="exit">退出登录</el-dropdown-item>
+
+                </el-dropdown-menu>
+              </el-dropdown>
+            </li>
+            <!-- <li>
+
               <i class="iconfont iconrenyuan icontouxiang1"></i>
               <el-popover width="116" trigger="hover">
                 <div style="text-align: center;">
-<!--                   <p style="">
-                    <el-button type="warning" size="mini" @click="exit()" style="">
-                      退出登录
-                    </el-button>
-                  </p> -->
                   <ul>
+                    <li style="cursor: pointer;" @click="personalInfo">我的资源</li>
                     <li style="cursor: pointer;" @click="exit">退出登录</li>
                   </ul>
 
@@ -25,8 +35,7 @@
                 <span style="" slot="reference" > {{getuserInfo.person.fullName}}</span>
 
               </el-popover>
-              <!-- <span>UFO</span> -->
-            </li>
+            </li> -->
             <li>
               <!-- <img src="@/assets/images/ben.png" alt /> -->
               <i class="iconfont iconboshimao iconclass1"></i>
@@ -121,15 +130,19 @@ export default {
   },
   methods: {
               //退出登录
-      exit() {
+    exit() {
 
-        Cookies.remove('resource-teacher')
-        window.sessionStorage.clear()
-        //this.$router.push('/login')
-        window.location.reload()
+      Cookies.remove('resource-teacher')
+      localStorage.clear()
+      //this.$router.push('/login')
+      window.location.reload()
 
-        
-      },
+      
+    },
+
+    personalInfo() {
+      this.$router.push('/teacher/personal')
+    },
     choose_nau(index) {
       this.NauList.forEach(item => {
         item.check = false;
@@ -138,7 +151,13 @@ export default {
       this.$router.push(this.NauList[index].route);
     },
 
-
+    handleCommand(command) {
+      if(command == 'personal') {
+        this.$router.push('/teacher/personal')
+      }else if(command == 'exit') {
+        this.exit()
+      }
+    }
   }
 };
 </script>
@@ -146,6 +165,14 @@ export default {
 
 <style lang="less">
 .header {
+
+  .el-dropdown {
+    color: #909399;
+
+    &:focus {
+      outline: 0px;
+    }
+  }
   .el-input__inner {
     border-radius: 0px;
     background: #f0f3fa;

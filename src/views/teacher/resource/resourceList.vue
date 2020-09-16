@@ -7,31 +7,21 @@
       <div slot="left">
           <div class="search-wrap" style="text-align: center;">
             <el-radio-group v-model="activeType" size="mini" @click="handleClick">
-              <el-radio-button label="Chapter">章节目录</el-radio-button>
-              <el-radio-button label="Knowledge">知识点</el-radio-button>
+              <el-radio-button label="chapter">章节目录</el-radio-button>
+              <el-radio-button label="knowledge">知识点</el-radio-button>
             </el-radio-group>
           </div>
-          <top-popover>
-            <div slot="reference" class="search-class">
+          <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
+            <div slot="reference">
               <p class="top-title">
-                  <span>人教版：</span>
-                  <span v-if="filter.grade.value">{{filter.grade.value}}</span>
-                  <i class="iconfont iconshezhi settingicon"></i>
-                </p>
+                <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
+                <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
+                <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span>
+                
+                <i class="iconfont iconshezhi settingicon"></i>
+              </p>
             </div>
             <div slot="popover">
-              <div>
-        
-                <p>年级：</p>
-                <el-radio-group v-model="filter.grade" size="mini">
-                  <el-radio-button v-for="list in gradeList" :label="list" :key="list.key">{{list.value}}</el-radio-button>
-                </el-radio-group>
-
-                <!-- <p>科目：</p>
-                <el-radio-group v-model="filter.subject" size="mini" @change="changeSubject">
-                  <el-radio-button :label="item" :key="item.key" v-for="item in subjectsList">{{item.value}}</el-radio-button>
-                </el-radio-group> -->
-              </div>
             </div>
           </top-popover>
 
@@ -39,8 +29,8 @@
           <div class="tree-content">
 
             <div class="tree-class">
-              <pointTree chooseType="chapter" :grade="filter.grade.key" :subjectCode="getuserInfo.subjectCode"  @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='Chapter'"></pointTree>
-              <pointTree chooseType="knowledge" :grade="filter.grade.key" :subjectCode="getuserInfo.subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType=='Knowledge'"></pointTree>
+              <pointTree chooseType="chapter" :volumeId="volumeId"  @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='chapter'"></pointTree>
+              <pointTree chooseType="knowledge" :subjectCode="subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType=='knowledge'"></pointTree>
             </div>
     
                   
@@ -51,10 +41,25 @@
 
       <div slot="right" class="rescoure-wrap">
         <div class="bread-div">
-          <span style=""><i class="iconfont iconshouye iconclass"></i>当前位置：首页 > {{resourceName}}</span>
+          <span style=""><i class="iconfont iconshouye iconclass"></i>当前位置：首页 > {{resourceType}}</span>
         </div>
         <div class="search-div el-radio-costom">
-          <ul>
+
+          <el-form :inline="true" :model="search" class="demo-form-inline" size="mini">
+            <el-form-item label="文件类型">
+              <el-select v-model="search.fileType" class="search-class" size="mini" placeholder="文件类型" clearable @change="resetPage">
+                <el-option :label="list.value" :value="list.key" :key="list.key" v-for="list in fileTypeList"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="文件名称">
+              <el-input v-model="search.fileName" placeholder="文件名称"></el-input>
+            </el-form-item>
+            
+            <el-form-item>
+              <el-button type="primary" @click="resetPage">查询</el-button>
+            </el-form-item>
+          </el-form>
+          <!-- <ul>
             <li>
               <p>年级</p>
               <div class="div2">
@@ -72,20 +77,20 @@
               </div>
             </li>
 
-          </ul>
+          </ul> -->
         </div>
         <div class="top-div" style="">
           <p class="top-p">共有<span class="activecolor">{{total}}</span>个资源符合结果</p>
-          <p class="top-p cursor" @click="sortResource('download')"><i class="iconfont iconpaixu" :class="{activecolor:downloadSort}"></i>下载量</p>
+          <!-- <p class="top-p cursor" @click="sortResource('download')"><i class="iconfont iconpaixu" :class="{activecolor:downloadSort}"></i>下载量</p>
           <p class="top-p cursor" @click="sortResource('score')"><i class="iconfont iconpaixu" :class="{activecolor:scoreSort}"></i>评分</p>
           <p class="top-p cursor" @click="sortResource('collect')"><i class="iconfont iconpaixu" :class="{activecolor:collectSort}"></i>收藏</p>
-          <p class="top-p cursor" @click="sortResource('recent')"><i class="iconfont iconpaixu" :class="{activecolor:recentSort}"></i>最新</p>
+          <p class="top-p cursor" @click="sortResource('recent')"><i class="iconfont iconpaixu" :class="{activecolor:recentSort}"></i>最新</p> -->
         </div>
 
         <div class="rescoure-content-wrap">
           <div class="one-part" v-for="list in tableData">
             <div class="one-part-left">
-              <p class="left-title" @click="resourcePreview"><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
+              <p class="left-title" @click="resourcePreview(list.resourceId)"><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
               <p>
                 <span>贡献者：{{list.userName}}</span>
                 <span class="left-tag">{{list.createTime}}</span>
@@ -132,6 +137,7 @@
 import { mapGetters } from 'vuex'
 import topPopover from "@/components/Popover/topPopover";
 import leftFixedNav from "@/components/Nav/leftFixedNav";
+import { getfileType } from '@/utils/basic.service.js'
 export default {
 
 
@@ -140,8 +146,8 @@ export default {
   		type: Boolean,
   		default:false
   	},
-  	resourceName: {
-  		type: String,
+  	resourceTypeList: {
+  		type: Array,
   	}
   },
   components: {
@@ -154,23 +160,27 @@ export default {
         grade:''
       },
       search: {
+        fileName:'',
+        fileType: '',
         grade:'',
         year:'',
         page:1,
         size: 20,
       },
       total:0,
-      activeType:'Chapter',
-      chapterIds:[],
-      knowledgeIds:[],
+      activeType:'chapter',
+      chapterLists:[],
+      knowledgeLists:[],
       tagList:[],
       downloadSort:false,
       scoreSort: false,
       collectSort: false,
       recentSort: true,
-      list: ['高一','高二'],
-      value: 3.7,
+      value: 0,
       tableData:[],
+      fileTypeList:[],
+      volumeId:'',
+      subjectCode:'',
     };
   },
 
@@ -183,6 +193,8 @@ export default {
 
     },
 
+
+
     $route() {
       this.init()
     }
@@ -192,13 +204,28 @@ export default {
     ...mapGetters([
       'gradeList',
       'getuserInfo',
+      'isReady'
 
     ]),
+
+    resourceType() {
+      // console.log(this.$route.params)
+      // console.log(this.resourceTypeList)
+      return this.resourceTypeList.filter(item=>{
+        // console.log(item.id,this.$route.params.resourceType)
+        return item.key == this.$route.params.resourceType
+      })[0].name
+      
+    },
+
+
+
 
  
   },
   mounted() {
     this.init()
+    this.getfileType()
   },
 
   methods: {
@@ -208,20 +235,29 @@ export default {
       this.getresourceList()
     },
     handleClick() {
-      if(this.activeType == 'Chapter') {
-        this.tagList = this.chapterIds
-      }else {
-        this.tagList = this.knowledgeIds
-      }
+      // if(this.activeType == 'Chapter') {
+      //   this.tagList = this.chapterIds
+      // }else {
+      //   this.tagList = this.knowledgeIds
+      // }
     },
-
+    getfileType() {
+      getfileType()
+      .then((data)=>{
+        if(data.status == '200') {
+          this.fileTypeList = data.data
+        }
+      })
+    },
     getCheckedChapters(list) {
-      this.knowledgeIds
+      this.chapterLists = list
+      this.resetPage()
 
     },
 
     getCheckedKnows(list) {
-
+      this.knowledgeLists = list
+      this.resetPage()
     },
     // 分页
     handleSizeChange(val) {
@@ -236,10 +272,19 @@ export default {
       // this.getTableData()
     // },
     },
+    setparams(volumeId,subjectCode) {
 
-    resourcePreview() {
-      this.$router.push(`/teacher/resourceRreview`)
+      this.volumeId = volumeId
+
+      this.subjectCode = subjectCode
+
+      
     },
+    resourcePreview(resourceId) {
+
+      this.$router.push({path: '/teacher/resourceRreview', query: {id:resourceId}})
+    },
+
     sortResource(flag) {
       switch (flag) {
         case 'download':
@@ -265,22 +310,44 @@ export default {
     },
     getresourceList() {
 
-      let resourceType = this.$route.params.resourceType
+      let chapterIds = []
 
-    	this.$http.post(`/api/open/resources/1/resourceList`,{
-    // 		fileType:'',
-				// fileName:'',
-				resourceType: resourceType,
-				// oeseType:'',
-				// sort:'',
-				// startTime:'',
-				// endTime:'',
-				// filterPaper:'',
-				// chapterIds:'',
-				// knowledgeIds:'',
-				page: this.search.page - 1,
-				size: this.search.size
-    	})
+      this.chapterLists.forEach(item=>{
+        chapterIds.push(item.id)
+      })
+
+
+      let knowledgeIds = []
+      this.knowledgeLists.forEach(item=>{
+        knowledgeIds.push(item.id)
+      })
+
+      let params = {
+        fileType: this.search.fileType,
+        fileName: this.search.fileName,
+        resourceType: this.$route.params.resourceType,
+        // oeseType:'',
+        grade: this.filter.grade.key,
+        // startTime:'',
+        // endTime:'',
+        // filterPaper: this.$route.params.resourceType=='ExaminationPaper'?1:'',
+
+        page: this.search.page - 1,
+        size: this.search.size
+      }
+
+      // if(this.activeType == 'Chapter') {
+      //   params.knowledgeIds = []
+      // }else {
+      //   params.chapterIds = []
+      // }
+
+
+
+    	this.$http.post(`/api/open/resources/1/resourceList`, {
+        chapterIds: chapterIds,
+        knowledgeIds:knowledgeIds},params)
+
     	.then((data)=>{
     		if(data.status == '200') {
     			this.tableData = data.data.content
@@ -295,7 +362,7 @@ export default {
       switch(fileType) {
 		    case 'PDF':
 		      obj = {
-		      	iconpdf:true,
+		      	iconPDF:true,
 		      	pdficon: true
 		      }
 		      break;
@@ -356,7 +423,7 @@ export default {
       height: 36px;
       line-height: 36px;
       border: 1px solid #e2e2e2;
-      margin-top: 20px;
+      // margin-top: 20px;
       display: flex;
       background-color: #e8ecf0;
       color: #9ea1a5;

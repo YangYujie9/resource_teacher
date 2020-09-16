@@ -16,7 +16,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="设置试卷学科：" prop="subject">
-          <el-select v-model="form.subject" placeholder="请选择" @change="getquestionType">
+          <el-select v-model="form.subject" placeholder="请选择" @change="getquestionType" disabled>
             <el-option
               v-for="item in subjectList"
               :key="item.code"
@@ -49,8 +49,8 @@
           <el-select v-model="form.address" placeholder="请选择">
             <el-option
               v-for="item in regionList"
-              :key="item"
-              :label="item"
+              :key="item.key"
+              :label="item.value"
               :value="item">
             </el-option>
           </el-select>
@@ -63,7 +63,7 @@
                 v-model="form.questionType">
                 <div v-for="type in questionTypeList" style="margin-right: 20px;">
 
-                  <p><el-checkbox  :label="type" :key="type.key"  style="margin-right: 10px;"> {{type.value}}</el-checkbox></p>
+                  <p><el-checkbox  :label="type" :key="type.id"  style="margin-right: 10px;"> {{type.name}}</el-checkbox></p>
                   <el-input v-model="type.number" class="input-class" style="width:122px;" placeholder="请输入数量"></el-input>
                 </div>
               </el-checkbox-group>
@@ -117,7 +117,8 @@ import { getquestionType } from '@/utils/basic.service.js';
 
 export default {
 
-  props: ['regionList','gradeList','yearList','testPaperTypeList'],
+  props: ['regionList','yearList','testPaperTypeList'],
+  inject: ['reload'],
   data() {
     return {
       paperId:'',
@@ -171,6 +172,7 @@ export default {
 
     ...mapGetters([
       'getuserInfo',
+      'gradeList',
       'difficultyList',
       'subjectList'
 
@@ -240,12 +242,12 @@ export default {
           for(let i=0;i<this.form.questionType.length;i++) {
             if(!this.form.questionType[i].number) {
               return this.$message({
-                message:`请完善${this.form.questionType[i].value}的数量`,
+                message:`请完善${this.form.questionType[i].name}的数量`,
                 type:'warning'
               })
             }else {
               // questionList.push({key:this.form.questionType[i].key,value:this.form.questionType[i].number})
-              questionList.push(`${this.form.questionType[i].value},${this.form.questionType[i].number}`)
+              questionList.push(`${this.form.questionType[i].name},${this.form.questionType[i].number}`)
             }
           }
 
@@ -254,7 +256,8 @@ export default {
             name: this.form.name,
             year: this.form.year,
             subjectCode: this.form.subject,
-            region: this.form.address,
+            region: this.form.address.value,
+            regionId: this.form.address.key,
             grade: this.form.grade,
             learningSection: this.getuserInfo.learningSection,
             testPaperType: this.form.type,
@@ -311,8 +314,7 @@ export default {
       let submitInfo = this.submitdIndex.split('-')
 
       
-      // this.$router.push(`/addquestion/submitQuestions/${this.paperId}-${this.submitdIndex}`)
-      this.$router.push({ path: '/addquestion/submitQuestions', query: { paperId: this.paperId, questionType:submitInfo[0], sort: submitInfo[1], subjectCode:submitInfo[2], grade:submitInfo[3]}});
+      this.$router.push({ path: '/questions/submitQuestions', query: { paperId: this.paperId, questionType:submitInfo[0], sort: submitInfo[1], subjectCode:submitInfo[2], grade:submitInfo[3]}});
       
     },
 
@@ -321,7 +323,20 @@ export default {
       this.$http.put(`/api/open/paper/addPaper/${this.paperId}`)
       .then((data)=>{
         if(data.status == '200') {
-          this.getTruePaperTemplate()
+          this.$confirm('组卷完成，是否进入真题试卷？', '', {
+              confirmButtonText: '进入',
+              cancelButtonText: '取消',
+              type: '',
+              center: true
+            }).then(() => {
+
+              
+              this.$router.push(`/questions/actualPaper/search/true`)
+
+
+            }).catch(() => {
+              this.reload()
+            });
           
         }
       })

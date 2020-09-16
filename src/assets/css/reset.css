@@ -137,9 +137,21 @@ input:focus {
   outline: 0px;
 }
 
+.iconclass {
+  margin-left: 10px;
+  cursor: pointer;
+
+
+}
+
+.iconclass:hover {
+  color: #409EFF;
+}
 
 .cursor {
   cursor: pointer;
 }
 
-
+.el-pagination.is-background .btn-next, .el-pagination.is-background .btn-prev, .el-pagination.is-background .el-pager li {
+  background-color:transparent;
+}

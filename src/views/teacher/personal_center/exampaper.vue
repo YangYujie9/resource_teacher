@@ -1,391 +1,235 @@
 <template>
-  <div class="warehouse">
+  <div class="exampaper">
 
 
-      <div slot="right">
-        <div class="wrap">
-          <div class="bread-div">
-            <div>
-              <i class="iconfont iconshouye iconclass"></i>当前位置：个人中心 > 我的组卷
-            </div>
+    <div class="exampaper-wrap">
 
-            <div>
-              <el-button
-                type="danger"
-                size="mini"
-                @click="$router.push('/addquestion/submitQuestions')"
-              >上传试题</el-button>
-              <!-- <el-button type="danger" size="mini" :class="{upbutton: isfixTab}">上传试题</el-button> -->
-            </div>
+
+      <div class="top-search">
+
+          <el-form :inline="true" :model="search" class="demo-form-inline " >
+              
+              <el-form-item label="上传时间">
+                <el-date-picker
+                  v-model="search.time"
+                  @change="resetPage"
+                  type="daterange"
+                  size="mini"
+                  value-format="yyyy-MM-dd"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  style="width:260px;"
+                ></el-date-picker>
+              </el-form-item>
+              <el-form-item label="试卷名">
+                <el-input v-model="search.keyword" class="search-class" placeholder="请输入试卷名" size="mini" clearable @change="resetPage" prefix-icon="el-icon-search"></el-input>
+              </el-form-item>
+          </el-form>
+
+      </div>
+
+      <!-- <div style="margin-top:10px;">
+        <span style="margin-right: 10px;">关键字</span>
+        <el-input v-model="search.keyword" placeholder="请输入内容" style="width:200px;" size="mini"></el-input>
+      </div> -->
+
+      <div class="top-total" style="">
+        <p class="top-p">共有<span class="activecolor">{{total}}</span>个资源符合结果</p>
+      </div>
+      <div class="wrap-content-right-wrap">
+        <div class="singal-paper" v-for="list in tableData">
+          <div>
+            <p class="p1">{{list.name}}</p>
+            <p class="p2"><span>组卷日期：{{list.name}}</span><span style="margin-left:20px;">下载日期：未下载</span></p>
           </div>
-          <div class="wrap-content">
-
-            <div class="wrap-content-right">
-              <div class="wrap-content-right-top">
-                <!-- <el-form :inline="true" :model="search" class="demo-form-inline">
-                    <el-form-item label="题型">
-                      <el-select v-model="search.type" class="search-class" size="mini">
-                        <el-option label="区域一" value="shanghai"></el-option>
-                        <el-option label="区域二" value="beijing"></el-option>
-                      </el-select>
-                    </el-form-item>
-                    <el-form-item label="公开">
-                      <el-select v-model="search.range" class="search-class" size="mini">
-                        <el-option label="区域一" value="shanghai"></el-option>
-                        <el-option label="区域二" value="beijing"></el-option>
-                      </el-select>
-                    </el-form-item>
-                    <el-form-item label="难度">
-                      <el-select v-model="search.diff" class="search-class" size="mini">
-                        <el-option label="区域一" value="shanghai"></el-option>
-                        <el-option label="区域二" value="beijing"></el-option>
-                      </el-select>
-                    </el-form-item>
-                    <el-form-item label="上传时间">
-                      <el-date-picker
-                        v-model="search.uploadtime"
-                        type="daterange"
-                        size="mini"
-                        range-separator="至"
-                        start-placeholder="开始日期"
-                        end-placeholder="结束日期"
-                        style="width:260px;"
-                      ></el-date-picker>
-                    </el-form-item>
-                    <el-form-item>
-                      <span class="cursor" v-show="!isAnswer" @click="isAnswer=true">
-                        <i class="iconfont iconxianshi" style="position: relative;top:1px"></i>
-                        显示答案
-                      </span>
-                      <span class="cursor" v-show="isAnswer" @click="isAnswer=false">
-                        <i class="iconfont iconyincang"></i>
-                        隐藏答案
-                      </span>
-                    </el-form-item>
-                    <el-form-item>
-                      <el-button type="primary" size="mini" style="margin-left:20px;">
-                        <i class="iconfont iconiconjia" style="font-size:12px;"></i> 全部加入试卷
-                      </el-button>
-                    </el-form-item>
-                </el-form>-->
-                <div class="search">
-                  <p style="margin-right: 20px;">
-                    题型
-                    <el-select v-model="search.type" class="search-class" size="mini">
-                      <el-option label="区域一" value="shanghai"></el-option>
-                      <el-option label="区域二" value="beijing"></el-option>
-                    </el-select>
-                  </p>
-                  <p style="margin-right: 20px;">
-                    难度
-                    <el-select v-model="search.diff" class="search-class" size="mini">
-                      <el-option label="区域一" value="shanghai"></el-option>
-                      <el-option label="区域二" value="beijing"></el-option>
-                    </el-select>
-                  </p>
-                  <p>
-                    上传时间
-                    <el-date-picker
-                      v-model="search.uploadtime"
-                      type="daterange"
-                      size="mini"
-                      range-separator="至"
-                      start-placeholder="开始日期"
-                      end-placeholder="结束日期"
-                      style="width:260px;"
-                    ></el-date-picker>
-                  </p>
-                </div>
-              </div>
-
-              <div style="margin-top:10px;">
-                <span>关键字</span>
-                <el-input v-model="search.keyword" placeholder="请输入内容" style="width:200px;" size="mini"></el-input>
-              </div>
-              <div class="wrap-content-right-wrap">
-                <div class="singal-paper" v-for="i in 10">
-                  <div>
-                    <p class="p1">2020年03月22日初中数学组卷</p>
-                    <p class="p2"><span>组卷日期：2020/4/22</span><span style="margin-left:20px;">下载日期：未下载</span></p>
-                  </div>
-                  <div>
-                    <el-button type="text">浏览</el-button>
-                    <el-button type="text">下载</el-button>
-                    <el-button type="text">编辑</el-button>
-                    <el-button type="text">删除</el-button>
-                  </div>
-                </div>
-
-                <div class="pagination">
-                  <el-pagination
-                    background
-                    @size-change="handleSizeChange"
-                    @current-change="handleCurrentChange"
-                    :current-page="currentPage"
-                    :page-sizes="[100, 200, 300, 400]"
-                    :page-size="100"
-                    layout="total, prev, pager, next, sizes"
-                    :total="400"
-                  ></el-pagination>
-                </div>
-              </div>
-            </div>
+          <div>
+            <el-button type="text" @click="browsePaper(list.paperId)">浏览</el-button>
+            <el-button type="text" @click="downloadPaper(list.paperId)">下载</el-button>
+            <el-button type="text" @click="editPaper(list.paperId)">编辑</el-button>
+            <el-button type="text" @click="deletePaper(list.paperId)">删除</el-button>
           </div>
         </div>
+
+        <div class="pagination">
+          <el-pagination
+            background
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="search.page"
+            :page-sizes="[20, 40, 80, 100]"
+            :page-size="search.size"
+            layout="total, prev, pager, next, sizes"
+            :total="total"
+          ></el-pagination>
+        </div>
+
       </div>
+    </div>
+
+
+    <el-dialog 
+      title="试卷预览" 
+      :visible.sync="dialogVisible" 
+      :close-on-click-modal='false'
+      width="860px">
+      <div class="preview-wrap">
+        <paperPreview :isAnswer="isAnswer" :paperId="paperId" knowledgeType="knowledge"></paperPreview>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="" size="mini">确 定</el-button>
+        <el-button @click="dialogVisible = false" size="mini">取 消</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
-import teacherNav from "@/components/Nav/teacherNav";
-import leftFixedNav from "@/components/Nav/leftFixedNav";
-import topPopover from "@/components/Popover/topPopover";
+import Cookies from 'js-cookie'
+import paperPreview from '@/components/Question/paperPreview'
+import { debounce } from '@/utils/public.js'
 export default {
-  props: ["isfixTab"],
   components: {
-    teacherNav,
-    leftFixedNav,
-    topPopover
+    paperPreview
   },
   data() {
     return {
       search: {
-        type: "",
-        range: "",
-        diff: "",
-        uploadtime: "",
+        time: "",
         keyword:'',
+        page:1,
+        size:20
       },
+      total:0,
+      tableData:[],
+      dialogVisible:false,
+      questionList:[],
       isAnswer: false,
-      isMulti: false,
-      activeType: "chapter",
-      currentPage: 1,
-      list: ["全部", "选择题", "填空题", "解答题", "判断题", "全部"],
-      treeData: {
-        showCheckBox: true,
-        data: [
-          {
-            id: 1,
-            label: "第1章 有理数",
-            children: [
-              {
-                id: 9,
-                label: "1.1正数和负数"
-              },
-              {
-                id: 10,
-                label: "1.1正数和负数"
-              },
-              {
-                id: 11,
-                label: "1.1正数和负数"
-              }
-            ]
-          },
-          {
-            id: 1,
-            label: "第1章 有理数",
-            children: [
-              {
-                id: 9,
-                label: "1.1正数和负数"
-              },
-              {
-                id: 10,
-                label: "1.1正数和负数"
-              },
-              {
-                id: 11,
-                label: "1.1正数和负数"
-              }
-            ]
-          },
-          {
-            id: 1,
-            label: "第1章 有理数",
-            children: [
-              {
-                id: 9,
-                label: "1.1正数和负数"
-              },
-              {
-                id: 10,
-                label: "1.1正数和负数"
-              },
-              {
-                id: 11,
-                label: "1.1正数和负数"
-              }
-            ]
-          },
-          {
-            id: 1,
-            label: "第1章 有理数",
-            children: [
-              {
-                id: 9,
-                label: "1.1正数和负数"
-              },
-              {
-                id: 10,
-                label: "1.1正数和负数"
-              },
-              {
-                id: 11,
-                label: "1.1正数和负数"
-              }
-            ]
-          },
-          {
-            id: 1,
-            label: "第1章 有理数",
-            children: [
-              {
-                id: 9,
-                label: "1.1正数和负数"
-              },
-              {
-                id: 10,
-                label: "1.1正数和负数"
-              },
-              {
-                id: 11,
-                label: "1.1正数和负数"
-              }
-            ]
-          },
-          {
-            id: 2,
-            label: "第2章 整式的加减",
-            children: [
-              {
-                id: 5,
-                label: "2.2 函数和元素"
-              },
-              {
-                id: 6,
-                label: "2.2 函数和元素"
-              }
-            ]
-          },
-          {
-            id: 7,
-            label: "第2章 整式的加减",
-            children: [
-              {
-                id: 8,
-                label: "2.2 函数和元素"
-              },
-              {
-                id: 3,
-                label: "2.2 函数和元素"
-              }
-            ]
-          },
-          {
-            id: 4,
-            label: "第2章 整式的加减",
-            children: [
-              {
-                id: 13,
-                label: "2.2 函数和元素"
-              },
-              {
-                id: 14,
-                label: "2.2 函数和元素"
-              }
-            ]
-          },
-          {
-            id: 15,
-            label: "第2章 整式的加减",
-            children: [
-              {
-                id: 16,
-                label: "2.2 函数和元素"
-              },
-              {
-                id: 17,
-                label: "2.2 函数和元素"
-              }
-            ]
-          },
-          {
-            id: 15,
-            label: "第2章 整式的加减",
-            children: [
-              {
-                id: 16,
-                label: "2.2 函数和元素"
-              },
-              {
-                id: 17,
-                label: "2.2 函数和元素"
-              }
-            ]
-          },
-          {
-            id: 15,
-            label: "第2章 整式的加减",
-            children: [
-              {
-                id: 16,
-                label: "2.2 函数和元素"
-              },
-              {
-                id: 17,
-                label: "2.2 函数和元素"
-              }
-            ]
-          },
-          {
-            id: 15,
-            label: "第2章 整式的加减",
-            children: [
-              {
-                id: 16,
-                label: "2.2 函数和元素"
-              },
-              {
-                id: 17,
-                label: "2.2 函数和元素"
-              }
-            ]
-          },
-          {
-            id: 15,
-            label: "第2章 整式的加减",
-            children: [
-              {
-                id: 16,
-                label: "2.2 函数和元素"
-              },
-              {
-                id: 17,
-                label: "2.2 函数和元素"
-              }
-            ]
-          }
-        ]
-      }
+      paperName:'',
+      paperId:'',
+
+
     };
   },
-  mounted() {
-    this.get_resource();
-  },
-  methods: {
-    get_resource() {
-      this.$emit("show_resource");
+  watch: {
+
+    grade(val) {
+      this.resetPage()
     },
 
-    handleSizeChange() {},
+    chapterIds(val) {
+      this.resetPage()
+    },
+    knowledgeIds(val) {
+      this.resetPage()
+    },
+  },
+  mounted() {
+    this.getTableData()
+  },
+  methods: {
+    // 分页
+    handleSizeChange(val) {
+      this.search.size = val
+      // console.log(`每页 ${val} 条`);
+      this.resetPage()
+      
+    },
+    // 分页
+    handleCurrentChange(val) {
+      this.search.page = val
+      // console.log(`当前页: ${val}`);
+      this.getTableData()
+      // this.$emit('backToTop')
+    },
+    resetPage() {
+      this.search.page = 1
+      this.getTableData()
+    },
 
-    handleCurrentChange() {}
+
+    getTableData: debounce(function() {
+
+
+
+      let params = {
+        name: this.search.keyword,
+        grade: this.grade,
+        startTime:this.search.time? this.search.time[0]:'',
+        endTime: this.search.time?this.search.time[1]:'',
+        page: this.search.page - 1,
+        size: this.search.size
+
+
+      }
+
+
+
+
+      this.$http.post(`/api/open/paper/getPaperList`, {
+          chapterIds: this.chapterIds,
+          knowledgeIds: this.knowledgeIds
+        },
+          params
+      )
+
+      .then((data)=>{
+        if(data.status == '200') {
+          this.tableData = data.data.content
+          this.total = data.data.totalElements
+        }
+      })
+    }),
+
+    browsePaper(paperId) {
+
+      this.paperId = paperId
+      this.dialogVisible = true
+
+    },
+
+
+
+    downloadPaper(paperId) {
+
+    },
+    editPaper(paperId) {
+      this.$store.commit('setpaperId',paperId)
+
+      Cookies.set("paperId", paperId)
+
+      this.$router.push('/questions/examinationPaper')
+    },
+    deletePaper(paperId) {
+        this.$confirm('此操作将永久删除该组卷吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$http.delete(`/api/open/paper/${paperId}`)
+          .then((data)=>{
+            if(data.status == '200') {
+              this.getTableData()
+
+              this.$message({
+                message:'删除成功',
+                type:'success'
+              })
+            }
+          })
+        }).catch(() => {
+         
+        });
+
+
+
+    },
   }
 };
 </script>
 <style lang="less">
-.warehouse {
+.exampaper {
   .el-radio-button__inner {
     border: 0px;
     background-color: #f6faff;
@@ -435,107 +279,54 @@ export default {
 }
 </style>
 <style scoped lang="less">
-.warehouse {
-  &-nav {
-    .tree-wrap {
-      width: 200px;
-      padding: 0px;
-      .tab-class {
-        padding: 0px;
+.exampaper {
+
+
+
+    &-wrap {
+      // margin-top: 10px;
+      // display: flex;
+   
+      margin-bottom: 30px;
+      // margin-top: 10px;
+      // padding:20px;
+
+
+      .singal-paper {
+        border: 1px solid #e2e2e2;
+        margin-top: 10px;
+        //background-color: #f6faff;
+        padding:20px;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        line-height: 2.5;
+        transition:0.3s;
+        &:hover {
+          box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+        }
+        
+        
+
+        .p1 {
+          font-size: 1rem;
+          color: #409EFF;
+        }
+
+        .p2 {
+          font-size: 0.8rem;
+          color: #828282;
+        }
       }
-    }
+        
+      
+    
   }
 
-  .wrap {
-    &-content {
-      margin-top: 10px;
-      display: flex;
-
-      &-left {
-        width: 270px;
-        flex-shrink: 0;
-        margin-right: 10px;
-
-        .knowwrap {
-          height: 36px;
-          line-height: 36px;
-          color: #3399ff;
-          font-weight: 500;
-          display: flex;
-          font-size: 14px;
-          justify-content: space-between;
-          padding-left: 10px;
-
-          .p2 {
-            color: #abb4ca;
-            font-size: 12px;
-
-            span {
-              cursor: pointer;
-            }
-
-            .active {
-              color: #3399ff;
-            }
-          }
-        }
-      }
-
-      &-right {
-        width: 90%;
-        font-size: 14px;
-        //height: 700px;
-
-          &-top {
-            font-size: 13px;
-            border: 1px solid #e2e2e2;
-            line-height: 40px;
-            padding: 6px 20px;
-
-            .search {
-              display: flex;
-
-              .search-class {
-                width: 120px;
-                margin-left: 5px;
-              }
-            }
-          }
-        &-wrap {     
-          margin-bottom: 30px;
-          margin-top: 10px;
-
-
-          .singal-paper {
-            border: 1px solid #e2e2e2;
-            margin-top: 10px;
-            //background-color: #f6faff;
-            padding:20px;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            line-height: 2.5;
-            transition:0.3s;
-            &:hover {
-              box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
-            }
-            
-            
-
-            .p1 {
-              font-size: 1rem;
-              color: #409EFF;
-            }
-
-            .p2 {
-              font-size: 0.8rem;
-              color: #828282;
-            }
-          }
-        }
-      }
-    }
+  .preview-wrap {
+    height: calc(50vh);
+    overflow-y: auto;
   }
 }
 </style>

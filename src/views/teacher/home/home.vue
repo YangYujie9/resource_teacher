@@ -9,37 +9,27 @@
        
           <div class="search-wrap">
             <el-radio-group v-model="activeType" size="mini" @change="getPonitTree">
-              <el-radio-button label="Chapter">章节目录</el-radio-button>
-              <el-radio-button label="Knowledge">知识点</el-radio-button>
+              <el-radio-button label="chapter">章节目录</el-radio-button>
+              <el-radio-button label="knowledge">知识点</el-radio-button>
             </el-radio-group>
           </div>
-          <top-popover>
-            <div slot="reference" class="search-class">
+          <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
+            <div slot="reference">
               <p class="top-title">
-                  <span>人教版：</span>
-                  <span v-if="filter.grade.value">{{filter.grade.value}}</span>
-                  <i class="iconfont iconshezhi settingicon"></i>
-                </p>
+                <span v-if="$refs.filter" >{{$refs.filter.subject.subjectName}}</span>
+                <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
+                <!-- <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span> -->
+                
+                <i class="iconfont iconshezhi settingicon"></i>
+              </p>
             </div>
             <div slot="popover">
-              <div>
-        
-                <p>年级：</p>
-                <el-radio-group v-model="filter.grade" size="mini" @change="getPonitTree">
-                  <el-radio-button v-for="list in gradeList" :label="list" :key="list.key">{{list.value}}</el-radio-button>
-                </el-radio-group>
-
-                <!-- <p>科目：</p>
-                <el-radio-group v-model="filter.subject" size="mini" @change="changeSubject">
-                  <el-radio-button :label="item" :key="item.key" v-for="item in subjectsList">{{item.value}}</el-radio-button>
-                </el-radio-group> -->
-              </div>
             </div>
           </top-popover>
 
           <div class="tree-class">
-            <pointTree chooseType="chapter" :grade="filter.grade.key" :subjectCode="getuserInfo.subjectCode"  @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='Chapter'"></pointTree>
-            <pointTree chooseType="knowledge" :grade="filter.grade.key" :subjectCode="getuserInfo.subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType=='Knowledge'"></pointTree>
+            <pointTree chooseType="chapter" :volumeId="volumeId"  @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='chapter'"></pointTree>
+            <pointTree chooseType="knowledge"  :subjectCode="subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType=='knowledge'"></pointTree>
           </div>
       
         </div>
@@ -50,31 +40,30 @@
         <div class="top-right ">
           <div style="border-bottom: 1px dashed #c8cacf;">
             <el-button type="danger" @click="uploadResource" size="large" style="width: 100%"><i class="iconfont iconshangchuan"></i> 上传我的资源</el-button>
-            <p style="line-height: 38px;text-align: center;font-size: 16px;">已有资源<span style="color: #5182f4;">12983</span> 份 </p>
+            <p style="line-height: 38px;text-align: center;font-size: 16px;">已有资源<span style="color: #5182f4;">{{resourceCount}}</span> 份 </p>
           </div>
 
           <p style="font-size: 16px;margin: 10px 0px;">资源统计</p>
           <ul>
-            <li v-for="i in 10"><span>课件</span> <span>920</span> </li>
-
+            <li v-for="item in staticList"><span>{{item.resourceName}}</span> <span>{{item.number}}</span> </li>
           </ul>
         </div>
       </div>
 
       <div class="home-nav">
         <span>精品资源</span>
-        <el-button type="text" style="color: #ffffff;">换一批</el-button>
+        <el-button type="text" style="color: #ffffff;" @click="getBoutiqueList" >换一批</el-button>
       </div>
       <div class="home-content">
         <div class="resource-wrap">
-          <div class="one-resource" v-for="i in 9">
+          <div class="one-resource" v-for="item in boutiqueList">
             <img src="@/assets/images/book.png" alt="">
 
-            <p style="text-align: center;margin-top: 10px;line-height: 2;">小石潭记</p>
+            <p style="text-align: center;margin-top: 10px;line-height: 2;">{{item.name}}</p>
             <p class="foot-tag">
-              <span>100w人阅读</span>
-              <span><i class="iconfont iconpinglun1 tag-icon" ></i>100w</span>
-              <span><i class="iconfont icondianzan tag-icon"></i>6000w</span>
+              <span>{{item.preview}}人阅读</span>
+              <span><i class="iconfont iconpinglun1 tag-icon" ></i>{{item.download}}</span>
+              <span><i class="iconfont icondianzan tag-icon"></i>{{item.download}}</span>
             </p>
           </div>
         </div>
@@ -83,18 +72,18 @@
 
       <div class="home-nav">
         <span>热门资源</span>
-        <el-button type="text" style="color: #ffffff;">换一批</el-button>
+        <el-button type="text" style="color: #ffffff;" @click="getHotList" >换一批</el-button>
       </div>
       <div class="home-content">
         <div class="resource-wrap">
-          <div class="one-resource" v-for="i in 11">
+          <div class="one-resource" v-for="item in hotList">
             <img src="@/assets/images/book.png" alt="">
 
-            <p style="text-align: center;margin-top: 10px;line-height: 2;">小石潭记</p>
+            <p style="text-align: center;margin-top: 10px;line-height: 2;">{{item.name}}</p>
             <p class="foot-tag">
-              <span>100w人阅读</span>
-              <span><i class="iconfont iconpinglun1 tag-icon" ></i>100w</span>
-              <span><i class="iconfont icondianzan tag-icon"></i>6000w</span>
+              <span>{{item.preview}}w人阅读</span>
+              <span><i class="iconfont iconpinglun1 tag-icon" ></i>{{item.download}}</span>
+              <span><i class="iconfont icondianzan tag-icon"></i>{{item.download}}</span>
             </p>
           </div>
         </div>
@@ -123,14 +112,18 @@ export default {
 
   data() {
     return {
-      activeType:"Chapter",
+      activeType:"chapter",
       filter: {
         grade: "",
       },
       subjectsList:[],
-      sectionList:[]
-      //subjectName:'',
-
+      sectionList:[],
+      resourceCount:0,
+      staticList:[],
+      boutiqueList:[],
+      hotList:[],
+      volumeId:'',
+      subjectCode:'',
 
     };
   },
@@ -152,6 +145,7 @@ export default {
     ...mapGetters([
       'gradeList',
       'getuserInfo',
+      'isReady'
 
     ]),
 
@@ -162,6 +156,10 @@ export default {
 
     this.gradeList.length? this.filter.grade = this.gradeList[0]: null
     // this.subjectCode = this.getuserInfo.subjectCode
+    this.getResourceCount()
+    this.getBoutiqueList()
+    this.getHotList()
+    this.getResourceStatic()
 
 
     
@@ -183,6 +181,14 @@ export default {
 
     },
 
+    setparams(volumeId,subjectCode) {
+
+      this.volumeId = volumeId
+
+      this.subjectCode = subjectCode
+
+      
+    },
     uploadResource() {
       this.$router.push('/teacher/uploadResource')
     },
@@ -191,6 +197,52 @@ export default {
     pointNodeClick() {},
 
     defaultPointNode() {},
+
+    //获取公开的资源总数
+    getResourceCount(){
+      this.$http.get(`/api/open/resources/list/count`)
+        .then((result)=>{
+          if(result.status == '200') {
+            this.resourceCount = result.data
+          }
+        })
+    },
+
+    //获取每个资源类型的统计数
+    getResourceStatic(){
+      this.$http.get(`/api/open/resources/list/static`)
+        .then((result)=>{
+          if(result.status == '200') {
+            this.staticList = result.data
+          }
+        })
+    },
+
+    //获取n条精品资源
+    getBoutiqueList(){
+      this.$http.get(`/api/open/resources/list/number`,{
+          grade:this.filter.grade.key,
+          type:'boutique',
+          number:10})
+        .then((result)=>{
+          if(result.status == '200') {
+            this.boutiqueList = result.data
+          }
+        })
+    },
+
+    //获取n条最热资源
+    getHotList(){
+      this.$http.get(`/api/open/resources/list/number`,{
+          grade:this.filter.grade.key,
+          type:'hot',
+          number:10})
+        .then((result)=>{
+          if(result.status == '200') {
+            this.hotList = result.data
+          }
+        })
+    }
 
   }
 };
@@ -209,7 +261,7 @@ export default {
       background-color: #5182f4;
       margin-bottom: 20px;
       margin-top: 20px;
-      padding:0px 16.5%;
+      padding:0px 12.5%;
       display: flex;
       justify-content: space-between;
 
@@ -231,6 +283,7 @@ export default {
     .home-content {
       width: 75%;
       margin: 0 auto;
+      min-height: 300px;
       // background-color:red;
       // height: 300px;
 
@@ -255,6 +308,7 @@ export default {
 
             .tag-icon {
               font-size: 0.9rem;
+              margin-right: 5px;
             }
           }
         }

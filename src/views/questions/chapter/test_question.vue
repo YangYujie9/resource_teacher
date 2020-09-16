@@ -7,7 +7,7 @@
           <p>题型</p>
           <div class="div2">
             <el-radio-group v-model="search.type" size="mini" @change="resetPage">
-              <el-radio-button :label="item.key" :key="item.key" v-for="item in typeList">{{item.value}}</el-radio-button>
+              <el-radio-button :label="item.code" :key="item.code" v-for="item in typeList">{{item.name}}</el-radio-button>
             </el-radio-group>
           </div>
         </li>
@@ -88,11 +88,13 @@
 
     <div class="card-wrap">
 
-       <div v-for="(list,index) in tableData">
+       <!-- <div v-for="(list,index) in tableData">
           <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder">
             
           </singleQuestion>
-        </div>     
+
+        </div>   -->
+        <questionList :isAnswer="isAnswer" :tableData="tableData" knowledgeType="chapter" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" ></questionList>   
 
        <!--<div >
         <el-card class="box-card" shadow="hover" v-for="i in 10">
@@ -192,6 +194,7 @@ import similarityDialog from '@/components/Dialog/similarity'
 import errorDialog from '@/components/Dialog/error'
 import favoriteDialog from '@/components/Dialog/favorite'
 import singleQuestion from '@/components/Question/singleQuestion'
+import questionList from '@/components/Question/questionList'
 import { getquestionType } from '@/utils/basic.service.js'
 // import { getmyTestBasket } from '@/utils/basic.service.js'
 
@@ -203,8 +206,9 @@ export default {
     errorDialog,
     favoriteDialog,
     singleQuestion,
+    questionList
   },
-  props: ['chapterList','gradeName','subjectCode','grade'],
+  props: ['chapterList','gradeName','subjectCode','grade','volumeId'],
   data() {
     return {
       search: {
@@ -230,10 +234,12 @@ export default {
       favoriteVisible:false,
       testBasket:0,
 
+
     };
   },
   computed: {
       ...mapGetters([
+        'getuserInfo',
         'difficultyList',
         'paperId',
 
@@ -256,7 +262,7 @@ export default {
     gradeName(val) {
       if(val) {
 
-        this.getmyTestBasket()
+        
         
       }
     },
@@ -267,15 +273,17 @@ export default {
     }
   },
   mounted() {
+    this.$nextTick(()=>{
+      MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 
-    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-
+    })
+    
     this.search.difficulty = this.difficultyList[0].key
 
 
     this.subjectCode?this.getquestionType():null
     
-
+    this.getmyTestBasket()
 
   },
 
@@ -292,13 +300,13 @@ export default {
         if (data.status == "200") {
             
             let arr = []
-            arr.push({key:'',value:'全部'})
+            arr.push({code:'',name:'全部'})
             data.data.forEach(item=>{
               arr.push(item)
             })
 
             this.typeList = arr
-            this.search.type = this.typeList[0].key;
+            this.search.type = this.typeList[0].code;
             this.resetPage()
         } 
       })
@@ -337,7 +345,7 @@ export default {
       this.getTableData()
     },
     getTableData() {
-      if(!this.gradeName) {return false}
+      if(!this.grade) {return false}
       let chapterIds = []
       this.chapterList.forEach(item=>{
         chapterIds.push(item.id)
@@ -350,7 +358,7 @@ export default {
         difficultyType: this.search.difficulty,
         name: this.search.keyword,
         // gradeName: this.gradeName.substr(0,this.gradeName.length-1),
-        grade: this.grade.substr(0,this.grade.length-2),
+        grade: this.grade,
         
         page: this.search.page - 1,
         size: this.search.size,
@@ -422,7 +430,7 @@ export default {
     getmyTestBasket() {
 
 
-      this.$refs.basketTag.getmyTestBasket(this.gradeName)
+      this.$refs.basketTag.getmyTestBasket()
 
 
     },
