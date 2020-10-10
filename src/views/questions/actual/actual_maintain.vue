@@ -246,8 +246,9 @@ export default {
                 type:'warning'
               })
             }else {
+              console.log(this.form.questionType)
               // questionList.push({key:this.form.questionType[i].key,value:this.form.questionType[i].number})
-              questionList.push(`${this.form.questionType[i].name},${this.form.questionType[i].number}`)
+              questionList.push(`${this.form.questionType[i].code},${this.form.questionType[i].number}`)
             }
           }
 

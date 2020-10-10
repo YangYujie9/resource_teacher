@@ -56,18 +56,22 @@
       </div>
       <div class="home-content">
         <div class="resource-wrap">
-          <div class="one-resource" v-for="item in boutiqueList">
-            <img src="@/assets/images/book.png" alt="">
+          <div class="one-resource" v-for="item in boutiqueList" @click="resourcePreview(item.resourceId)">
 
-            <p style="text-align: center;margin-top: 10px;line-height: 2;">{{item.name}}</p>
+
+            <img :src="item.surfaceUrl" alt="" class="pic-class" v-if="item.surfaceUrl">
+            <img src="@/assets/images/default.jpg" style="width: 100%;" v-if="!item.surfaceUrl">
+            <p class="title-class" style="">{{item.name}}</p>
             <p class="foot-tag">
               <span>{{item.preview}}人阅读</span>
-              <span><i class="iconfont iconpinglun1 tag-icon" ></i>{{item.download}}</span>
-              <span><i class="iconfont icondianzan tag-icon"></i>{{item.download}}</span>
+              <!-- <span><i class="iconfont iconpinglun1 tag-icon" ></i>{{item.download}}</span>   评论数-->
+              <span><i class="el-icon-download tag-icon" ></i>{{item.download}}</span>
+              <span><i class="iconfont icondianzan tag-icon"></i>{{item.thumbUp}}</span>
             </p>
           </div>
         </div>
       </div>
+
 
 
       <div class="home-nav">
@@ -76,14 +80,16 @@
       </div>
       <div class="home-content">
         <div class="resource-wrap">
-          <div class="one-resource" v-for="item in hotList">
-            <img src="@/assets/images/book.png" alt="">
+          <div class="one-resource" v-for="item in hotList" @click="resourcePreview(item.resourceId)">
+            <img :src="item.surfaceUrl" alt="" v-if="item.surfaceUrl">
+            <img src="@/assets/images/default.jpg" style="width: 100%;" v-if="!item.surfaceUrl">
 
-            <p style="text-align: center;margin-top: 10px;line-height: 2;">{{item.name}}</p>
+            <p class="title-class" >{{item.name}}</p>
             <p class="foot-tag">
-              <span>{{item.preview}}w人阅读</span>
-              <span><i class="iconfont iconpinglun1 tag-icon" ></i>{{item.download}}</span>
-              <span><i class="iconfont icondianzan tag-icon"></i>{{item.download}}</span>
+              <span>{{item.preview}}人阅读</span>
+              
+              <span><i class="el-icon-download tag-icon" ></i>{{item.download}}</span>
+              <span><i class="iconfont icondianzan tag-icon"></i>{{item.thumbUp}}</span>
             </p>
           </div>
         </div>
@@ -242,7 +248,13 @@ export default {
             this.hotList = result.data
           }
         })
-    }
+    },
+
+    resourcePreview(resourceId) {
+
+      this.$router.push({path: '/teacher/resourceRreview', query: {id:resourceId}})
+      
+    },
 
   }
 };
@@ -300,7 +312,30 @@ export default {
           cursor: pointer;
           // height: 300px;
 
+          .title-class {
+            text-align: center;
+            margin-top: 5px;
+            line-height: 2;
+            white-space:nowrap;
+            overflow:hidden; 
+            text-overflow:ellipsis;
+
+
+            &:hover {
+               text-overflow:inherit;
+               overflow:visible;
+            }
+          }
+
+
+          .pic-class {
+
+          }
+
+
+
           .foot-tag {
+            margin-top: 2px;
             display: flex;
             justify-content: space-between;
             align-items:center;

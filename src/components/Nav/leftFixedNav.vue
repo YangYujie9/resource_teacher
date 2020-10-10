@@ -238,7 +238,7 @@ export default {
     }
 
     .fixedright {
-      min-height: calc(100vh - 100px);
+      min-height: calc(100vh - 50px);
     }
   }
   // .fixedNavbar{

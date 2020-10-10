@@ -91,7 +91,7 @@
             <el-button type="text" size="small" v-if="isComplete=='true'" @click="previewPaper(scope.row)">预览</el-button>
             <el-button type="text" size="small" v-if="isComplete=='true' && !scope.row.isCollect" @click="collectPaper(scope.row.paperId)">收藏</el-button>
             <el-button type="text" size="small" v-if="isComplete=='true' && scope.row.isCollect" @click="cancelCollect(scope.row.paperId)">取消收藏</el-button>
-            <el-button type="text" size="small" v-if="isComplete=='true'">下载</el-button>
+            <el-button type="text" size="small" v-if="isComplete=='true'" @click="downloadPaper(scope.row.paperFileId)">下载</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -290,7 +290,15 @@ export default {
       })
     },
 
+    downloadPaper(paperFileId) {
+      this.$http.get(`/api/open/common/${paperFileId}/download`)
+        .then((data)=>{
+          if(data.status == '200') {
+            window.open(data.data)
+          }
+        })
 
+    },
   
   }
 };

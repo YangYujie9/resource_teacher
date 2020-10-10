@@ -7,19 +7,19 @@
       <div class="popover-div">
           <div style="padding-bottom: 8px;">
             <p>学科：</p>
-             <el-radio-group v-model="subject" size="mini" :disabled="subjectEditable">
+             <el-radio-group v-model="subject" size="mini" :disabled="subjectEditable" @change="getVersion">
                 <el-radio-button :label="item" :key="item.code" v-for="item in subjectList">{{item.subjectName}}</el-radio-button>
             </el-radio-group>
           </div>
           <div v-show="chooseType=='chapter'"  class="one-part">
             <p>教材版本：</p>
-             <el-radio-group v-model="oese" size="mini" @change="getVolumeList">
+             <el-radio-group v-model="oese" size="mini" @change="getVolumeList" :disabled="isError">
                 <el-radio-button :label="item" :key="item.oeseId" v-for="item in versionList">{{item.name}}</el-radio-button>
             </el-radio-group>
           </div>
           <div v-show="chooseType=='chapter'"  class="one-part">
             <p>册别：</p>
-             <el-radio-group v-model="volume" size="mini" >
+             <el-radio-group v-model="volume" size="mini" :disabled="isError" >
                 <el-radio-button :label="item" :key="item.oeseId" v-for="item in volumeList">{{item.name}}</el-radio-button>
             </el-radio-group>
           </div>
@@ -47,6 +47,13 @@ export default {
     },
     acVolumeList: {
       type: Array
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    questionDetail: {
+      type: Object
     }
   },
   components: {},
@@ -67,6 +74,7 @@ export default {
     };
   },
   watch: {
+
     volume(val) {
 
       val?this.$emit('setparams',val.oeseId,this.subject.code):null
@@ -102,6 +110,14 @@ export default {
         this.volume = this.volumeList[0]
 
         // this.$emit('setparams',this.volume.oeseId,this.subject.code)
+      }else if(this.isError){
+          this.subjectEditable = true
+          this.subject = this.subjectList.filter(item=>{
+            return item.code == this.questionDetail.subjectCode
+          })[0]
+
+        this.getVersion()
+      
       }else {
 
         if(this.getuserInfo.userType == 'Teacher') {
@@ -128,23 +144,55 @@ export default {
   methods: {
 
     getVersion() {
-      this.$http.get(`/api/open/common/oeses/${this.getuserInfo.learningSection}/${this.subject.code}`)
+      
+      this.versionList = []
+      this.volumeList = []
+
+      this.$http.get(`/api/open/common/oeses/${this.subject.code}`)
+      // this.$http.get(`/api/open/common/oeses/${this.getuserInfo.learningSection}/${this.subject.code}`)
       .then((data)=>{
         if(data.status == '200') {
           this.versionList = data.data
-          this.oese = this.versionList[0]
-          this.getVolumeList()
+          if(this.versionList.length) {
+            if(this.isError) {
+              this.oese = this.versionList.filter(list=>{
+                return list.oeseId == this.questionDetail.versionId
+              })[0]
+            }else {
+              this.oese = this.versionList[0]
+            }
+
+
+            if(this.oese) {
+              this.getVolumeList()
+            }
+
+            
+            
+          }
+
         }
       })
     },
 
 
     getVolumeList() {
+      this.volumeList = []
       this.$http.get(`/api/open/common/oeseList/${this.oese.oeseId}`)
       .then((data)=>{
         if(data.status == '200') {
           this.volumeList = data.data
-          this.volume = this.volumeList[0]
+
+          if(this.volumeList.length) {
+            if(this.isError) {
+              this.volume = this.volumeList.filter(list=>{
+                return list.oeseId == this.questionDetail.volumeId
+              })[0]
+            }else {
+              this.volume = this.volumeList[0]
+            }
+          }
+          
 
           // this.volume?this.$emit('setparams',this.volume.oeseId,this.subject.code):null
         }

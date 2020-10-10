@@ -96,70 +96,6 @@
         </div>   -->
         <questionList :isAnswer="isAnswer" :tableData="tableData" knowledgeType="chapter" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" ></questionList>   
 
-       <!--<div >
-        <el-card class="box-card" shadow="hover" v-for="i in 10">
-          <div class="maskdiv">
-            <div class="mask">
-              <span class="maskspan">同步</span>
-            </div>
-          </div> 
-          <section class="content">
-            <div class="qt2 top"></div>
-
-            <div class="middle">
-              <div>
-                <p class="title">【知识点】</p>
-                <p>{{list.knowledgesPoint}}</p>
-              </div>
-
-              <div>
-                <p class="title">【答案】</p>
-                <p>{{list.answers}}
-                  <span v-for="(item,index1) in list.answers">{{item}}
-                   <span   style="margin-left: 0px;">{{index1+1}}、</span>
-                   <span style="margin-left: 0px;">{{item}}</span>
-                  </span>
-                </p>
-              </div>
-              <div>
-                <p class="title">【分析】</p>
-              </div>
-              <div>
-                <p class="title">【详解】</p>
-              </div>
-              <div>
-                <p class="title">【点睛】</p>
-              </div>
-              <p class="tag">2019~山东省高中二期中</p>
-            </div>
-          </section>
-          <section class="foot-wrap">
-            <p class="pt1">
-              <span>更新：2020/8/7</span>
-              <span>难度：0.9</span>
-              <span>题型：选择题</span>
-              <span>组卷：60</span>
-            </p>
-            <p class="pt2">
-              <span>
-                <i class="iconfont iconpaibanguanli iconcolor"></i> 相似题
-              </span>
-              <span>
-                <i class="iconfont iconjiucuo iconcolor"></i> 纠错
-              </span>
-              <span>
-                <i class="iconfont iconshoucang1" style="color:#ffda33;"></i>
-                <i class="iconfont iconshoucang2 iconcolor"></i>
-                收藏
-              </span>
-              <span>
-                <i class="iconfont iconxiangqing1 iconcolor"></i> 详情
-              </span>
-              <el-button type="primary" size="mini">加入试卷</el-button>
-            </p>
-          </section>
-        </el-card>
-      </div> -->
 
       <div class="pagination">
         <el-pagination
@@ -181,34 +117,35 @@
 
 
 
-    <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket" @addCollectFolder="addCollectFolder"></similarityDialog>
+<!--     <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket" @addCollectFolder="addCollectFolder"></similarityDialog>
     <errorDialog :dialogVisible="errorVisible"  @close="close_error"></errorDialog>
-    <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog>
+    <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog> -->
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import basketTag from "@/components/Popover/basketTag";
-import similarityDialog from '@/components/Dialog/similarity'
-import errorDialog from '@/components/Dialog/error'
-import favoriteDialog from '@/components/Dialog/favorite'
+// import similarityDialog from '@/components/Dialog/similarity'
+// import errorDialog from '@/components/Dialog/error'
+// import favoriteDialog from '@/components/Dialog/favorite'
 import singleQuestion from '@/components/Question/singleQuestion'
 import questionList from '@/components/Question/questionList'
 import { getquestionType } from '@/utils/basic.service.js'
+import { debounce } from '@/utils/public.js'
 // import { getmyTestBasket } from '@/utils/basic.service.js'
 
 
 export default {
   components: {
     basketTag,
-    similarityDialog,
-    errorDialog,
-    favoriteDialog,
+    // similarityDialog,
+    // errorDialog,
+    // favoriteDialog,
     singleQuestion,
     questionList
   },
-  props: ['chapterList','gradeName','subjectCode','grade','volumeId'],
+  props: ['chapterList','subjectCode','volumeId'],
   data() {
     return {
       search: {
@@ -250,19 +187,16 @@ export default {
     subjectCode(val) {
       if(val) {
         this.getquestionType()
+        this.resetPage()
       }
       
 
     },
-    grade(val) {
-      if(val) {
-        this.resetPage()
-      }
-    },
-    gradeName(val) {
+
+    volumeId(val) {
       if(val) {
 
-        
+        this.resetPage()
         
       }
     },
@@ -273,10 +207,10 @@ export default {
     }
   },
   mounted() {
-    this.$nextTick(()=>{
-      MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    // this.$nextTick(()=>{
+    //   MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
 
-    })
+    // })
     
     this.search.difficulty = this.difficultyList[0].key
 
@@ -344,8 +278,7 @@ export default {
       this.search.page = 1
       this.getTableData()
     },
-    getTableData() {
-      if(!this.grade) {return false}
+    getTableData: debounce(function() {
       let chapterIds = []
       this.chapterList.forEach(item=>{
         chapterIds.push(item.id)
@@ -357,19 +290,19 @@ export default {
         questionType: this.search.type,
         difficultyType: this.search.difficulty,
         name: this.search.keyword,
+        oeseId: this.volumeId,
         // gradeName: this.gradeName.substr(0,this.gradeName.length-1),
-        grade: this.grade,
+        // grade: this.grade,
         
         page: this.search.page - 1,
         size: this.search.size,
-        // subject:this.subjectCode
+        subject:this.subjectCode
         // knowledgeId: this.search.difficulty,
       }
       this.$http.post(`/api/open/question/1/questions`,{
-        chapterId: chapterIds,
+        chapterIds: chapterIds,
       },params)
       .then((data)=>{
-        window.scrollTo(0,0)
         data.data.content.forEach(item=>{
 
           item.showDetail = false
@@ -386,7 +319,7 @@ export default {
 
         
       })
-    },
+    }),
 
 
     handleQuestion(item,item0) {

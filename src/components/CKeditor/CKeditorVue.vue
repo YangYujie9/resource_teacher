@@ -46,10 +46,16 @@ class MyUploadAdapter {
 
 export default {
   
-    props: { },
-	components: {
-	    ckeditor: CKEditor.component,
-	 },
+    props: {
+
+			readOnly:{
+				type:Boolean,
+				default: false
+			}
+		},
+		components: {
+		    ckeditor: CKEditor.component,
+		},
     data() {
 	    return {
 	      editor: DocumentEditor,
@@ -141,6 +147,8 @@ export default {
     methods:{
 		// 富文本配置初始化
 		onReady(editor) {
+
+			editor.isReadOnly = this.readOnly
 			editor.ui.getEditableElement().parentElement.insertBefore(
 			    editor.ui.view.toolbar.element,
 			    editor.ui.getEditableElement()
@@ -158,7 +166,8 @@ export default {
 
 	    setData(data){
 	    	this.editorData = data
-	    },  
+	    }, 
+
     }
 }
 </script>

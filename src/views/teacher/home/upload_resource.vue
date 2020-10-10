@@ -56,21 +56,15 @@
                   ref="resourceSite"
                   accept="file"
                   action="/api/open/common/file/initUpload"
-                  :on-remove="beforeRemoveSite"
                   :before-remove="beforeRemove"
+                  :on-remove="removeSite"
                   :before-upload="handleBeforeUploadSite"
                   :http-request="defaultUpload"
                   :limit="1"
+                  :file-list="uploadSiteList"
                   :on-exceed="exceedFile">
                   <el-button size="mini" type="primary">点击上传</el-button>
                 </el-upload>
-                <div v-for="(item, index) in uploadSiteList.uploadList" :key="index">
-                    <el-progress 
-                      :percentage="item.percent || 0"
-                      :stroke-width="5" 
-                      :status="item.status" >
-                    </el-progress>
-                </div>
               </el-form-item>
 
               <el-form-item prop="surface" v-show="showAnswerUpload" :label="resourceFileAttach">
@@ -80,20 +74,14 @@
                   ref="surface"
                   action="/api/open/common/file/initUpload"
                   :before-remove="beforeRemove"
-                  :on-remove="beforeRemoveSurface"
+                  :on-remove="removeAnswer"
                   :before-upload="handleBeforeUploadSurface"
                   :http-request="defaultUpload"
                   :limit="1"
+                  :file-list="uploadAnswerList"
                   :on-exceed="exceedFile">
                   <el-button size="mini" type="primary">点击上传</el-button>
                 </el-upload>
-                <div v-for="(item, index) in uploadSurfaceList.uploadList" :key="index">
-                    <el-progress 
-                      :percentage="item.percent || 0"
-                      :stroke-width="5" 
-                      :status="item.status">
-                    </el-progress>
-                </div>
               </el-form-item>
 
               <p class="top-p">2、资源信息</p>
@@ -111,7 +99,7 @@
                 </el-input>
               </el-form-item>
 
-              <el-form-item label="学段" prop="learningSection" :required="true">
+              <el-form-item label="学段" prop="learningSection">
                 <el-select v-model="resourceForm.learningSection" placeholder="请选择" class="input-class" disabled >
                   <el-option label="小学" value="PrimarySchool"></el-option>
                   <el-option label="初中" value="JuniorMiddleSchool"></el-option>
@@ -120,22 +108,14 @@
               </el-form-item>
 
               <el-form-item label="科目" prop="subjectId" >
-                  <el-select v-model="resourceForm.subjectId" placeholder="请选择" class="input-class" disabled >
-                    <el-option :label="resourceObject.subjectName" :value="resourceObject.subjectId" >{{resourceObject.subjectName}}</el-option>
+                  <el-select v-model="resourceObject.subjectName"  placeholder="请选择" class="input-class" disabled >
+                    <el-option :label="resourceObject.subjectName" value="subjectId">{{resourceObject.subjectName}}</el-option>
                   </el-select>
               </el-form-item>
 
               <el-form-item label="年级" prop="grade" >
-                <el-select v-model="resourceObject.gradeId" placeholder="请选择" class="input-class" disabled>
+                <el-select v-model="resourceForm.grade" placeholder="请选择" class="input-class">
                   <el-option :label="item.value" :value="item.key" v-for="item in gradeList" >{{item.value}}</el-option>
-                </el-select>
-              </el-form-item>
-
-              <el-form-item label="版本" prop="oeseType">
-                <el-select v-model="resourceForm.oeseType" placeholder="请选择" class="input-class">
-                  <el-option label="人教版" value="PepEdition"></el-option>
-                  <el-option label="沪教版" value="ShVersion"></el-option>
-                  <el-option label="苏教版" value="SueOclock"></el-option>
                 </el-select>
               </el-form-item>
 
@@ -149,13 +129,10 @@
                 </el-select>
               </el-form-item>
               
-
-
             </el-form>
 
             <p class="top-p">4、筛选</p>
             <div class="tag-class">
-
               <el-tag v-for="(tag,index) in tagsList" :key="tag.id" effect="dark" closable size="small" @close="closeTag(index)">{{tag.name}}</el-tag>
             </div>
           </div>
@@ -187,14 +164,15 @@ export default {
       resourceForm:{
         name:'',
         resourceSite:null,
+        answerFile:null,
         synopsis:'',
-        oeseType:null,
         resourceType:'Courseware',
         grade:'',
-        learningSection:'',
         chapterIdList:[],
         knowledgeIdList:[],
-        openState:''
+        openState:'Privately',
+        oeseId:'',
+        oeseBookId:''
       },
      resourceRules: {
         resourceType: [{ required: true, message: '请选择资源类型', trigger: 'change' }],
@@ -206,25 +184,15 @@ export default {
         openState: [{required: true, message: '请设置权限', trigger: 'change' }]
       },
       resourceObject:{
-        gradeId:'',
-        gradeName:'',
-        subjectId:'',
-        subjectCode:'',
         subjectName:''
       },
-      uploadSiteList: {
-          name: '',
-          resourceSite: '',
-          uploadList:[]
-      },
-      uploadSurfaceList: {
-          name: '',
-          uploadList:[]
-      },
+      uploadSiteList: [],
+      uploadAnswerList: [],
+
       showAnswerUpload: false,
       activeType:"chapter",
       resourceTypeList:[],
-      gradeSectionList:[],
+  
       tagsList:[],
       chapterTags:[],
       knowledgeTags:[],
@@ -232,7 +200,6 @@ export default {
       volumeId:'',
       subjectCode:'',
 
-      
     };
   },
   components: {
@@ -240,21 +207,10 @@ export default {
     leftFixedNav
   },
   watch: {
-    gradeList(val) {
-      if(val.length) {
-        this.resourceObject.gradeId = val[0].key;
-        this.resourceObject.gradeName = val[0].value;
-        this.resourceForm.grade = val[0].key;
-      }
-    },
-
     getuserInfo(val) {
       if(val) {
-        this.resourceObject.subjectId = this.getuserInfo.subject.id
         this.resourceObject.subjectName = this.getuserInfo.subject.name
-        this.resourceObject.subjectCode = this.getuserInfo.subjectCode
         this.resourceForm.learningSection = this.getuserInfo.learningSection
-        this.resourceForm.subjectId = this.getuserInfo.subject.id
       }
     },
   },
@@ -275,53 +231,41 @@ export default {
   },
   mounted() {
     if(this.getuserInfo && this.getuserInfo.subject) {
-      this.resourceObject.subjectId = this.getuserInfo.subject.id
       this.resourceObject.subjectName = this.getuserInfo.subject.name
-      this.resourceObject.subjectCode = this.getuserInfo.subjectCode 
       this.resourceForm.learningSection = this.getuserInfo.learningSection
-      this.resourceForm.subjectId = this.getuserInfo.subject.id
     }
     if(this.gradeList.length) {
-      this.resourceObject.gradeId = this.gradeList[0].key;
-      this.resourceObject.gradeName = this.gradeList[0].value;
       this.resourceForm.grade = this.gradeList[0].key;
     }
 
-
-
-
-    this.getGradeSectionList(this.resourceForm.learningSection);
   },
   created(){
     this.getResourceType();
   },
   methods: {
     setparams(volumeId,subjectCode) {
-
       this.volumeId = volumeId
-
       this.subjectCode = subjectCode
-
-      
     },
+
     exceedFile(files, fileList) {
       return this.$message({
         message:'只允许上传一个文件！',
         type:'warning'
       })
     },
+
     closeTag(index) {
 
       if(this.activeType == "chapter") {
-
         this.chapterTags.splice(index,1)
         this.$refs.chapterTree.setCheckedNodes(this.chapterTags)
       }else {
         this.knowledgeTags.splice(index,1)
         this.$refs.knowledgeTree.setCheckedNodes(this.knowledgeTags)
       }
-
     },
+
     handleClick(tab, event) {
       if(tab.name == "chapter") {
         this.tagsList = this.chapterTags
@@ -336,7 +280,7 @@ export default {
 
     toPageBack() {
         this.$router.go(-1);
-      },
+    },
 
     /**获取章节*/
     getCheckedChapters(list) {
@@ -363,24 +307,15 @@ export default {
 
     },
 
-    /**通过学段获取年级*/
-    getGradeSectionList(learningSection){
-      this.$http.get(`/api/open/common/grade/`+learningSection)
-        .then((result)=>{
-          if(result.status == '200') {
-            this.gradeSectionList = result.data
-          }    
-        })
-
-    },
-
     /**上传资源 */
     submitResource(){
-      if (this.uploadSiteList.uploadList.length > 0){
-        this.resourceForm.resourceSite = {id:this.uploadSiteList.uploadList[0].id};
+      if (this.uploadSiteList.length > 0){
+        this.resourceForm.resourceSite = {id:this.uploadSiteList[0].id};
+      } else {
+        this.$message({message:'请上传资源',type:'error'});
       }
-      if (this.uploadSurfaceList.uploadList.length > 0){
-        this.resourceForm.answerFile = {id:this.uploadSurfaceList.uploadList[0].id};
+      if (this.uploadAnswerList.length > 0){
+        this.resourceForm.answerFile = {id:this.uploadAnswerList[0].id};
       }
       let knowledgeIds = []
       let chapterIds = []
@@ -392,7 +327,7 @@ export default {
       })
       this.resourceForm.chapterIdList = chapterIds;
       this.resourceForm.knowledgeIdList = knowledgeIds;
-      this.resourceForm.grade = this.resourceObject.gradeId
+      this.resourceForm.oeseBookId = this.volumeId
 
       this.$refs.resourceForm.validate((valid)=>{
           if(valid){
@@ -422,14 +357,12 @@ export default {
         return this.$confirm(`确定移除 ${ file.name }？`);
     },
 
-    beforeRemoveSite(file, fileList) {
-        this.uploadSiteList.uploadList.splice(0, 1);
-        this.uploadSiteList.name  = '';
+    removeSite(file, fileList) {
+      this.uploadSiteList = [];
     },
 
-    beforeRemoveSurface(file, fileList) {
-        this.uploadSurfaceList.uploadList.splice(0, 1);
-        this.uploadSurfaceList.name  = '';
+    removeAnswer(file, fileList) {
+      this.uploadAnswerList = [];
     },
 
     handleBeforeUploadSite(file) {
@@ -446,20 +379,14 @@ export default {
     handleBeforeUpload (file,curUpload) {
         let currentKey = 0;
         if (curUpload === 'site'){
-          this.uploadSiteList.name = file.name.split('.')[0];
-          this.uploadSiteList.uploadList = [...this.uploadSiteList.uploadList, {
+          this.uploadSiteList = [...this.uploadSiteList, {
             name: file.name,
-            percent: 10,
-            id: '',
-            status: ''
+            id: ''
           }]
         } else {
-          this.uploadSurfaceList.name = file.name.split('.')[0];
-          this.uploadSurfaceList.uploadList = [...this.uploadSurfaceList.uploadList, {
+          this.uploadAnswerList = [...this.uploadAnswerList, {
             name: file.name,
-            percent: 10,
-            id: '',
-            status: ''
+            id: ''
           }]
         }
         
@@ -469,25 +396,17 @@ export default {
           name: file.name,
           size: file.size
         }).then((res)=>{
-          const totalPieces = file.size > this.bytesPerPiece ? Math.ceil(file.size / this.bytesPerPiece) : 1;
-          const percentAdd = Math.floor((100 - 15) / totalPieces); //上传进度增长值，预留15%给前后
-
+          
           uploadFilesBySteaps({
             file: file,
             uploadUrl:res.data.uploadUrl, 
             limitSize: this.bytesPerPiece,
-            callBack: ()=>{
-              if (curUpload === 'site'){
-                this.uploadSiteList.uploadList[currentKey].percent+=percentAdd;
-              } else {
-                this.uploadSurfaceList.uploadList[currentKey].percent+=percentAdd;
-              }  
-            },
+            callBack: ()=>{},
             errBack: ()=>{
               if (curUpload === 'site'){
-                this.uploadSiteList.uploadList[currentKey].status = 'exception';
+                //this.uploadSiteList = [];
               } else {
-                this.uploadSurfaceList.uploadList[currentKey].status = 'exception';
+                //this.uploadAnswerList = [];
               }
             },
             httpConfig: {clsoeMessage: true}
@@ -498,11 +417,7 @@ export default {
                 this.confirmUpload(mergeResponse.data.id, currentKey,curUpload);
               }).catch((mergeError)=>{
                 this.$message({message:'上传失败，请删除并重新上传',type:'error'});
-                if (curUpload === 'site'){
-                  this.uploadSiteList.uploadList[currentKey].status = 'exception';
-                } else {
-                  this.uploadSurfaceList.uploadList[currentKey].status = 'exception';
-                }
+                
               })
             } else {
               this.confirmUpload(uploadResponse[0].id, currentKey,curUpload);
@@ -511,11 +426,7 @@ export default {
             this.$message({message:'网络状况不佳，请删除并重新上传',type:'error'});
           })
         }).catch((initErr)=>{
-          if (curUpload === 'site'){
-            this.uploadSiteList.uploadList[currentKey].status = 'exception';
-          } else {
-            this.uploadSurfaceList.uploadList[currentKey].status = 'exception';
-          }
+          
         })
         return false;
       },
@@ -527,23 +438,12 @@ export default {
         completeFileUpload(id).then((completeResponse)=>{
           this.$message({message:'上传成功',type:'success'});
           if (curUpload === 'site'){
-            this.uploadSiteList.uploadList[currentKey].id = id;
-            this.uploadSiteList.uploadList[currentKey].percent = 100;
-            this.uploadSiteList.uploadList[currentKey].status = 'success';
-            this.uploadSiteList.resourceSite = this.uploadSiteList.uploadList.length ? this.uploadSiteList.uploadList.length + '' : '';
-            this.$refs.resourceForm.validateField('resourceSite');
+            this.uploadSiteList[currentKey].id = id;
           } else {
-            this.uploadSurfaceList.uploadList[currentKey].id = id;
-            this.uploadSurfaceList.uploadList[currentKey].percent = 100;
-            this.uploadSurfaceList.uploadList[currentKey].status = 'success';
+            this.uploadAnswerList[currentKey].id = id;
           }
         }).catch((completeErr)=>{
           this.$message({message:completeErr || '上传失败',type:'warning'});
-          if (curUpload === 'site'){
-            this.uploadSiteList.uploadList[currentKey].status = 'exception';
-          } else {
-            this.uploadSurfaceList.uploadList[currentKey].status = 'exception';
-          }
         })
       },
   }

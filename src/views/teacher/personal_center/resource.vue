@@ -1,91 +1,94 @@
 <template>
   <div class="resource">
+    <div class="resource-wrap">
+      <div class="top-search">
+        <el-form :inline="true" :model="search" class="demo-form-inline " >
+
+          <el-form-item label="上传时间">
+            <el-date-picker
+              v-model="search.time"
+              @change="resetPage"
+              type="daterange"
+              size="mini"
+              value-format="yyyy-MM-dd"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              style="width:260px;"
+            ></el-date-picker>
+          </el-form-item>
+					<el-form-item label="文件类型">
+            <el-select v-model="search.fileType" class="search-class" size="mini" clearable @change="resetPage">
+              <el-option :label="list.value" :value="list.key" :key="list.key" v-for="list in fileTypeList"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="文件名">
+            <el-input v-model="search.fileName" class="search-class" placeholder="请输入文件名" size="mini" clearable @change="resetPage" prefix-icon="el-icon-search"></el-input>
+          </el-form-item>
+        </el-form>
+
+      </div>
+
+      <div class="top-total" style="">
+        <p class="top-p">共有<span class="activecolor">{{total}}</span>个资源符合结果</p>
+      </div>
+      <div class="wrap-content-right-wrap">
+
+        <div class="singal-paper" v-for="list in tableData">
+          <div class="singal-paper-left">
+            <div	 class="left-title">
+            	<p><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
+            	<p class="type-class" :style="statusStyle(list.applyState)">{{list.applyName}}</p>
+            </div>
+            <p>
+              <span>贡献者：{{list.userName}}</span>
+              <span class="left-tag">{{list.createTime}}</span>
+              <span class="left-tag">下载量：{{list.download}}</span>
+              <span class="left-tag">点赞数：{{list.thumbUp}}</span>
+            </p>
+          </div>
+          <div  class="singal-paper-middle">
+            <p>{{list.preview}}人已读</p>
+            <p>
+              <el-rate
+                v-model="list.score"
+                disabled
+                show-score
+                text-color="#ff9900"
+                disabled-void-color="#C0C4CC"
+                score-template="{value}">
+              </el-rate>
+            </p>
 
 
-        <div class="resource-wrap">
-
-
-              <div class="top-search">
-                 <el-form :inline="true" :model="search" class="demo-form-inline " >
-
-                    <el-form-item label="上传时间">
-                      <el-date-picker
-                        v-model="search.time"
-                        @change="resetPage"
-                        type="daterange"
-                        size="mini"
-                        value-format="yyyy-MM-dd"
-                        range-separator="至"
-                        start-placeholder="开始日期"
-                        end-placeholder="结束日期"
-                        style="width:260px;"
-                      ></el-date-picker>
-                    </el-form-item>
-										<el-form-item label="文件类型">
-                      <el-select v-model="search.fileType" class="search-class" size="mini" clearable @change="resetPage">
-                        <el-option :label="list.value" :value="list.key" :key="list.key" v-for="list in fileTypeList"></el-option>
-                      </el-select>
-                    </el-form-item>
-                    <el-form-item label="文件名">
-                      <el-input v-model="search.fileName" class="search-class" placeholder="请输入文件名" size="mini" clearable @change="resetPage" prefix-icon="el-icon-search"></el-input>
-                    </el-form-item>
-                </el-form>
-
-              </div>
-
-			        <div class="top-total" style="">
-			          <p class="top-p">共有<span class="activecolor">{{total}}</span>个资源符合结果</p>
-			        </div>
-              <div class="wrap-content-right-wrap">
-
-                <div class="singal-paper" v-for="list in tableData">
-                  <div class="singal-paper-left">
-			              <div	 class="left-title">
-			              	<p><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
-			              	<p class="type-class">{{list.applyName}}</p>
-			              </div>
-			              <p>
-			                <span>贡献者：{{list.userName}}</span>
-			                <span class="left-tag">{{list.createTime}}</span>
-			                <span class="left-tag">下载量：{{list.download}}</span>
-			                <span class="left-tag">点赞数：{{list.thumbUp}}</span>
-			              </p>
-                  </div>
-                  <div  class="singal-paper-middle">
-			              <p>{{list.preview}}人已读</p>
-			              <p>
-			                <el-rate
-			                  v-model="list.score"
-			                  disabled
-			                  show-score
-			                  text-color="#ff9900"
-			                  disabled-void-color="#C0C4CC"
-			                  score-template="{value}">
-			                </el-rate>
-			              </p>
-
-
-                  </div>
-                	<div class="singal-paper-right">
-		              	<el-button type="primary" size="mini" @click="deleteFile(list.resourceId)">删除</el-button>
-		              </div>
-                </div>
-
-                <div class="pagination">
-                  <el-pagination
-                    background
-                    @size-change="handleSizeChange"
-                    @current-change="handleCurrentChange"
-                    :current-page="search.page"
-                    :page-sizes="[10, 20, 40, 60]"
-                    :page-size="search.size"
-                    layout="total, prev, pager, next, sizes"
-                    :total="total"
-                  ></el-pagination>
-                </div>
+          </div>
+        	<div class="singal-paper-right">
+            <span>
+              <el-button type="primary" size="mini" @click="reSubmitFile(list.resourceId)" v-if="list.applyState=='Reject'">重新提交</el-button>
+            </span>
+            <span>
+              <el-button type="primary" size="mini" @click="editFile(list.resourceId)" v-if="list.applyState=='Reject'">编辑</el-button>
+            </span>
+          	<el-button type="primary" size="mini" @click="deleteFile(list.resourceId)">删除</el-button>
 
           </div>
         </div>
+
+        <div class="pagination">
+          <el-pagination
+            background
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="search.page"
+            :page-sizes="[10, 20, 40, 60]"
+            :page-size="search.size"
+            layout="total, prev, pager, next, sizes"
+            :total="total"
+          ></el-pagination>
+        </div>
+
+      </div>
+    </div>
   </div>
 </template>
 
@@ -125,6 +128,8 @@ export default {
       'getuserInfo',
 
     ]),
+
+
   },
   watch: {
   	resourceType(val) {
@@ -173,7 +178,7 @@ export default {
           fileName:this.search.fileName,
           resourceType: this.resourceType=='0'?'':this.resourceType,
           // oeseType:'',
-          grade: this.grade,
+          //grade: this.grade,
           startTime:this.search.time? this.search.time[0]:'',
           endTime: this.search.time?this.search.time[1]:'',
 
@@ -198,40 +203,7 @@ export default {
          }
        })
       }),
-    // getTableData() {
 
-
-
-    //   let params = {
-    //    	fileType:this.search.fileType,
-    //     fileName:this.search.fileName,
-    //     resourceType: this.resourceType=='0'?'':this.resourceType,
-    //     // oeseType:'',
-    //     grade: this.grade,
-				// startTime:this.search.time? this.search.time[0]:'',
-				// endTime: this.search.time?this.search.time[1]:'',
-
-    //     page: this.search.page - 1,
-    //     size: this.search.size
-    //   }
-
-
-
-
-    // 	this.$http.post(`/api/open/resources/0/resourceList`, {
-	   //      chapterIds: this.chapterIds,
-	   //      knowledgeIds: this.knowledgeIds
-	   //    },
-	   //      params
-    //   )
-
-    // 	.then((data)=>{
-    // 		if(data.status == '200') {
-    // 			this.tableData = data.data.content
-    // 			this.total = data.data.totalElements
-    // 		}
-    // 	})
-    // },
     setClass(fileType) {
     	let obj = {};
      //  obj[fileType[item]] = true;
@@ -263,6 +235,24 @@ export default {
       return obj;
     },
 
+    statusStyle(status) {
+      let style = {}
+      switch(status) {
+        case 'Audit':
+          style = { 'background-color' : '#999999'}
+          break;
+        case 'Reject':
+          style = { 'background-color' : '#ff2727'}
+          break;
+        case 'WORD':
+          style = { 'background-color' : '#ff2727'}
+          break;
+        default:
+          style = { 'background-color' : '#00cc00'}
+      } 
+
+      return style
+    },
 
     deleteFile(resourceId) {
 
@@ -288,6 +278,25 @@ export default {
       }).catch(() => {
        
       });
+    },
+
+    reSubmitFile(resourceId) {
+      this.$http.put(`/api/open/resources/status/${resourceId}?applyState=Audit`)
+      .then((data)=>{
+        if(data.status == '200') {
+          this.$message({
+            type: 'success',
+            message: '提交成功!'
+          });
+          this.getTableData()
+
+
+        }
+      })
+    },
+
+    editFile(resourceId) {
+      this.$router.push({path:'/teacher/personal/myResourceUpdate', query: {id:resourceId}})
     },
 
 
@@ -355,7 +364,7 @@ export default {
 		            	height: 32px;
 		            	line-height: 32px;
 		            	padding: 0px 20px;
-		            	background-color: #00cc00;
+		            	// background-color: #00cc00;
 		            	text-align: center;
 		            	color: #ffffff;
 		            	font-size: 0.9rem;

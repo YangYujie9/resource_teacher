@@ -171,6 +171,7 @@ export default {
     border:0px;
     // width: 300px;
   }
+
   .left {
     .el-radio-button,
     .el-radio-button__inner {
@@ -179,7 +180,7 @@ export default {
       
     }
     .el-radio-button__inner {
-      border:1px solid #e2e2e2 ;
+      border:1px solid #e2e2e2 !important;
       margin-bottom: 10px;
     }
 

@@ -1,27 +1,50 @@
 <template>
   <div class="login">
-	<img src="../assets/images/loginpage.png" alt />
-	<div class="frames">
-	  <p style="margin-bottom: 20px;">{{ msg }}</p>
-	  <div class="center">
-		<el-form :model="loginForm" :rules="rules" ref="formName">
-		  <el-form-item prop="username">
-			<el-input placeholder="账号" v-model="loginForm.username"></el-input>
-		  </el-form-item>
-		  <el-form-item prop="password">
-			<el-input
-			  placeholder="密码"
-			  v-model="loginForm.password"
-			  @keyup.enter.native="loginFn"
-			  show-password>
-			</el-input>
-		  </el-form-item>
-		  <el-form-item>
-			<p class="gos" @click="loginFn">登录</p>
-		  </el-form-item>
-		</el-form>
-	  </div>
-	</div>
+		<div class="bg-class">
+			<p class="bg-class-title">{{ msg }}</p>
+			<p class="bg-class-title bg-class-tag">Education Cloud Platform</p>
+		</div>
+		<div class="frames">
+		  
+		  <div class="center">
+		  	  <el-tabs v-model="loginType">
+				    <el-tab-pane label="账号登陆" name="account" >
+	    				<el-form :model="loginForm" :rules="rules" ref="formName" hide-required-asterisk>
+								<el-form-item prop="usertype" label="类型">
+									<div style="position: relative;">
+										<el-select v-model="usertype" style="width: 100px;">
+											<el-option label="老师" value="teacher"></el-option>
+											<el-option label="录题员" value="recorder"></el-option>
+										</el-select>
+										<!-- <div class="bottom_line"></div> -->
+									</div>
+							  </el-form-item>	
+							  <el-form-item prop="username" label="账号">
+									<el-input placeholder="账号" v-model="loginForm.username" prefix-icon="el-icon-user" class="input_p"></el-input>
+									<div class="bottom_line"></div>
+							  </el-form-item>
+							  <el-form-item prop="password" label="密码">
+									<el-input
+									  placeholder="密码"
+								    class="input_p"
+								     prefix-icon="el-icon-unlock"
+									  v-model="loginForm.password"
+									  @keyup.enter.native="loginFn"
+									  show-password>
+									</el-input>
+									<div class="bottom_line"></div>
+							  </el-form-item>
+							  <el-form-item>
+									<p class="gos" @click="loginFn" :loading="loading">登录</p>
+							  </el-form-item>
+							</el-form>
+				    </el-tab-pane>
+				    <!-- <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane> -->
+
+				  </el-tabs>
+
+		  </div>
+		</div>
   </div>
 </template>
 
@@ -30,20 +53,23 @@ import Cookies from "js-cookie";
 export default {
   data() {
 		return {
-		  msg: "资源题库管理平台",
+		  msg: "教育资源云平台",
+		  loading: false,
 		  loginForm: {
-			username: "",
-			password: ""
+				username: "",
+				password: ""
 		  },
+		  loginType:'account',
+		  usertype:'teacher',
 		  rules: {
-			username: [
-			  { required: true, message: "请输入用户名", trigger: "blur" },
-			  // { min: 1, max: 4, message: "长度在1至4个字符", trigger: "blur" }
-			],
-			password: [
-			  { required: true, message: "请输入密码", trigger: "blur" },
-			  { type: "string", min: 4, message: "密码至少四位", trigger: "blur" }
-			]
+				username: [
+				  { required: true, message: "请输入用户名", trigger: "blur" },
+				  // { min: 1, max: 4, message: "长度在1至4个字符", trigger: "blur" }
+				],
+				password: [
+				  { required: true, message: "请输入密码", trigger: "blur" },
+				  { type: "string", min: 4, message: "密码至少四位", trigger: "blur" }
+				]
 		  }
 		};
   },
@@ -61,44 +87,91 @@ export default {
   methods: {
 		loginFn() {
 		  this.$refs['formName'].validate(valid => {
-			if (valid) {
 
-				this.$http.post(`/api/open/user/teacherLogin`,this.loginForm)
+				if (valid) {
 
-				.then(data => {
+					this.loading = true
 
-				  if(data.status == '200') {
-						let Authorization = data.data.tokenType + ' ' +data.data.token
+					if(this.usertype == 'teacher') {
 
-						Cookies.set("resource-teacher", Authorization);
-						// this.$store.commit('setUserInfo',data.data.userInfo);
-						this.$store.dispatch('getUserBaseInfo', this.$router)
-						
-						
-						this.$router.push("/questions/chooseBychapter")
-						
+						this.$http.post(`/api/open/user/teacherLogin`,this.loginForm)
 
-						
-				  }else {
+						.then(data => {
 
-						Cookies.remove("resource-teacher")
-						this.$message({
-							message:data.msg,
-							type:"error"
+						  if(data.status == '200') {
+								let Authorization = data.data.tokenType + ' ' +data.data.token
+
+								Cookies.set("resource-teacher", Authorization);
+								// this.$store.commit('setUserInfo',data.data.userInfo);
+								this.$store.dispatch('getUserBaseInfo', this.$router)
+								
+								
+								this.$router.push("/teacher/home")
+								
+
+								
+						  }else {
+
+								Cookies.remove("resource-teacher")
+								this.$message({
+									message:data.msg,
+									type:"error"
+								})
+								this.$router.replace("/login")
+								
+						  }
+				
 						})
-						this.$router.replace("/login")
-						
-				  }
-		
-				})
 
-			}
+					}else {
+						this.$http.post(`/api/internal/user/login`,this.loginForm)
+
+						.then(data => {
+
+						  if(data.status == '200') {
+								let Authorization = data.data.tokenType + ' ' + data.data.token
+
+								Cookies.set("resource-teacher", Authorization);
+								// this.$store.commit('setUserInfo',data.data.userInfo);
+								this.$store.dispatch('getUserBaseInfo', this.$router)
+								
+								
+								this.$router.push("/questions/submitQuestions")
+								
+
+								
+						  }else {
+
+								Cookies.remove("resource-teacher")
+								this.$message({
+									message:data.msg,
+									type:"error"
+								})
+								this.$router.replace("/login")
+								
+						  }
+				
+						})
+					}
+
+
+
+				}
 		  });
 		}
   }
 };
 </script>
 <style lang="less">
+.login {
+	.el-tabs__header {
+    margin: 0 0 25px;
+	}
+
+	input {
+		border:0px;
+	}
+}
 
 </style>
 <style lang="less" scoped>
@@ -106,8 +179,28 @@ export default {
   position: fixed;
   height: 100%;
   width: 100%;
-  background: url(../assets/images/login-bj.png) no-repeat 100% 100%;
-  background-size: cover;
+
+
+
+  .bg-class {
+  	height: 100%;
+  	width: 80%;
+	  background: url(../assets/images/ban.png) no-repeat center center;
+		background-size:100% 100%;
+
+		&-title {
+			padding-top: 60px;
+			padding-left: 50px;
+			font-size: 20px;
+			color: #ffffff;
+		}
+
+		&-tag {
+			// line-height: 1.5;
+			font-size: 16px;
+			padding-top: 10px;
+		}
+  }
 }
 .login img {
   position: absolute;
@@ -116,38 +209,49 @@ export default {
 }
 .frames {
   position: absolute;
-  top: 50%;
-  left: 0;
+  top: 48%;
+  left: 50%;
   right: 0;
   width: 434px;
-  height: 310px;
+  height: 370px;
   text-align: center;
   padding: 40px 32px;
   margin: 0 auto;
   -webkit-transform: translateY(-65%);
   transform: translateY(-65%);
   border-radius: 8px;
-  -webkit-box-shadow: 0 6px 10px 0 rgba(47, 110, 56, 0.74);
-  box-shadow: 0 6px 10px 0 rgba(47, 110, 56, 0.74);
-  background: #fff;
+  // -webkit-box-shadow: 0 6px 10px 0 rgba(47, 110, 56, 0.74);
+  // box-shadow: 0 6px 10px 0 rgba(47, 110, 56, 0.74);
+  // background: #fff;
+
+  .bottom_line {
+  	height: 2px;
+  	background-color: #52a3fc;
+
+  }
+
+  .input_p {
+  	width: 320px;
+  }
 }
 .frames p {
   color: #2d2d2d;
   font-size: 20px;
 }
 .frames .gos {
+	margin-top: 8px;
   width: 100%;
-  height: 46px;
-  line-height: 46px;
-  font-size: 18px;
+  height: 42px;
+  line-height: 42px;
+  font-size: 16px;
   color: #fff;
   -webkit-box-shadow: 0 2px 4px 0 rgba(32, 82, 30, 0.19);
   box-shadow: 0 2px 4px 0 rgba(32, 82, 30, 0.19);
   border-radius: 4px;
-  background-color: #52bc4d;
+  background-color: #52a3fc;
   cursor: pointer;
 }
 .center .el-input {
-  line-height: 50px;
+  // line-height: 50px;
 }
 </style>

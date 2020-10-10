@@ -146,6 +146,10 @@ Vue.use(VueRouter)
           path: 'myDownload',
           name: 'myDownload',
           component: ()=>import('@/views/teacher/personal_center/download'),
+        },{
+          path: 'myResourceUpdate',
+          name: 'myResourceUpdate',
+          component: ()=>import('@/views/teacher/personal_center/resource_update'),
         }]
       },
       // {
@@ -171,6 +175,8 @@ const router = new VueRouter({
 
 
 router.beforeEach((to, from, next) => { 
+
+
 
     NProgress.start()
 
@@ -210,7 +216,7 @@ router.beforeEach((to, from, next) => {
     next()
 })
 
-router.afterEach(() => {
+router.afterEach((to, from, next) => {
   NProgress.done()
 })
 

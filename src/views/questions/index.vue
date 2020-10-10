@@ -1,7 +1,7 @@
 <template>
-  <div class="home"  ref="home">
+  <div class="home"  ref="home"  v-loading.fullscreen.lock="!isReady">
    <!--  /*<el-scrollbar style="height:100%"  ref="home">*/ -->
-      <page-head></page-head>
+      <page-head  v-if="isReady"></page-head>
       <div class="home-wrap">
         <div class="nav" :class="{ fixedNavbar: isfixTab}" ref="navBar">
           <ul>
@@ -13,15 +13,17 @@
           </ul>
         </div>
 
-        <router-view :isfixTab="isfixTab" @backToTop="backToTop"></router-view>
+        <router-view :isfixTab="isfixTab" @backToTop="backToTop"  v-if="isReady"></router-view>
 
       </div>
       <div class="footer"></div>
+
 <!--     </el-scrollbar> -->
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import pageHead from "@/components/Nav/pageHead";
 export default {
   components: {
@@ -66,12 +68,26 @@ export default {
           route: "/teacher/home",
           check: false
         }
-      ]
+      ],
     };
+  },
+
+  computed: {
+
+    ...mapGetters([
+      'getuserInfo',
+      'isReady'
+
+    ]),
+
   },
   watch:{
 
+
+
     $route(to,from){
+
+      this.$refs['home'].scrollTop = 0
       this.navList.forEach(list=>{
         to.path.indexOf(list.route)>-1?list.check=true:list.check=false
       })
@@ -101,11 +117,18 @@ export default {
     },
 
     choose_nau(list) {
-      this.navList.forEach(list => {
-        list.check = false;
-      });
-      list.check = true;
-      this.$router.push(list.route);
+
+      if(this.getuserInfo.userType == 'Teacher') {
+        this.navList.forEach(list => {
+          list.check = false;
+        });
+        list.check = true;
+        this.$router.push(list.route);
+      }else {
+
+        return this.$message.warning('您无进入此页面的权限')
+      }
+
     },
 
     backToTop() {
@@ -146,6 +169,13 @@ export default {
       background-color: #409eff;
       color: #ffffff;
     }
+
+    .el-card .qt1 img {
+      vertical-align: middle;
+      float: right;
+      max-height: 200px;
+      width: auto;
+    }
   }
 </style>
 <style scoped lang="less">
@@ -162,9 +192,10 @@ export default {
     width: 100%;
     position: relative;
     
-    //height: 100%;
+    min-height: 100%;
 
     .nav {
+      min-width: 1300px;
       height: 40px;
       line-height: 40px;
       color: #ffffff;

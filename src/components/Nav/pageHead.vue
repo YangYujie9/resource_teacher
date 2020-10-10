@@ -13,7 +13,7 @@
                   <i class="el-icon-arrow-down el-icon--right"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item command="personal">我的资源</el-dropdown-item>
+                  <el-dropdown-item command="personal" v-if="getuserInfo.userType == 'Teacher'">我的资源</el-dropdown-item>
                   <el-dropdown-item command="exit">退出登录</el-dropdown-item>
 
                 </el-dropdown-menu>

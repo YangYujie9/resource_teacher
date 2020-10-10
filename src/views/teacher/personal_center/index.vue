@@ -46,22 +46,7 @@
                 <div slot="popover">
                 </div>
               </top-popover>
-              <!-- <top-popover v-if="gradeList.length">
-                <div slot="reference">
-                  <p class="top-title">
-                    <span>{{filter.grade.value}}</span>
-                    <span style="margin-left:20px;">{{getuserInfo.subjectName}}</span>
-                  </p>
-                </div>
-                <div slot="popover">
-                  <div>
-                    <p>年级：</p>
-                    <el-radio-group v-model="filter.grade" size="mini">
-                      <el-radio-button :label="list" :key="list.key" v-for="list in gradeList">{{list.value}}</el-radio-button>
-                    </el-radio-group>
-                  </div>
-                </div>
-              </top-popover> -->
+
               <div class="tree-content">
                 <el-tabs stretch v-model="activeType">
                   <el-tab-pane label="按章节" name="chapter">
@@ -144,7 +129,7 @@ export default {
     ]),
 
     showTree() {
-      return this.$route.fullPath.indexOf('profile')==-1
+      return this.$route.fullPath.indexOf('profile')==-1 && this.$route.fullPath.indexOf('myResourceUpdate')==-1
     },
 
 
@@ -199,9 +184,8 @@ export default {
 
   methods: {
     init() {
-      this.gradeList.length? this.filter.grade = this.gradeList[0]: null
-
       
+      this.gradeList.length? this.filter.grade = this.gradeList[0]: null
 
       if(this.showTree) {
         

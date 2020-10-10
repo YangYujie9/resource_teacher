@@ -17,9 +17,9 @@
                     </el-checkbox-group>
 
                   </p>
-                  <p style="flex-shrink: 0;">
+                  <!-- <p style="flex-shrink: 0;">
                     <el-button type="text">删除</el-button>
-                  </p>
+                  </p> -->
                 </div>
               </div>
             </div>
@@ -39,7 +39,7 @@
         <div style="margin-left:20px;">
           <el-button type="primary" size="mini" @click="scoredialogVisible=true">分值设定</el-button>
           <el-button type="primary" size="mini" @click="analysisdialogVisible=true">试卷分析</el-button>
-          <el-button type="primary" size="mini" @click="finishExam">保存试卷</el-button>
+          <el-button type="primary" size="mini" @click="finishExam">完成组卷</el-button>
           <el-button type="primary" size="mini" @click="$router.push('/questions/chooseBychapter')">继续挑题</el-button>
           <el-button type="primary" size="mini" @click="cleardialogVisible=true">清空试卷</el-button>
         </div>
@@ -54,10 +54,11 @@
               <p><span>{{$changeIndex(index+1)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
               <div class="singleques" v-for="(list1,index1) in list.list">
 
+
                 <div class="pt1">
                   <span>{{index1 + 1}}</span>
                   <span>、</span>
-                  <div  v-html="list1.name"></div>
+                  <div  v-html="list1.name" style="width: 100%;"></div>
                   <!-- <img src="@/assets/test1.png" /> -->
                   
                   
@@ -145,7 +146,7 @@
                       <!-- <p @click="onUpItem()">上移</p>
                       <p @click="onDownItem()">下移</p> -->
                       <p @click="deleteQuestion(list1.questionId)">删除</p>
-                      <p>换一题</p>
+                      <p @click="changeAnother(list1.questionId)">换一题</p>
                     </div>
                   </div>
                 </div>
@@ -222,7 +223,35 @@ export default {
     // this.paperId = this.$route.params.paperId
     this.getPaperDetail()
 
+
+    this.$nextTick(() => {
+
+      let that = this
+
+      // 禁用右键
+      document.oncontextmenu = new Function("event.returnValue=false");
+      // 禁用选择
+      // document.onselectstart = new Function("event.returnValue=false");
+
+      document.oncopy = function() {
+        that.$alert('本页内容禁止复制，谢谢', '提示', {
+          confirmButtonText: '确定',
+          callback: action => {
+            
+          }
+        });
+        return false;      
+      }
+    });
+
   },
+
+  destroyed(){
+    document.oncontextmenu = null;
+    document.oncopy = null
+  },
+
+  
   methods: {
 
     closescore() {
@@ -244,7 +273,7 @@ export default {
         if(data.status == '200') {
           this.$confirm("组卷完成，是否下载", {
             confirmButtonText: "下载试卷",
-            cancelButtonText: "保存试卷",
+            cancelButtonText: "重新挑题",
             center: true,
             //type: "warning"
           })
@@ -253,7 +282,7 @@ export default {
 
             })
             .catch(() => {
-              this.getPaperDetail()
+              this.$router.push('/questions/chooseBychapter')
             });
         }
       })
@@ -305,21 +334,37 @@ export default {
     },
 
     deleteQuestion(questionId) {
-      this.$http.delete(`/api/open/paper/${this.paperId}/${questionId}`)
-      .then(data=>{
-        if(data.status == '200') {
-          this.getPaperDetail()
-          this.$message({
-            message: '试题删除成功',
-            type:'success'
-          })
-        }
+
+      this.$confirm("确定从试卷中删除该题？", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        // center: true,
+        //type: "warning"
       })
+      .then(() => {
+
+        this.$http.delete(`/api/open/paper/${this.paperId}/${questionId}`)
+        .then(data=>{
+          if(data.status == '200') {
+            this.getPaperDetail()
+            this.$message({
+              message: '试题删除成功',
+              type:'success'
+            })
+          }
+        })
+
+      })
+      .catch(() => {
+
+      });
+
+
+
     },
 
     getPaperDetail() {
-      this.$http.get(`/api/open/paper/myTestBasket`)
-      //this.$http.get(`/api/open/paper/${this.paperId}`)
+      this.$http.get(`/api/open/paper/${this.paperId}`)
       .then((data)=>{
         if(data.status == '200') {
           this.paperName = data.data.paperName
@@ -420,11 +465,21 @@ export default {
       })
       .then(data=>{
         if(data.status == '200') {
-          this.getPaperDetail
+          this.getPaperDetail()
           // return this.$message({
           //   message:'分值设定成功',
           //   type: 'success'
           // })
+        }
+      })
+    },
+
+
+    changeAnother(questionId) {
+      this.$http.put(`/api/open/paper/changeOneQuestion/${this.paperId}/${questionId}`)
+      .then(data=>{
+        if(data.status == '200') {
+          this.getPaperDetail()
         }
       })
     }
@@ -494,9 +549,12 @@ export default {
           Arial, "宋体" !important;
     }
 
+
     img {
       vertical-align: middle;
-      height: 30px;
+      float: right;
+      max-height: 200px;
+      width: auto;
     }
   }
 
@@ -552,7 +610,7 @@ export default {
         margin-top: 20px;
 
         .singleques {
-          margin: 20px 0px;
+          // margin: 20px 0px;
           //padding:10px 20px;
           border: 1px solid transparent;
           transition: 0.5s;
@@ -571,19 +629,15 @@ export default {
             zoom: 1;
             clear: both;
             line-height: 25px;
-            padding: 20px 30px;
+            padding: 10px 30px;
             position: relative;
             word-break: break-word;
             cursor: pointer;
             display: flex;
 
-            img {
-              float: right;
-              position: relative;
-            }
           }
           .pt2 {
-            padding: 0 30px 20px 30px;
+            padding: 0 30px 20px 50px;
 
 
             ul {

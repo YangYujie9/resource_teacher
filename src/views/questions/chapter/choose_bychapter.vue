@@ -48,7 +48,7 @@
           </div>
         </div>
         <div class="tab-div">
-          <test-question :chapterList="chapterList" :gradeName="filter.grade.value" :grade="filter.grade.key" :subjectCode="subjectCode" @backToTop="backToTop"></test-question>
+          <test-question :chapterList="chapterList" :volumeId="volumeId" :subjectCode="subjectCode" @backToTop="backToTop"></test-question>
 <!-- 
           <el-tabs v-model="activeName" stretch>
             <el-tab-pane label="同步题" name="question">
@@ -105,11 +105,7 @@ export default {
 
   watch: {
 
-    gradeList(val) {
 
-      val? this.filter.grade = val[0]:null
-
-    },
   },
 
   computed: {

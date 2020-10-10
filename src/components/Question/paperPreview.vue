@@ -1,21 +1,6 @@
 <template>
   <div class="paper-preview">
-    <div class="active-wrap">
-      <div>
-        <div v-if="isActual">
-          <el-button type="primary" size="mini" @click="$router.go(-1)"><i class="iconfont iconfanhui" style="font-size: 12px;"></i> 返回</el-button>
-          <el-button type="primary" size="mini" @click="scoredialogVisible=true">分值设定</el-button>
-        </div>
-      </div>
-      <span class="ansbtn cursor" v-show="!isAnswer" @click="isAnswer=true">
-        <i class="iconfont iconxianshi" style="position: relative;top:1px"></i> 
-        显示答案
-      </span>
-      <span class="ansbtn cursor" v-show="isAnswer" @click="isAnswer=false">
-        <i class="iconfont iconyincang"></i> 
-        隐藏答案
-      </span>
-    </div>
+
 
     <div class="paper-title">
       <p class="title">{{paperName}}</p>
@@ -32,7 +17,7 @@
       <div class="paper-content-wrap" v-for="(list,index) in questionList">
         <p><span>{{$changeIndex(index+1)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
         <div v-for="list1 in list.list">
-          <singleQuestion :list="list1" :index="index" :isAnswer="isAnswer" shadow="none" :showAction='false'>
+          <singleQuestion :list="list1" :index="index" shadow="none" :showAction='false'>
           
           </singleQuestion>
         </div>
@@ -64,16 +49,20 @@ export default {
   props: {
     paperId: {
       type: String,
+      default:''
     },
     isActual: {
       type:Boolean,
       default: false,
+    },
+    isAnswer: {
+      type: Boolean,
+      
     }
   },
 
   data() {
     return {
-      isAnswer: false,
 
       questionList:[],
       paperName: "",
@@ -100,12 +89,34 @@ export default {
   },
   watch: {
     paperId(val) {
+
       val?this.getPaperDetail():null
+    },
+
+
+    isAnswer(value) {
+
+      if(value) {
+        this.questionList.forEach(item=>{
+
+          item.list.forEach(item1=>{
+            item1.showDetail = true
+          })
+          
+        })
+      }else {
+        this.questionList.forEach(item=>{
+          item.list.forEach(item1=>{
+            item1.showDetail = false
+          })
+        })
+      }
     }
   },
   mounted() {
 
-    // this.getPaperDetail()
+
+    this.getPaperDetail()
 
   },
   methods: {
@@ -116,6 +127,11 @@ export default {
 
 
     getPaperDetail() {
+
+
+      this.questionList = []
+
+
       this.$http.get(`/api/open/paper/${this.paperId}`)
       .then((data)=>{
         if(data.status == '200') {
@@ -130,6 +146,7 @@ export default {
             list[list.length-1].list = []
 
             data.data.questionMap[key].forEach((item,index)=>{
+              item.showDetail = false
               // console.log(item)
               item.index = index + 1
               // item.showDetail = false
@@ -147,6 +164,7 @@ export default {
 
 
           this.questionList = list
+
         }
       })
     },
@@ -296,11 +314,7 @@ export default {
   // min-height: calc(100vh - 328px);
   
 
-  .active-wrap {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+
 
   .paper-title {
     text-align: center;

@@ -72,7 +72,7 @@
                 <p>题型</p>
                 <div class="div2">
                   <el-radio-group v-model="search.type" size="mini" @change="resetPage">
-                    <el-radio-button :label="item.id" :key="item.id" v-for="item in typeList">{{item.name}}</el-radio-button>
+                    <el-radio-button :label="item.code" :key="item.code" v-for="item in typeList">{{item.name}}</el-radio-button>
                   </el-radio-group>
                 </div>
               </li>
@@ -84,30 +84,7 @@
                   </el-radio-group>
                 </div>
               </li>
-               <!--<li>
-                <p>题类</p>
-                <div class="div2">
-                  <el-radio-group v-model="search.category" size="mini">
-                    <el-radio-button :label="item" v-for="item in list"></el-radio-button>
-                  </el-radio-group>
-                </div>
-              </li>
-              <li>
-                <p>来源</p>
-                <div class="div2">
-                  <el-radio-group v-model="search.resource" size="mini">
-                    <el-radio-button :label="item" v-for="item in list"></el-radio-button>
-                  </el-radio-group>
-                </div>
-              </li>
-              <li>
-                <p>年份</p>
-                <div class="div2">
-                  <el-radio-group v-model="search.year" size="mini">
-                    <el-radio-button :label="item" v-for="item in list"></el-radio-button>
-                  </el-radio-group>
-                </div>
-              </li> -->
+
               <li>
                 <!-- <p>排序</p>
                 <div class="div2">
@@ -175,9 +152,9 @@
       </div>
     </left-fixed-nav>
 
-    <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket"></similarityDialog>
+<!--     <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket"></similarityDialog>
     <errorDialog :dialogVisible="errorVisible"  @close="close_error"></errorDialog>
-    <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog>
+    <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog> -->
   </div>
 </template>
 
@@ -186,12 +163,13 @@ import { mapGetters } from 'vuex'
 import leftFixedNav from "@/components/Nav/leftFixedNav";
 import topPopover from "@/components/Popover/topPopover";
 import basketTag from "@/components/Popover/basketTag";
-import similarityDialog from '@/components/Dialog/similarity'
-import errorDialog from '@/components/Dialog/error'
-import favoriteDialog from '@/components/Dialog/favorite'
+// import similarityDialog from '@/components/Dialog/similarity'
+// import errorDialog from '@/components/Dialog/error'
+// import favoriteDialog from '@/components/Dialog/favorite'
 import singleQuestion from '@/components/Question/singleQuestion'
 import questionList from '@/components/Question/questionList'
 import { getquestionType } from '@/utils/basic.service.js'
+import { debounce } from '@/utils/public.js'
 // import { getmyTestBasket } from '@/utils/basic.service.js'
 
 export default {
@@ -199,9 +177,9 @@ export default {
     leftFixedNav,
     topPopover,
     basketTag,
-    similarityDialog,
-    errorDialog,
-    favoriteDialog,
+    // similarityDialog,
+    // errorDialog,
+    // favoriteDialog,
     singleQuestion,
     questionList
   },
@@ -268,7 +246,7 @@ export default {
   },
   mounted() {
 
-    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+    // MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
     if(this.gradeList.length) {
       this.filter.grade = this.gradeList[0]
       
@@ -306,13 +284,12 @@ export default {
       this.getTableData()
     },
 
-    chapterList(val) {
 
-      this.resetPage()
-    },
     getCheckedNodes(list) {
 
       this.knowledgeList = list
+
+      this.resetPage()
       
 
     },
@@ -327,13 +304,13 @@ export default {
           if (data.status == "200") {
             
             let arr = []
-            arr.push({id:'',name:'全部'})
+            arr.push({code:'',name:'全部'})
             data.data.forEach(item=>{
               arr.push(item)
             })
 
             this.typeList = arr
-            this.search.type = this.typeList[0].id;
+            this.search.type = this.typeList[0].code;
             this.resetPage()
           } 
         })
@@ -363,7 +340,7 @@ export default {
       this.search.page = 1
       this.getTableData()
     },
-    getTableData() {
+    getTableData: debounce(function() {
       // console.log(this.filter.grade.value)
       if(!this.filter.grade.key) {return false}
       let knowledgeIds = []
@@ -385,7 +362,7 @@ export default {
         // knowledgeId: this.search.difficulty,
       }
       this.$http.post(`/api/open/question/1/questions`,{
-        knowledgeId: knowledgeIds,
+        knowledgeIds: knowledgeIds,
       },params)
       .then((data)=>{
         
@@ -405,7 +382,7 @@ export default {
 
         
       })
-    },
+    }),
 
 
     handleQuestion(item,item0) {

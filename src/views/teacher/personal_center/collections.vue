@@ -30,7 +30,7 @@
             <el-form :inline="true" :model="search" class="demo-form-inline " >
                 <el-form-item label="题型">
                   <el-select v-model="search.questionType" class="search-class" size="mini" clearable @change="resetPage">
-                    <el-option :label="list.name" :value="list.id" :key="list.id" v-for="list in typeList"></el-option>
+                    <el-option :label="list.name" :value="list.code" :key="list.code" v-for="list in typeList"></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label="难度">

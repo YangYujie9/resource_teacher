@@ -23,7 +23,7 @@
               </el-radio-group>
           </div> 
 
-          <el-button type="text" class="textbtn" v-if="question">换一批</el-button>
+          <el-button type="text" class="textbtn" v-if="question" @click="changeSimilar">换一批</el-button>
         </div>
 
         <!-- <el-card class="box-card" shadow="never" v-if="question">
@@ -92,8 +92,8 @@
             </p>
           </section>
         </el-card> -->
-        <div v-if="similarityList.length">
-          <singleQuestion shadow="never" :showSimilarity="false" :list="question" :index="1" :isAnswer="isAnswer" @getData="getSimilarity" @addCollectFolder="addCollectFolder" @getmyTestBasket="getmyTestBasket">
+        <div v-if="similarityList.length" >
+          <singleQuestion shadow="never" :showSimilarity="false" :list="question" :index="1" :isAnswer="isAnswer" @getData="getSimilarity" @addCollectFolder="addCollectFolder" @getmyTestBasket="getmyTestBasket" @errorCorrection="errorCorrection">
             
           </singleQuestion>
         </div>
@@ -105,15 +105,25 @@
 
     </el-dialog>
 
+  <!--   <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket" @addCollectFolder="addCollectFolder"></similarityDialog> -->
+    <errorDialog :dialogVisible="errorVisible" :questionId="errorId" @close="close_error"></errorDialog>
+    <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog>
   </div> 
 </template>
 
 <script>
+// import similarityDialog from '@/components//Dialog/similarity'
+import errorDialog from '@/components/Dialog/error'
+import favoriteDialog from '@/components/Dialog/favorite'
+
+
 export default {
   props: ['dialogVisible','questionId','knowledgeType'],
   components: {
-    singleQuestion: () => import('@/components/Question/singleQuestion')
-    
+    singleQuestion: () => import('@/components/Question/singleQuestion'),
+    // similarityDialog,
+    errorDialog,
+    favoriteDialog,
   },
   data() {
     return {
@@ -122,8 +132,18 @@ export default {
       similarityList: [],
       questionIndex: '',
       question:'',
+      similarityVisible: false,
+      errorVisible: false,
+      favoriteVisible: false,
+      similarityId:'',
+      collectId:'', 
+      errorId: '',
+      page:1,
+      size:5,
+      totalPages:0,
     };
   },
+
   mounted() {
     //this.$emit("getTreeData", this.treeData);
     MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
@@ -145,16 +165,43 @@ export default {
     },
 
     closeDialog() {
+      this.page = 1
+      this.totalPages = 0
+      this.questionIndex = 0
       this.$emit('close')
     },
 
+    errorCorrection(id) {
+
+      this.errorId = id
+      
+      this.errorVisible = true
+    },
+
+    addCollectFolder(id) {
+      // this.$emit('addCollectFolder',id)
+      this.collectId = id
+      // console.log(this.collectId)
+      this.favoriteVisible = true
+    },
+
+    close_error() {
+      this.errorVisible = false
+      // this.getTableData()
+    },
+    close_favorite() {
+      this.favoriteVisible = false
+      // this.getTableData()
+    },
 
     getSimilarity() {
 
-      this.$http.get(`/api/open/question/similar/${this.questionId}/1/questions`)
+      this.$http.get(`/api/open/question/similar/${this.questionId}/1/questions?page=${this.page-1}&size=${this.size}`)
       .then((data)=>{
         if(data.status == '200') {
-        
+
+          this.totalPages = data.data.totalPages
+
           data.data.content.forEach(item=>{
             item.showDetail = false
             item.check = item.check?item.check:false
@@ -168,7 +215,7 @@ export default {
 
           this.similarityList = data.data.content
           if(this.similarityList.length) {
-            this.questionIndex = 0
+            this.questionIndex = this.questionIndex?this.questionIndex:0
             this.question = this.similarityList[this.questionIndex]
                     
           }
@@ -231,13 +278,32 @@ export default {
       }
     },
 
+    changeSimilar() {
+      
+      if(this.page < this.totalPages) {
+        this.page += 1
+        this.getSimilarity()
+      }else {
+
+        this.$message.warning('已无更多相似题')
+
+        if(this.page != 1) {
+          this.page = 1
+          this.getSimilarity()
+        }
+
+      }
+      
+      
+    },
+
     getmyTestBasket() {
       this.$emit('getmyTestBasket')
     },
 
-    addCollectFolder() {
-      this.$emit('addCollectFolder')
-    }
+    // addCollectFolder() {
+    //   this.$emit('addCollectFolder')
+    // }
 
 
   }
@@ -298,6 +364,11 @@ export default {
     color: #333333 !important;
   }
 
+
+  .question-wrap {
+    height: 45vh;
+    overflow: auto;
+  }
 
   
 }

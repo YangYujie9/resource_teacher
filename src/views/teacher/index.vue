@@ -42,6 +42,8 @@ export default {
   },
   watch: {
     $route(to,from){
+
+      this.$refs["quesHome"].$refs["wrap"].scrollTop = 0
       this.NavList.forEach(list=>{
         to.path.indexOf(list.route)>-1?list.check=true:list.check=false
       })
@@ -195,6 +197,13 @@ export default {
 </script>
 <style lang="less">
 .ques-home {
+
+  .el-card .qt1 img {
+    vertical-align: middle;
+    float: right;
+    max-height: 200px;
+    width: auto;
+  }
   .el-radio-costom {
     .el-radio-button__inner {
       border: 0px;
@@ -284,6 +293,7 @@ export default {
     //height: 100%;
 
     .nav {
+      min-width: 1300px;
       height: 40px;
       line-height: 40px;
       color: #ffffff;

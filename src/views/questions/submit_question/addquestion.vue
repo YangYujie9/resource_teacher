@@ -3,7 +3,7 @@
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left">
         <!-- <div class="tree-wrap" :class="{fixedclass:isfixTab}" style="z-index: 1000;"> -->
-          <top-popover v-if="isReady&&actualReady" :chooseType="activeType" ref="filter" @setparams="setparams" :acVersionList="versionList" :acVolumeList="volumeList" :subjectCode="subjectCode">
+          <top-popover v-if="isReady&&topReady" :chooseType="activeType" ref="filter" @setparams="setparams" :acVersionList="versionList" :acVolumeList="volumeList" :subjectCode="subjectCode" :isError="isError" :questionDetail="questionDetail">
             <div slot="reference">
               <p class="top-title">
                 <span v-if="$refs.filter" >{{$refs.filter.subject.subjectName}}</span>
@@ -20,14 +20,14 @@
 
           <div class="tree-content">
             <el-tabs stretch v-model="activeType" @tab-click="handleClick">
-              <el-tab-pane label="按章节" name="chapter">
+              <el-tab-pane label="按章节" name="chapter" :disabled="isError">
                 <div class="tree-class" :class="{treeclassfixed:isfixTab}">
-                  <pointTree chooseType="chapter" :volumeId="volumeId"  @getCheckedNodes="getCheckedChapters" ref="chapterTree" ></pointTree>
+                  <pointTree chooseType="chapter" :volumeId="volumeId" :isDisable="isError&&chapterReadonly" @selectnode="defaultCheckChapters" @getCheckedNodes="getCheckedChapters" ref="chapterTree" ></pointTree>
                 </div>
               </el-tab-pane>
-              <el-tab-pane label="按考点" name="knowledge">
+              <el-tab-pane label="按考点" name="knowledge" :disabled="isError">
                 <div class="tree-class">
-                  <pointTree chooseType="knowledge" :subjectCode="subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree"></pointTree>
+                  <pointTree chooseType="knowledge" :subjectCode="subjectCode" :isDisable="isError&&knowledgeReadonly" @selectnode="defaultCheckKnows" @getCheckedNodes="getCheckedKnows" ref="knowledgeTree"></pointTree>
                 </div>
               </el-tab-pane>
             </el-tabs>
@@ -39,7 +39,7 @@
         <div class="content-class">
           <div class="form-class" style="margin-top: 0px;">
             <el-form>
-              <el-form-item label="题型：">
+              <el-form-item label="题型：" class="btngroup-bottom">
                 <el-radio-group v-model="questionType" size="mini" :disabled="typeDisable" @change="changeType()">
                   <el-radio-button
                     v-for="list in typeList"
@@ -49,7 +49,7 @@
                 </el-radio-group>
               </el-form-item>
               <el-form-item label="难度：">
-                <el-radio-group v-model="form.difficulty" size="mini">
+                <el-radio-group v-model="form.difficulty" size="mini" :disabled="isError">
                   <el-radio-button v-for="list in difficultyList" :label="list.key" :key="list.key">{{list.value}}</el-radio-button>
                 </el-radio-group>
               </el-form-item>
@@ -67,13 +67,13 @@
             </div>
             <div class="tag-class">
 
-              <el-tag v-for="(tag,index) in tagsList" :key="tag.id" closable type="warning" @close="closeTag(index)">{{tag.name}}</el-tag>
+              <el-tag v-for="(tag,index) in tagsList" :key="tag.id" :closable="isError&&(!chapterReadonly||!knowledgeReadonly)" type="warning" @close="closeTag(index)">{{tag.name}}</el-tag>
             </div>
           </div>
 
           <div>
             <p>题干内容</p>
-            <ckeditor ref="ck0"></ckeditor>
+            <ckeditor ref="ck0" :readOnly="isError&&stemReadonly"></ckeditor>
            
           </div>
 
@@ -86,6 +86,7 @@
                   style="width:60px;"
                   size="mini"
                   @change=""
+                  :disabled="isError"
                 >
                   <el-option
                     v-for="item in marchingOption"
@@ -101,7 +102,7 @@
                   placeholder="请选择"
                   style="width:60px;"
                   size="mini"
-                  :disabled="qnumDisable"
+                  :disabled="qnumDisable || isError"
                   @change="changequestionNum"
                 >
                   <el-option
@@ -129,7 +130,8 @@
                   placeholder="请选择"
                   style="width:160px;"
                   size="mini"
-                  @change="changeOption"
+                  :disabled="isError"
+                  @change="changeOption(true)"
                 >
                   <el-option
                     v-for="item in templateList"
@@ -149,13 +151,13 @@
               <el-radio-button label="answer">详解</el-radio-button>
             </el-radio-group>
             <div v-show="activeName=='stems'">
-              <ckeditor ref="ck1"></ckeditor>
+              <ckeditor ref="ck1" :readOnly="isError&&stemReadonly"></ckeditor>
             </div>
             <div v-show="activeName=='analysis'">
-              <ckeditor ref="ck2"></ckeditor>
+              <ckeditor ref="ck2" :readOnly="isError&&analysisReadonly"></ckeditor>
             </div>
             <div v-show="activeName=='answer'">
-              <ckeditor ref="ck3"></ckeditor>
+              <ckeditor ref="ck3" :readOnly="isError&&detailedAnaReadonly"></ckeditor>
             </div>
 
           </div>
@@ -184,6 +186,7 @@
                   placeholder="请选择"
                   style="width:60px;"
                   size="mini"
+                  :disabled="isError"
                 >
                   <el-option v-for="item in ansOptions" :key="item" :label="item" :value="item"></el-option>
                 </el-select>
@@ -211,14 +214,14 @@
               </el-form-item>
             </el-form>
             <div v-show="templateKey=='SingleChoose' ||templateKey=='MultipleChoose' ||templateKey=='BoolenQuestion'">
-              <ckeditor ref="ckA" v-show="currentOption.label == 'A'"></ckeditor>
-              <ckeditor ref="ckB" v-show="currentOption.label == 'B'"></ckeditor>
-              <ckeditor ref="ckC" v-show="currentOption.label == 'C'"></ckeditor>
-              <ckeditor ref="ckD" v-show="currentOption.label == 'D'"></ckeditor>
-              <ckeditor ref="ckE" v-show="currentOption.label == 'E'"></ckeditor>
-              <ckeditor ref="ckF" v-show="currentOption.label == 'F'"></ckeditor>
-              <ckeditor ref="ckG" v-show="currentOption.label == 'G'"></ckeditor>
-              <ckeditor ref="ckH" v-show="currentOption.label == 'H'"></ckeditor>
+              <ckeditor ref="ckA" v-show="currentOption.label == 'A'" :readOnly="isError&&optionReadonly"></ckeditor>
+              <ckeditor ref="ckB" v-show="currentOption.label == 'B'" :readOnly="isError&&optionReadonly"></ckeditor>
+              <ckeditor ref="ckC" v-show="currentOption.label == 'C'" :readOnly="isError&&optionReadonly"></ckeditor>
+              <ckeditor ref="ckD" v-show="currentOption.label == 'D'" :readOnly="isError&&optionReadonly"></ckeditor>
+              <ckeditor ref="ckE" v-show="currentOption.label == 'E'" :readOnly="isError&&optionReadonly"></ckeditor>
+              <ckeditor ref="ckF" v-show="currentOption.label == 'F'" :readOnly="isError&&optionReadonly"></ckeditor>
+              <ckeditor ref="ckG" v-show="currentOption.label == 'G'" :readOnly="isError&&optionReadonly"></ckeditor>
+              <ckeditor ref="ckH" v-show="currentOption.label == 'H'" :readOnly="isError&&optionReadonly"></ckeditor>
               
             </div>
             <!-- <div v-if="templateKey=='BoolentemplateKey'">
@@ -238,7 +241,7 @@
                 placeholder="请选择"
                 style="width:60px;"
                 size="mini"
-                :disabled="templateKey=='SingleChoose'||templateKey=='BoolenQuestion'"
+                :disabled="templateKey=='SingleChoose'||templateKey=='BoolenQuestion' ||isError"
               >
                 <el-option v-for="item in relOptions" :key="item" :label="item" :value="item"></el-option>
               </el-select>
@@ -246,12 +249,13 @@
             <p v-show="templateKey=='SingleChoose' ||templateKey=='MultipleChoose'||templateKey=='BoolenQuestion'">
               <span style="margin-left:20px;">正确选项:</span>
               <el-select
-                v-model="answers[index]"
+                v-model="answers[index].value"
                 placeholder="请选择"
                 style="width:60px;margin-right:10px;"
                 size="mini"
                 v-for="(i,index) in answers"
                 v-if="index<form.relOptionNum"
+                :disabled="isError&&answerReadonly"
               >
                 <el-option
                   v-for="(item,index) in optionList"
@@ -259,6 +263,7 @@
                   :key="item.label"
                   :label="item.label"
                   :value="item.label"
+
                 ></el-option>
               </el-select>
             </p>
@@ -291,13 +296,14 @@
               </el-select>
           </div>
           <div style="text-align:center;margin-top:20px">
-            <el-button type="primary" size="mini" @click="submitquestion">上 传</el-button>
+            <el-button type="primary" size="mini" @click="errorCorrection" v-if="isError">纠 错</el-button>
+            <el-button type="primary" size="mini" @click="submitquestion" v-else>上 传</el-button>
           </div>
         </div>
       </div>
     </left-fixed-nav>
 
-    <el-dialog title="填空题答案" :visible.sync="fillanswerVisible" width="800px;" 
+<!--     <el-dialog title="填空题答案" :visible.sync="fillanswerVisible" width="800px;" 
       :modal-append-to-body="false"
       :close-on-click-modal="false">
       <div>
@@ -307,12 +313,13 @@
         <el-button @click="fillanswerVisible = false" size="mini">取 消</el-button>
         <el-button type="primary" @click="setfillAnswer" size="mini">确 定</el-button>
       </span>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import Cookies from 'js-cookie'
 import leftFixedNav from "@/components/Nav/leftFixedNav";
 import topPopover from "@/components/Popover/topPopover";
 import Ueditor from "@/components/Ueditor/Ueditor";
@@ -335,7 +342,7 @@ export default {
       editable: false,
       activeType: "chapter",
       activeName: "analysis",
-      actualReady: false,
+      topReady: false,
       // gradeList: getgradeList,
       fillanswerVisible: false,
       fillindex: 0,
@@ -401,7 +408,7 @@ export default {
       // ],
       //ansCotent:[],
       relOptions: [1, 2, 3, 4, 5, 6, 7, 8],
-      answers: ["A", "A", "A", "A", "A", "A", "A", "A"],
+      answers: [{value:"A"}, {value:"A"}, {value:"A"}, {value:"A"},{value:"A"}, {value:"A"}, {value:"A"}, {value:"A"}],
       questionType: "",
       form: {
         optionNum: 4,
@@ -449,7 +456,16 @@ export default {
       ],
       versionList:[],
       volumeList:[],
-
+      isError: false,
+      questionDetail: {},
+      oldQuestionDetail: {},
+      stemReadonly: true,
+      analysisReadonly: true,
+      detailedAnaReadonly: true,
+      optionReadonly:true,
+      answerReadonly: true,
+      chapterReadonly: true,
+      knowledgeReadonly: true,
     };
   },
 
@@ -577,23 +593,64 @@ export default {
       this.versionList = []
       this.volumeList = []
 
-      this.currentOption = this.optionList[0]
+      // this.currentOption = this.optionList[0]
       this.query = this.$route.query
       if(this.query && this.query.paperId) {
         this.actualPaper = this.query
         this.isActual = true
         this.typeDisable = true
         this.subjectCode = this.actualPaper.subjectCode
+
+
         this.getyongshu()
 
+      }else if(this.query && this.query.questionId) {
+        this.isError = true
+        this.typeDisable = true
+        this.editable = true
+
+
+        switch(this.query.errorType) {
+          case 'StemError': //题干错误
+            this.stemReadonly = false
+            break
+
+          case 'AnalysisError': //分析错误
+            this.analysisReadonly = false
+            break
+          case 'DetailedAnalysisErrors': //详解错误
+            this.detailedAnaReadonly = false
+            break
+          case 'OptionError': //选项错误
+            this.optionReadonly = false
+            break
+          case 'AnswerError': //答案错误
+            this.answerReadonly = false
+            break
+          case 'ChapterError': //章节错误
+            this.chapterReadonly = false
+            this.activeType = "chapter"
+            break
+          case 'KnowledgeError': //知识点错误
+            this.knowledgeReadonly = false
+            this.activeType = "knowledge"
+            break
+        }
+        this.getQuestionDetail()
+
+
+
       }else {
-        this.actualReady = true
+
+        this.topReady = true
         this.activeType = this.query.activeType?this.query.activeType:'chapter'
         this.isActual = false
 
+
+
       }
 
-    this.getdifficultyType();  
+      this.getdifficultyType();  
     
   },
   methods: {
@@ -604,14 +661,27 @@ export default {
       this.$http.get(`/api/open/common/books/${this.getuserInfo.school.id}?subjectCode=${this.subjectCode}&grade=${this.actualPaper.grade}`)
       .then(data=>{
         if(data.status == '200') {
-          this.versionList.push({oeseId:data.data.oese.id,name:data.data.oese.name})
 
-          let arr = []
-          data.data.volumes.forEach(item=>{
-            arr.push({oeseId:item.id,name:item.name})
-          })
-          this.volumeList = arr
-          this.actualReady = true
+          if(data.data && data.data.oese) {
+            this.versionList.push({oeseId:data.data.oese.id,name:data.data.oese.name})
+
+            let arr = []
+            data.data.volumes.forEach(item=>{
+              arr.push({oeseId:item.id,name:item.name})
+            })
+            this.volumeList = arr
+            this.topReady = true
+          }else {
+            this.$alert('请先联系管理员绑定相关的教材版本和册别', '提示', {
+              confirmButtonText: '确定',
+              callback: action => {
+
+                this.$router.push(`/questions/actualPaper/maintain/${this.actualPaper.paperId}`)
+                console.log(action)
+              }
+            });
+          }
+
         }
       })
     },
@@ -633,7 +703,7 @@ export default {
     //     })
 
     //   }else {
-    //     this.actualReady = true
+    //     this.topReady = true
     //     this.activeType = this.query.activeType?this.query.activeType:'chapter'
     //     this.isActual = false
 
@@ -663,6 +733,10 @@ export default {
     changequestionNum(val) {
 
       this.activeName = this.showQuestionTab? 'stems': "analysis"
+
+      this.templateSelectShow? this.form.templateType = 'SingleChoose':null
+
+      this.changeOption()
       // val == 1 ? (this.activeName = "analysis") : null;
     },
 
@@ -675,16 +749,18 @@ export default {
     // },
 
 
-    changeOption() {
-
+    changeOption(flag) {
       this.activeName = this.showQuestionTab? 'stems': "analysis"
 
       if(this.questionTemplate == 'SolvingQuestionTemplate' || this.questionTemplate =='ReadingComprehensionTemplate' || this.questionTemplate =='GestaltFillsUpTemplate' ) {
-
+        (!flag && this.form.questionNum>1)?this.form.templateType = this.templateList[0].key:null
       }else {
         this.form.marchingAnsw = this.questionTemplate =='MatchingTemplate'?  "A":''
         this.form.templateType = ''
       }
+
+      
+
 
 
         if (this.templateKey == "SingleChoose" || this.templateKey == "MultipleChoose") {
@@ -703,7 +779,7 @@ export default {
 
           this.currentOption = this.optionList[0]
           this.form.optionNum = 4;
-          this.answers = ["A", "A", "A", "A", "A", "A", "A", "A"];
+          this.answers = [{value:"A"}, {value:"A"}, {value:"A"}, {value:"A"},{value:"A"}, {value:"A"}, {value:"A"}, {value:"A"}];
 
           if (this.templateKey == "SingleChoose") {
             this.form.relOptionNum = 1;
@@ -721,7 +797,7 @@ export default {
           this.currentOption = this.optionList[0]
           this.form.optionNum = 2;
           this.form.relOptionNum = 1;
-          this.answers = ["A"];
+          this.answers = [{value:"A"}];
         } else if (this.templateKey == "FillingQuestionTemplate") {
           
           this.form.questionNum = 1
@@ -759,7 +835,7 @@ export default {
     },
 
      changeType() {
-
+      this.form.matchingNum = this.questionTemplate =='MatchingTemplate'?7:0
       if(this.editable) {
         this.changeOption()
         // if (this.questionType == "SingleChoose" || this.questionType == "MultipleChoose") {
@@ -836,7 +912,7 @@ export default {
         ques = this.$refs.ck1.getData()
         
       }
-
+      // console.log(this.questionOtions)
       let analyze = this.$refs.ck2.getData();
       let answ = this.$refs.ck3.getData();
       this.questionOtions.forEach(item => {
@@ -890,14 +966,19 @@ export default {
         this.$refs.ck3.setData(list.answ);
 
       if(list.edit) {
+
         this.form.marchingAnsw = list.marchingAnsw
         // this.form.templateType = list.templateType
+        
         this.optionList = list.selectOptions
-        this.currentOption = this.optionList[0]
+        this.currentOption = (this.optionList && this.optionList.length)?this.optionList[0]:''
         // this.optionList[0].check = true
         this.form.optionNum = list.optionNum;
+
         this.form.relOptionNum = list.relOptionNum
+
         this.answers = list.answers
+        
         if(this.templateKey == "SingleChoose" ||this.templateKey == "MultipleChoose" ||this.templateKey == "BoolenQuestion") {
           this.$nextTick(()=>{
             this.optionList.forEach(item=>{
@@ -905,7 +986,7 @@ export default {
             })
           })
         }
-
+        
         // this.$refs.ueA.setData(this.optionList[0].content);
         this.form.optionNum = list.optionNum;
         this.form.relOptionNum = list.relOptionNum
@@ -915,7 +996,7 @@ export default {
         this.form.marchingAnsw = ''
         // this.form.templateType = ''
         this.changeOption()
-        if(this.templateKey == "SingleChoose" ||this.templateKey == "MultipleChoose" ||this.templateKey == "BoolenQuestion") {
+        // if(this.templateKey == "SingleChoose" ||this.templateKey == "MultipleChoose" ||this.templateKey == "BoolenQuestion") {
           this.$nextTick(()=>{
             this.optionList.forEach(item=>{
               // this.$refs.ueA.setData('')
@@ -923,7 +1004,7 @@ export default {
             })
           })
           
-        }
+        // }
         
       }
       //console.log(this.questionOtions,this.optionList)
@@ -932,31 +1013,40 @@ export default {
       list.check = true;
     },
 
-    getfillAnswer(index) {
-      let ans = this.answers[index] == "答案" ? "" : this.answers[index];
+    // getfillAnswer(index) {
+    //   let ans = this.answers[index] == "答案" ? "" : this.answers[index];
 
-      this.fillanswerVisible = true;
-      this.$refs.ckFill.setData(ans)
-      this.fillindex = index;
+    //   this.fillanswerVisible = true;
+    //   this.$refs.ckFill.setData(ans)
+    //   this.fillindex = index;
+    // },
+
+    // setfillAnswer() {
+    //   let answ = this.$refs.ueFill.getData();
+    //   this.answers[this.fillindex] = answ;
+    //   this.fillanswerVisible = false;
+    // },
+
+    defaultCheckChapters() {
+
+      this.isError? this.$refs.chapterTree.setNodesByIds(this.questionDetail.chapters):null
     },
 
-    setfillAnswer() {
-      let answ = this.$refs.ueFill.getData();
-      this.answers[this.fillindex] = answ;
-      this.fillanswerVisible = false;
+    defaultCheckKnows() {
+
+      this.isError? this.$refs.knowledgeTree.setNodesByIds(this.questionDetail.knowledges):null
     },
-
-
     getCheckedChapters(list) {
 
       this.chapterTags = list
-      this.tagsList = this.chapterTags
+
+      this.activeType == "chapter"? this.tagsList = this.chapterTags:null
 
     },
 
     getCheckedKnows(list) {
       this.knowledgeTags = list
-      this.tagsList = this.knowledgeTags
+      this.activeType == "knowledge"?this.tagsList = this.knowledgeTags:null
     },
 
 
@@ -996,7 +1086,12 @@ export default {
             })[0].code            
             
             
-          }else {
+          }else if(this.isError) {
+            this.questionType = this.typeList.filter(item=>{
+              return item.code == this.questionDetail.questionType
+            })[0].code 
+          }
+          else {
              this.questionType = this.typeList[0].code;
           }
           
@@ -1011,7 +1106,7 @@ export default {
           if (data.status == "200") {
             this.difficultyList = data.data;
 
-            this.form.difficulty = this.difficultyList[0].key;
+            this.form.difficulty = this.isError? this.questionDetail.difficultyType: this.difficultyList[0].key;
           }
         })
  
@@ -1021,6 +1116,10 @@ export default {
       this.save_prev();
       let questions = [];
       let name = this.$refs.ck0.getData();
+
+      if(!name) {
+        return this.$message.warning('题干不可以为空！')
+      }
       let knowledgeIds = []
       let chapterIds = []
 
@@ -1077,8 +1176,8 @@ export default {
           
           let answerflag = false
           for (let j = 0; j < this.questionOtions[i].relOptionNum; j++) {
-            if(this.questionOtions[i].answers) {
-              answerOption.push({sort:j+1,content:this.questionOtions[i].answers[j]});
+            if(this.questionOtions[i].answers[j].value) {
+              answerOption.push({sort:j+1,content:this.questionOtions[i].answers[j].value});
             }else {
 
               answerflag = true
@@ -1107,7 +1206,7 @@ export default {
           //answer: this.optionList[i].,
           analysis: this.questionOtions[i].analyze,
           detailedAnalysis:this.questionOtions[i].answ,
-          difficulty: this.questionOtions[i].difficulty,
+          difficulty: this.form.difficulty,
           knowledgeId: knowledgeIds,
           chapterId: chapterIds,
           subjectCode: this.subjectCode,
@@ -1126,11 +1225,11 @@ export default {
           //questions
         }
 
-        if(this.activeType == "chapter") {
-          questions[i].knowledgeId = []
-        }else {
-          questions[i].chapterId = []
-        }
+        // if(this.activeType == "chapter") {
+        //   questions[i].knowledgeId = []
+        // }else {
+        //   questions[i].chapterId = []
+        // }
         
       }
 
@@ -1145,12 +1244,14 @@ export default {
         requestBody = {
           name: name,
           questionType: this.questionType,
+          difficulty: this.form.difficulty,
           knowledgeId: knowledgeIds,
           chapterId: chapterIds,
           subjectCode: this.subjectCode,
           oeseId:this.volumeId,
           // subjectName: this.form.subjectName,
           parentId: 0,
+          optionNum: this.form.matchingNum,   //信息匹配的选项数
           questions: questions
         }
       }
@@ -1224,6 +1325,353 @@ export default {
 
       
     },
+    errorCorrection() {
+
+
+
+
+      this.save_prev();
+
+
+      let errorContentList = []
+
+      let flag = false
+      if(this.query.errorType == 'StemError') { //题干错误
+        let name = this.$refs.ck0.getData()
+        
+        if(!name) {
+          return this.$message.warning('题干不可以为空！')
+        }
+        if(name !== this.questionDetail.name) {
+          flag = true
+          errorContentList.push({questionContent:name})
+        }
+        if(this.form.questionNum>1) {
+          for(let i=0;i<this.form.questionNum;i++) {
+            if(this.questionOtions[i].showQuestionTab) {
+              if(this.questionOtions[i].ques !== this.oldQuestionDetail[i].ques) {
+                flag = true
+                errorContentList.push({questionContent:this.questionOtions[i].ques, questionId:this.questionOtions[i].questionId})
+              }
+            }
+          }
+        }
+
+
+      }else if(this.query.errorType == 'AnalysisError') {//分析错误
+        if(this.form.questionNum == 1) {
+          if(this.questionOtions[0].analyze !== this.oldQuestionDetail[0].analyze) {
+            flag = true
+            errorContentList.push({questionContent:this.questionOtions[0].analyze})
+          }
+        }else {
+          for(let i=0;i<this.form.questionNum;i++) {
+            if(this.questionOtions[i].analyze !== this.oldQuestionDetail[i].analyze) {
+              flag = true
+              errorContentList.push({questionContent:this.questionOtions[i].analyze, questionId:this.questionOtions[i].questionId})
+            }
+            
+          }
+        }
+      }else if(this.query.errorType == 'DetailedAnalysisErrors') {//详解错误
+        if(this.form.questionNum == 1) {
+          if(this.questionOtions[0].answ !== this.oldQuestionDetail[0].answ) {
+            flag = true
+            errorContentList.push({questionContent:this.questionOtions[0].answ})
+          }
+        }else {
+          for(let i=0;i<this.form.questionNum;i++) {
+            if(this.questionOtions[i].answ !== this.oldQuestionDetail[i].answ) {
+              flag = true
+              errorContentList.push({questionContent:this.questionOtions[i].answ, questionId:this.questionOtions[i].questionId})
+            }
+            
+          }
+        }
+      }else if(this.query.errorType == 'OptionError') {//选项错误
+        if(this.form.questionNum == 1) {
+          for(let i=0;i<this.questionOtions[0].selectOptions.length;i++) {
+            if(this.questionOtions[0].selectOptions[i].content !== this.oldQuestionDetail[0].selectOptions[i].content) {
+              flag = true
+              errorContentList.push({
+                questionContent:this.questionOtions[0].selectOptions[i].content, 
+                marking: this.questionOtions[0].selectOptions[i].id
+              })
+            }            
+          }
+        }else {
+
+          for(let i=0;i<this.form.questionNum;i++) {
+
+            for(let j=0;j<this.questionOtions[i].selectOptions.length;j++) {
+              if(this.questionOtions[i].selectOptions[j].content !== this.oldQuestionDetail[i].selectOptions[j].content) {
+                flag = true
+                errorContentList.push({
+                  questionContent:this.questionOtions[i].selectOptions[j].content, 
+                  questionId:this.questionOtions[i].questionId,
+                  marking: this.questionOtions[i].selectOptions[j].id
+                })
+              }            
+            }
+
+          }
+        }
+      }else if(this.query.errorType == 'AnswerError') {//答案错误
+        if(this.form.questionNum == 1) {
+          for(let i=0;i<this.questionOtions[0].answers.length;i++) {
+            if(this.questionOtions[0].answers[i].value !== this.oldQuestionDetail[0].answers[i].value) {
+              flag = true
+              errorContentList.push({
+                questionContent:this.questionOtions[0].answers[i].value, 
+                marking: this.questionOtions[0].answers[i].id
+              })
+            }            
+          }
+        }else {
+
+          for(let i=0;i<this.form.questionNum;i++) {
+
+            for(let j=0;j<this.questionOtions[i].answers.length;j++) {
+              if(this.questionOtions[i].answers[j].value !== this.oldQuestionDetail[i].answers[j].value) {
+                flag = true
+                errorContentList.push({
+                  questionContent:this.questionOtions[i].answers[j].value, 
+                  questionId:this.questionOtions[i].questionId,
+                  marking: this.questionOtions[i].answers[j].id
+                })
+              }            
+            }
+
+          }
+        }
+      }else if(this.query.errorType == 'ChapterError') {//章节错误
+
+        let list = []
+        this.questionDetail.chapters.forEach(item=>{
+          list.push(item.id)
+        })
+
+        if(this.chapterTags.length != this.questionDetail.chapters.length) { flag = true }
+
+        this.chapterTags.forEach(item=>{
+          if(list.indexOf(item.id)==-1) {
+            flag = true
+          }
+          errorContentList.push({
+            questionContent:item.id, 
+            marking: item.id
+          })
+
+        })
+
+      }else if(this.query.errorType == 'KnowledgeError') {//知识点错误
+
+        let list = []
+        this.questionDetail.knowledges.forEach(item=>{
+          list.push(item.id)
+        })
+
+        if(this.knowledgeTags.length != this.questionDetail.knowledges.length) { flag = true }
+
+        this.knowledgeTags.forEach(item=>{
+          if(list.indexOf(item.id)==-1) {
+            flag = true
+          }
+          errorContentList.push({
+            questionContent:item.id, 
+            marking: item.id
+          })
+
+        })
+      }
+
+      if(!flag) {
+        return this.$message.warning('未进行任何纠错，请确认')
+      }
+
+      this.$http.post(`/api/open/errorCorrection/addErrorCorrection`,{
+        errorType: this.query.errorType,
+        questionId: this.query.questionId,
+        content: Cookies.get('errorContent'),
+        errorContentList: errorContentList
+      })
+      .then(data=>{
+        if(data.status == '200') {
+          Cookies.set("errorContent", '')
+          this.$message.success('纠错成功')
+          this.$router.go(-1)
+        }
+      })
+
+    },
+
+    getQuestionDetail() {
+
+      this.$http.get(`/api/open/question/${this.query.questionId}`)
+      .then(data=>{
+        if(data.status == '200') {
+
+          this.questionDetail = data.data
+
+          this.questionDetail.versionId = data.data.oese && data.data.oese.id?data.data.oese.id:''  //教材版本
+
+          this.questionDetail.volumeId = data.data.oeseId     //  册别
+
+          // this.activeType = (this.questionDetail.chapters && this.questionDetail.chapters.length)?'chapter':'knowledge'
+
+          this.form.matchingNum = this.questionDetail.optionNum
+
+          this.$refs.ck0.setData(this.questionDetail.name)
+
+          if(this.questionDetail.smallQuestions && this.questionDetail.smallQuestions.length) {
+
+            this.form.questionNum = this.questionDetail.smallQuestions.length
+
+            for(let i=0;i<this.questionDetail.smallQuestions.length;i++) {
+
+              this.questionOtions[i].edit = true;
+              this.questionOtions[i].ques = this.questionDetail.smallQuestions[i].name;
+              this.questionOtions[i].analyze = this.questionDetail.smallQuestions[i].analysis;
+              this.questionOtions[i].answ = this.questionDetail.smallQuestions[i].detailedAnalysis;
+              this.questionOtions[i].questionId = this.questionDetail.smallQuestions[i].questionId;
+
+              this.questionOtions[i].difficulty = this.questionDetail.smallQuestions[i].difficultyType;
+
+              let arr = []
+
+              for(let j=0;j<this.questionDetail.smallQuestions[i].options.length;j++) {
+
+                arr[j] = {}
+
+                for(let k=0;k<this.optionList.length;k++) {
+
+                  if(this.questionDetail.smallQuestions[i].options[j].key == this.optionList[k].label) {
+
+                    arr[j] = this.optionList[k]
+
+                    arr[j].content = this.questionDetail.smallQuestions[i].options[j].value.name
+
+                    arr[j].id = this.questionDetail.smallQuestions[i].options[j].value.id
+
+                    break
+
+                  }
+
+                }
+
+              }
+              
+
+
+
+              if(this.questionDetail.smallQuestions[i].options && this.questionDetail.smallQuestions[i].options.length) {
+                if(this.questionDetail.smallQuestions[i].fillAnswers.length > 1) {
+                  this.questionOtions[i].templateType = 'MultipleChoose'
+                }else {
+                  this.questionOtions[i].templateType = 'SingleChoose'
+                }
+              }else if(this.questionDetail.smallQuestions[i].fillAnswers && this.questionDetail.smallQuestions[i].fillAnswers.length) {
+                this.questionOtions[i].templateType = 'BoolenQuestion'
+              }else if(!this.questionDetail.smallQuestions[i].name) {
+                this.questionOtions[i].templateType = 'NoSingleQues'
+              }else {
+                this.questionOtions[i].templateType = 'SubjectiveItem'
+              }
+
+       
+              this.questionOtions[i].selectOptions = JSON.parse(JSON.stringify(arr));
+              this.questionOtions[i].answers = []
+              for(let j=0;j<this.questionDetail.smallQuestions[i].fillAnswers.length;j++) {
+                this.questionOtions[i].answers[j] = {}
+                this.questionOtions[i].answers[j].value = this.questionDetail.smallQuestions[i].fillAnswers[j].value.name
+                this.questionOtions[i].answers[j].id = this.questionDetail.smallQuestions[i].fillAnswers[j].value.id
+              }
+              // this.questionOtions[i].answers = 
+              this.questionOtions[i].optionNum = this.questionDetail.smallQuestions[i].options.length;
+              this.questionOtions[i].relOptionNum = this.questionDetail.smallQuestions[i].fillAnswers.length;
+              // this.questionOtions[i].marchingAnsw = this.questionDetail.smallQuestions[i].name;
+              this.questionOtions[i].showQuestionTab = this.questionDetail.smallQuestions[i].name?true:false;
+
+
+            }
+            
+            // this.questionOtions[0].showQuestionTab?this.$refs.ck1.setData(this.questionOtions[0].ques):null
+            // this.$refs.ck2.setData(this.questionOtions[0].analyze)
+            // this.$refs.ck3.setData(this.questionOtions[0].answ)
+
+            this.form.templateType = this.questionOtions[0].templateType
+            if(this.questionOtions[0].showQuestionTab) {
+              this.$refs.ck1.setData(this.questionOtions[0].ques)
+              this.activeName = 'stems'
+            }else {
+              this.activeName = 'analysis'
+            }
+
+
+          }else {
+            this.form.questionNum = 1
+              this.questionOtions[0].edit = true;
+              this.questionOtions[0].ques = this.questionDetail.name;
+              this.questionOtions[0].analyze = this.questionDetail.analysis;
+              this.questionOtions[0].answ = this.questionDetail.detailedAnalysis;
+              this.questionOtions[0].difficulty = this.questionDetail.difficultyType;
+
+              let arr = []
+
+              for(let i=0;i<this.questionDetail.options.length;i++) {
+                arr[i] = {}
+                for(let j=0;j<this.optionList.length;j++) {
+
+                  if(this.questionDetail.options[i].key == this.optionList[j].label) {
+
+                    arr[i] = this.optionList[j]
+                    arr[i].content = this.questionDetail.options[i].value.name
+                    arr[i].id = this.questionDetail.options[i].value.id
+                    break
+
+                  }
+                }
+              }
+
+              this.questionOtions[0].selectOptions = arr
+              this.questionOtions[0].answers = []
+              for(let i=0;i<this.questionDetail.fillAnswers.length;i++) {
+                this.questionOtions[0].answers[i] = {}
+                this.questionOtions[0].answers[i].value = this.questionDetail.fillAnswers[i].value.name
+                this.questionOtions[0].answers[i].id = this.questionDetail.fillAnswers[i].value.id
+              }
+              this.questionOtions[0].optionNum = this.questionDetail.options.length;
+              this.questionOtions[0].relOptionNum = this.questionDetail.fillAnswers.length;
+              // this.questionOtions[0].marchingAnsw = this.questionDetail.smallQuestions[0].name;
+              this.questionOtions[0].showQuestionTab = this.questionDetail.name?true:false;
+              this.activeName = 'analysis'
+          }
+
+
+
+          this.$refs.ck2.setData(this.questionOtions[0].analyze)
+          this.$refs.ck3.setData(this.questionOtions[0].answ)
+
+          this.form.optionNum = this.questionOtions[0].optionNum
+          this.form.relOptionNum = this.questionOtions[0].relOptionNum
+          this.answers = this.questionOtions[0].answers
+          this.optionList = this.questionOtions[0].selectOptions
+          this.questionOtions[0].selectOptions.forEach(item=>{
+            this.$refs[`ck${item.label}`].setData(item.content)
+          })
+
+
+          if(this.questionOtions[0].selectOptions && this.questionOtions[0].selectOptions.length) {
+            this.currentOption = this.optionList[0]
+          }
+
+          console.log(this.questionOtions, this.questionDetail)
+          this.oldQuestionDetail = JSON.parse(JSON.stringify(this.questionOtions));
+          // console.log(this.oldQuestionDetail)
+          this.topReady = true
+        }
+      })
+    },
 
   }
 };
@@ -1254,6 +1702,17 @@ export default {
     align-items: center;
   }
 
+  .el-form-item__label {
+    min-width: 70px;
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  .btngroup-bottom {
+    .el-radio-button {
+      margin-bottom: 10px;
+    }
+  }
 
   .form-class {
     .el-radio-button:first-child .el-radio-button__inner {

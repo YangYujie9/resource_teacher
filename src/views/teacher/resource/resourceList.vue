@@ -41,7 +41,7 @@
 
       <div slot="right" class="rescoure-wrap">
         <div class="bread-div">
-          <span style=""><i class="iconfont iconshouye iconclass"></i>当前位置：首页 > {{resourceType}}</span>
+          <span style=""><i class="iconfont iconshouye iconclass"></i>当前位置：首页 > {{resourceType.name}}</span>
         </div>
         <div class="search-div el-radio-costom">
 
@@ -214,7 +214,7 @@ export default {
       return this.resourceTypeList.filter(item=>{
         // console.log(item.id,this.$route.params.resourceType)
         return item.key == this.$route.params.resourceType
-      })[0].name
+      })[0]
       
     },
 
@@ -325,7 +325,7 @@ export default {
       let params = {
         fileType: this.search.fileType,
         fileName: this.search.fileName,
-        resourceType: this.$route.params.resourceType,
+        resourceType: this.resourceType.id,
         // oeseType:'',
         grade: this.filter.grade.key,
         // startTime:'',

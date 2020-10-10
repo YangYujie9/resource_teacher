@@ -236,6 +236,7 @@ export default {
 
     getquestionType() {
       this.typeList = []
+      this.search.type = []
       // if(!this.subjectCode) {return false}
 
       getquestionType(this.subjectCode)
@@ -271,13 +272,16 @@ export default {
           type:'warning'
         })
       }
-      let tagIds = []
+      let chapterIds = []
+      let knowledgeIds = []
       let questions = []
 
-      this.tagsList.forEach(item=>{
-        tagIds.push(item.id)
+      this.chapterTags.forEach(item=>{
+        chapterIds.push(item.id)
       })
-
+      this.knowledgeTags.forEach(item=>{
+        knowledgeIds.push(item.id)
+      })
       let flag = false;
       this.search.type.forEach(item=>{
         if(!item.number) {
@@ -289,7 +293,7 @@ export default {
           return
         }
 
-        questions.push({questionType:item.key, number:item.number})
+        questions.push({questionType:item.code, number:item.number})
         
         
       })
@@ -302,16 +306,16 @@ export default {
         name: this.name,
         questions: questions,
         difficultyType: this.search.difficulty,
-        chapterIds: [],
-        knowledgeIds:[],
+        chapterIds: chapterIds,
+        knowledgeIds:knowledgeIds,
         grade:this.filter.grade.key
       }
 
-      if(this.activeType == "chapter") {
-        params.chapterIds = tagIds
-      }else {
-        params.knowledgeIds = tagIds
-      }
+      // if(this.activeType == "chapter") {
+      //   params.chapterIds = tagIds
+      // }else {
+      //   params.knowledgeIds = tagIds
+      // }
 
       // console.log(params)
       this.$http.post(`/api/open/paper/addTestBasket/auto`,params)

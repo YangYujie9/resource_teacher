@@ -41,11 +41,11 @@
         <div class="singal-paper" v-for="list in tableData">
           <div>
             <p class="p1">{{list.name}}</p>
-            <p class="p2"><span>组卷日期：{{list.name}}</span><span style="margin-left:20px;">下载日期：未下载</span></p>
+            <p class="p2"><span>组卷日期：{{list.createTime}}</span><span style="margin-left:20px;">下载日期：未下载</span></p>
           </div>
-          <div>
+          <div style="min-width: 90px;flex-shrink: 0;">
             <el-button type="text" @click="browsePaper(list.paperId)">浏览</el-button>
-            <el-button type="text" @click="downloadPaper(list.paperId)">下载</el-button>
+            <el-button type="text" @click="downloadPaper(list.paperFileId)">下载</el-button>
             <el-button type="text" @click="editPaper(list.paperId)">编辑</el-button>
             <el-button type="text" @click="deletePaper(list.paperId)">删除</el-button>
           </div>
@@ -74,7 +74,20 @@
       :close-on-click-modal='false'
       width="860px">
       <div class="preview-wrap">
-        <paperPreview :isAnswer="isAnswer" :paperId="paperId" knowledgeType="knowledge"></paperPreview>
+        <div class="active-wrap">
+ 
+          <span class="ansbtn cursor btn-class" v-show="!isAnswer" @click="isAnswer=true">
+            <i class="iconfont iconxianshi" style="position: relative;top:1px"></i> 
+            显示答案
+          </span>
+          <span class="ansbtn cursor btn-class" v-show="isAnswer" @click="isAnswer=false">
+            <i class="iconfont iconyincang"></i> 
+            隐藏答案
+          </span>
+        </div>
+        <div class="myexampaper-wrap">
+          <paperPreview :isAnswer="isAnswer" :paperId="paperId" knowledgeType="knowledge"></paperPreview>
+        </div>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="" size="mini">确 定</el-button>
@@ -185,13 +198,20 @@ export default {
     browsePaper(paperId) {
 
       this.paperId = paperId
+      console.log(this.paperId)
       this.dialogVisible = true
 
     },
 
 
 
-    downloadPaper(paperId) {
+    downloadPaper(paperFileId) {
+      this.$http.get(`/api/open/common/${paperFileId}/download`)
+        .then((data)=>{
+          if(data.status == '200') {
+            window.open(data.data)
+          }
+        })
 
     },
     editPaper(paperId) {
@@ -325,8 +345,25 @@ export default {
   }
 
   .preview-wrap {
-    height: calc(50vh);
-    overflow-y: auto;
+
+    
+
+    .active-wrap {
+      position: relative;
+      height: 24px;
+
+
+      .btn-class {
+        position: absolute;
+        right: 20px;
+      }
+    }
+
+    .myexampaper-wrap {
+      padding: 0 20px;
+      height: calc(50vh);
+      overflow-y: auto;
+    }
   }
 }
 </style>

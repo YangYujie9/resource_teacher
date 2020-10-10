@@ -34,7 +34,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-
+import { debounce } from '@/utils/public.js'
 export default {
 
   props: {
@@ -74,6 +74,10 @@ export default {
     },
     volumeId: {    //册别
       type: String,
+    },
+    isDisable: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -154,7 +158,12 @@ export default {
       let arr = [];
 
       data.checkedNodes.forEach(node => {
-        data.checkedKeys.indexOf(node.parentId.id) >-1?null:arr.push(node)
+        if(node.memberType == 'Volume') {
+          data.checkedKeys.splice(data.checkedKeys.indexOf(node.resourceId.id),1)
+        }else {
+          (data.checkedKeys.indexOf(node.parentId.id) >-1)?null:arr.push(node)
+        }
+        
           
       });
       this.$emit('getCheckedNodes',arr) ;
@@ -204,8 +213,9 @@ export default {
           // node.expand = true; /*默认展开顶级节点*/
           this.defaultSelectedNode = node;
           this.constructTreeData(node, data.members);
-
+          this.isDisable? node.disabled = true:null
           treeData.push(node);
+
           if (!this.defaultRoot) {
             this.firstSchool = this.deepFirstSearch(node);
           }
@@ -221,7 +231,7 @@ export default {
     constructTreeData(node, data) {
       node.title = node.name;
       node.id = node.resourceId.id;
-      (node.memberType == "Organization" && !this.orgSelectable) ? node.disabled = true:null
+      // (node.memberType == "Organization" && !this.orgSelectable) ? node.disabled = true:null
       // console.log(node)
       let nodeChildren = data.filter(function(item) {
         return item.parentId && item.parentId.id === node.resourceId.id;
@@ -231,6 +241,7 @@ export default {
         
         for (let i = 0; i < node.children.length; i++) {
           let newNode = node.children[i];
+          this.isDisable? node.children[i].disabled = true:null
           this.constructTreeData(newNode, data);
         }
       }
@@ -256,6 +267,18 @@ export default {
         this.$refs.tree.setCheckedNodes(nodes);
     },
 
+    setNodesByIds(arr) {
+      let ids = []
+
+      for(let i=0;i<arr.length;i++) {
+        ids.push(arr[i].id)
+      }
+      this.$refs.tree.setCheckedKeys(ids);
+      this.$emit('getCheckedNodes',arr) ;
+    },
+
+
+
     editNode(node,data) {
       this.$emit('editnode',node,data)
     },
@@ -279,7 +302,6 @@ export default {
     },
 
     handleNodeClick(data) {
-
 
       this.$emit('handleNodeClick',data)
       // if(data.memberType == "Organization" && !this.orgSelectable) {

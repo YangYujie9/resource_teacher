@@ -163,7 +163,7 @@
     </div> 
 
 
-    <el-dialog :title="dialogTitle" :visible.sync="dialogShareVisible" width="500px" :close-on-click-modal='false'>
+    <el-dialog :title="dialogTitle" :visible.sync="dialogShareVisible" width="600px" :close-on-click-modal='false'>
       <el-form :model="shareForm" label-width="120px" size="small">
         
           <p class="top-p">选择班级</p>
@@ -175,12 +175,14 @@
 
           <p class="top-p">选择用户</p>
           <el-form-item label="名称" prop="user">
-            <el-cascader-panel
-                v-model="shareForm.includeUsers"
-                :options="studentList"
-                :props="studentProps"
-                collapse-tags
-                clearable></el-cascader-panel>
+            <div style="display: flex;">
+              <el-cascader-panel
+                  v-model="shareForm.includeUsers"
+                  :options="studentList"
+                  :props="studentProps">
+                    
+              </el-cascader-panel>
+            </div>
           </el-form-item>
 
       </el-form>
@@ -232,7 +234,8 @@ export default {
       },
       commentList:[],
       totalCommit:0,
-      boutiqueList:[]
+      boutiqueList:[],
+
     };
   },
 

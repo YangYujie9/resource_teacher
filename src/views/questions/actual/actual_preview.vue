@@ -1,8 +1,23 @@
 <template>
   <div class="actual-preview">
+    <div class="active-wrap">
+      <div>
+        <div>
+          <el-button type="primary" size="mini" @click="$router.go(-1)"><i class="iconfont iconfanhui" style="font-size: 12px;"></i> 返回</el-button>
+          <el-button type="primary" size="mini" @click="scoredialogVisible=true">分值设定</el-button>
+        </div>
+      </div>
+      <span class="ansbtn cursor" v-show="!isAnswer" @click="isAnswer=true">
+        <i class="iconfont iconxianshi" style="position: relative;top:1px"></i> 
+        显示答案
+      </span>
+      <span class="ansbtn cursor" v-show="isAnswer" @click="isAnswer=false">
+        <i class="iconfont iconyincang"></i> 
+        隐藏答案
+      </span>
+    </div>
 
-
-    <paperPreview :paperId="paperId" :isActual="true"></paperPreview>
+    <paperPreview :paperId="paperId" :isActual="true" :isAnswer="isAnswer"></paperPreview>
 
 
   </div>
@@ -22,6 +37,7 @@ export default {
   data() {
     return {
     	paperId:'',
+      isAnswer: false,
 
     };
   },
