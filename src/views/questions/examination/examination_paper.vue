@@ -53,53 +53,54 @@
             <div v-for="(list,index) in questionList" class="singlediv">
               <p><span>{{$changeIndex(index+1)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
               <div class="singleques" v-for="(list1,index1) in list.list">
-
-
-                <div class="pt1">
-                  <span>{{index1 + 1}}</span>
-                  <span>、</span>
-                  <div  v-html="list1.name" style="width: 100%;"></div>
-                  <!-- <img src="@/assets/test1.png" /> -->
-                  
-                  
-                </div>
-                <div class="pt2" v-if="list1.options.length">
-
-                  <ul>
-                    <li style="width: 100%;" class="selectoption" v-for="list2 in list1.selectoption">
-                      <span style="margin-right: 10px;font-style: italic;">{{list2.key}}.</span>
-                      <div v-html="list2.value"></div>
-                    </li>
-
-                  </ul>
-
-                  
-                </div>
-
-              <!-- 小题 -->
-              <div class="" v-if="list1.smallQuestions.length" style="margin-top: 10px;">
-                <div v-for="(list4,index4) in list1.smallQuestions">
+                <section class=" cursor" @click="list1.showDetail=!list1.showDetail">
 
                   <div class="pt1">
+                    <span>{{index1 + 1}}</span>
+                    <span>、</span>
+                    <div  v-html="list1.name" style="width: 100%;"></div>
                     <!-- <img src="@/assets/test1.png" /> -->
-                    <span>({{index4+1}})</span><span>、</span>
-                    <span v-html="list4.name"></span>
+                    
+                    
                   </div>
                   <div class="pt2" v-if="list1.options.length">
-                    <ul>
-                      <li style="width: 100%;" class="selectoption" v-for="item in list1.selectoption">
 
-                        <span>{{item.key}}</span>
-                        <span>、</span>
-                        <span v-html="item.value"></span> 
-                        <!-- <img src="@/assets/test1.png" /> -->
+                    <ul>
+                      <li style="width: 100%;" class="selectoption" v-for="list2 in list1.selectoption">
+                        <span style="margin-right: 10px;font-style: italic;">{{list2.key}}.</span>{{list2}}
+                        <div v-html="list2.value"></div>
                       </li>
 
-
                     </ul>
+
+                    
                   </div>
-                </div>
-              </div>
+
+                  <!-- 小题 -->
+                  <div class="" v-if="list1.smallQuestions.length" style="margin-top: 10px;">
+                    <div v-for="(list4,index4) in list1.smallQuestions">
+
+                      <div class="pt1">
+                        <!-- <img src="@/assets/test1.png" /> -->
+                        <span>({{index4+1}})</span><span>、</span>
+                        <span v-html="list4.name"></span>
+                      </div>
+                      <div class="pt2" v-if="list4.options.length">
+                        <ul>
+                          <li style="width: 100%;" class="selectoption" v-for="item in list4.selectoption">
+
+                            <span>{{item.key}}</span>
+                            <span>、</span>
+                            <span v-html="item.value"></span> 
+                            <!-- <img src="@/assets/test1.png" /> -->
+                          </li>
+
+
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </section>
               <section class="content" style="border-top: 1px dashed #dbdee4;" v-show="list1.showDetail">
 
                 <div class="middle">
@@ -111,9 +112,9 @@
                   <div  v-if="list1.fillAnswers.length ||list1.smallQuestions.length">
                     <p class="anstitle">【答案】</p>
                     <p>
-                      <span v-for="(list3,index3) in list.answers">
-                       <span  v-if="list1.smallQuestions.length" style="margin-left: 0px;">{{index3+1}}、</span>
-                       <span style="margin-left: 0px;">{{list3}}</span>
+                      <span v-for="(list3,index3) in list1.answers"style="margin-right: 10px;">
+                       <span  v-if="list1.smallQuestions.length" style="margin-left: 0px;">{{index3+1}}.</span>
+                       <span style="margin-left: 0px;" v-html="list3"></span>
                       </span>
                     </p>
                   </div>
@@ -393,7 +394,7 @@ export default {
             })
           }
 
-          // console.log(list)
+          console.log(list)
 
 
           this.questionList = list
@@ -416,20 +417,26 @@ export default {
       //item.answers = []
       if(item.fillAnswers && item.fillAnswers.length) {
         item.fillAnswers.forEach(item1=>{
-          item0.answers.push(item1.value)
+          item0.answers.push(item1.value.name)
           // for(let key in item1) {
           //   item0.answers.push(item1[key])
           // }
         })
       }
 
-      //知识点
-      item.knowledgesPoint = []
+
+
+      //章节
+      item.chapterPoint = []
       if(item.chapters && item.chapters.length) {
         item.chapters.forEach(item1=>{
-          item.knowledgesPoint.push(item1.name)
+          item.chapterPoint.push(item1.name)
         })
-      }else if(item.knowledges && item.knowledges.length) {
+      }
+
+      //知识点
+      item.knowledgesPoint = []
+      if(item.knowledges && item.knowledges.length) {
         item.knowledges.forEach(item1=>{
           item.knowledgesPoint.push(item1.name)
         })

@@ -6,7 +6,7 @@
         <div class="nav" :class="{ fixedNavbar: isfixTab}" ref="navBar">
           <ul>
             <li
-              v-for="(list,index) in NavList"
+              v-for="(list,index) in NavigationBars"
               @click="choose_nau(list)"
               :class="{active:list.check}"
             >{{list.label}}</li>
@@ -15,7 +15,7 @@
 
         <router-view :isfixTab="isfixTab" @backToTop="backToTop" :resourceTypeList="resourceTypeList"  v-if="resourceTypeList.length"></router-view>
       </div>
-      <div class="footer"></div>
+      <div class="footer">{{getsiteInfo.copyright}}</div>
     </el-scrollbar>
   </div>
 </template>
@@ -31,12 +31,19 @@ export default {
 
     ...mapGetters([
       'gradeList',
-      'isReady'
+      'isReady',
+      'getsiteInfo'
 
     ]),
 
     subjectName() {
       return this.getuserInfo.subject.name
+    },
+
+
+    type() {
+
+      return this.$route.query.type
     }
 
   },
@@ -44,10 +51,33 @@ export default {
     $route(to,from){
 
       this.$refs["quesHome"].$refs["wrap"].scrollTop = 0
-      this.NavList.forEach(list=>{
-        to.path.indexOf(list.route)>-1?list.check=true:list.check=false
-      })
 
+
+      this.NavList.forEach(list=>{
+        // console.log(list.route,to.path)
+        list.route.indexOf(to.path)>-1?list.check=true:list.check=false
+      })
+      // console.log(this.NavList)
+    },
+
+
+    type(val) {
+
+      if(val && val == '2') {
+
+        for(let i=0;i<this.NavList.length;i++) {
+          this.NavList[i].route = this.NavList[i].route + '?type=2'
+        }
+
+      }else {
+        for(let i=0;i<this.NavList.length;i++) {
+          let index = this.NavList[i].route.indexOf('?')
+          index>-1?this.NavList[i].route = this.NavList[i].route.substring(0,index):null
+        }
+        // console.log(this.NavList)
+      }
+
+      this.getNavigationBars()
     }
   },
 
@@ -86,44 +116,45 @@ export default {
         {
           label: "首页",
           route: "/teacher/home",
-          check: false
+          check: false,
         },
         {
           label: "课件",
           route: "/teacher/resource/CourseWare",
-          check: false
+          check: false,
         },
         {
           label: "教案",
           route: "/teacher/resource/TeachPlan",
-          check: false
+          check: false,
         },
         {
           label: "学案",
           route: "/teacher/resource/LearningCase",
-          check: false
+          check: false,
         },
         {
           label: "套题试卷",
           route: "/teacher/resource/ExaminationPaper",
-          check: false
+          check: false,
         },
         {
           label: "教学反思",
           route: "/teacher/resource/TeachReflection",
-          check: false
+          check: false,
         },
         {
           label: "微课",
           route: "/teacher/resource/VideoLesson",
-          check: false
+          check: false,
         },
         {
           label: "题库",
           route: "/questions/chooseBychapter",
-          check: false
+          check: false,
         }
-      ]
+      ],
+      NavigationBars:[],
     };
   },
   mounted() {
@@ -134,12 +165,13 @@ export default {
       true
     );
 
-    
-
-    this.NavList.forEach(list=>{
-      this.$route.fullPath.indexOf(list.route)>-1?list.check=true:list.check=false
+    this.$nextTick(()=>{
+      this.NavList.forEach(list=>{
+        this.$route.fullPath.indexOf(list.route)>-1?list.check=true:list.check=false
+      })
     })
 
+    this.getNavigationBars()
 
     this.getResourceType()
 
@@ -181,12 +213,43 @@ export default {
                 }
               }
             })
-            // this.resourceForm.resourceType = this.resourceTypeList[0].id
 
             this.resourceTypeList = result.data
           }
         })
 
+    },
+
+
+    getNavigationBars() {
+      this.$http.get(`/api/open/common/enabledNavigationBars/0`)
+      .then((data)=>{
+        if(data.status = '200') {
+
+          let arr = []
+
+          for(let i=0;i<data.data.length;i++) {
+            for(let j=0;j<this.NavList.length;j++) {
+              if(data.data[i].navigationName == this.NavList[j].label) {
+
+                if(this.type && this.type == '2' &&data.data[i].navigationName == '题库') {
+
+                }else {
+                  arr.push(this.NavList[j])
+                }
+                
+                break
+              }
+            }
+          }
+
+
+          this.NavigationBars = arr
+
+          
+        }
+        
+      })
     },
 
     backToTop() {
@@ -294,6 +357,7 @@ export default {
 
     .nav {
       min-width: 1300px;
+      padding: 0 12.5%;
       height: 40px;
       line-height: 40px;
       color: #ffffff;
@@ -306,7 +370,9 @@ export default {
         font-size: 1.1rem;
 
         li {
-          margin: 0px 30px;
+          flex-grow: 1;
+          text-align: center;
+          margin: 0px 20px;
           padding: 0 20px;
           cursor: pointer;
 
@@ -337,6 +403,8 @@ export default {
     height: 60px;
     line-height: 60px;
     background-color: #75777c;
+    text-align: center;
+    color: #ffffff;
   }
 }
 </style>

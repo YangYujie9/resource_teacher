@@ -36,12 +36,12 @@
 
               </el-popover>
             </li> -->
-            <li>
+            <li @click="$router.push({path: '/teacher/home',query:{type:'2'}})">
               <!-- <img src="@/assets/images/ben.png" alt /> -->
               <i class="iconfont iconboshimao iconclass1"></i>
               <span> 校本资源</span>
             </li>
-            <li>
+            <li @click="$router.push({path: '/teacher/home'})">
               <!-- <img src="@/assets/images/zi.png" alt /> -->
               <i class="iconfont iconkapian iconclass1"></i>
               <span> 公共资源</span>
@@ -54,7 +54,8 @@
     <div class="middle">
       <div class="middle-wrap">
         <div class="logo">
-          <img src="@/assets/images/logo3.png" alt width="280px" />
+          <img src="@/assets/images/logo3.png" alt width="280px" v-if="!getsiteInfo.picture" />
+          <img :src="getsiteInfo.picture" alt width="260px" v-if="getsiteInfo.picture" />
         </div>
         <div class="search">
           <el-radio-group v-model="type" size="medium">
@@ -111,6 +112,7 @@ export default {
     return {
       type: "上海",
 			keyword: "",
+      logo:'',
     };
   },
 
@@ -121,12 +123,13 @@ export default {
     
     ...mapGetters([
       'getuserInfo',
+      'getsiteInfo'
 
     ]),
 
   },
   mounted() {
-    
+
   },
   methods: {
               //退出登录
@@ -157,7 +160,10 @@ export default {
       }else if(command == 'exit') {
         this.exit()
       }
-    }
+    },
+
+
+
   }
 };
 </script>

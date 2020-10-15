@@ -66,8 +66,8 @@
               </p> -->
             </div>
             <div class="tag-class">
-
-              <el-tag v-for="(tag,index) in tagsList" :key="tag.id" :closable="isError&&(!chapterReadonly||!knowledgeReadonly)" type="warning" @close="closeTag(index)">{{tag.name}}</el-tag>
+              <el-tag v-for="(tag,index) in tagsList" :key="tag.id" :closable="(isError&&(!chapterReadonly||!knowledgeReadonly))||!isError" type="warning" @close="closeTag(index)">{{tag.name}}</el-tag>
+              
             </div>
           </div>
 
@@ -435,7 +435,7 @@ export default {
       query:{},
       volumeId:'',
       subjectCode:'',
-      qnumDisable:false,
+      // qnumDisable:false,
       templateList: [
         {
           key:'SingleChoose',
@@ -522,6 +522,18 @@ export default {
       'isReady'
 
     ]),
+
+    qnumDisable() {
+
+      if(this.questionTemplate == 'SingleChooseTemplate' || this.questionTemplate =='MultipleChooseTemplate' || this.questionTemplate =='BoolenQuestionTemplate' || this.questionTemplate =='FillingQuestionTemplate') {
+        
+        return true
+      }else {
+        return false
+        
+      }
+    },
+
     showQuestionTab() {
 
       if(this.form.templateType == 'NoSingleQues' ||this.form.questionNum == 1 ||this.questionTemplate =='MatchingTemplate' ||this.questionTemplate =='GestaltFillsUpTemplate' || this.templateKey == "FillingQuestionTemplate") {
@@ -547,7 +559,7 @@ export default {
     },
 
     templateSelectShow() {
-      if((this.questionTemplate == 'SolvingQuestionTemplate' || this.questionTemplate =='ReadingComprehensionTemplate' || this.questionTemplate =='GestaltFillsUpTemplate') && this.form.questionNum>1) {
+      if((this.questionTemplate == 'SolvingQuestionTemplate' || this.questionTemplate =='ReadingComprehensionTemplate' || this.questionTemplate =='GestaltFillsUpTemplate') ) {
         return true
       }else {
         return false
@@ -736,6 +748,7 @@ export default {
 
       this.templateSelectShow? this.form.templateType = 'SingleChoose':null
 
+
       this.changeOption()
       // val == 1 ? (this.activeName = "analysis") : null;
     },
@@ -761,10 +774,11 @@ export default {
 
       
 
-
+      
 
         if (this.templateKey == "SingleChoose" || this.templateKey == "MultipleChoose") {
-          this.qnumDisable = false
+          // this.form.questionNum = 1
+          // this.qnumDisable = true
           
           this.optionList = [
             { label: "A", check: true, content: "" },
@@ -788,7 +802,8 @@ export default {
             this.relOptions = [ 2, 3, 4, 5, 6, 7, 8]
           }
         } else if (this.templateKey == "BoolenQuestion") {
-          this.qnumDisable = false
+          // this.form.questionNum = 1
+          // this.qnumDisable = true
           
           this.optionList = [
             { label: "A", content: "" },
@@ -800,15 +815,15 @@ export default {
           this.answers = [{value:"A"}];
         } else if (this.templateKey == "FillingQuestionTemplate") {
           
-          this.form.questionNum = 1
-          this.qnumDisable = true
+          // this.form.questionNum = 1
+          // this.qnumDisable = true
           this.form.optionNum = 0
           this.form.relOptionNum = 0
           // this.form.relOptionNum = 1
           // this.answers = ["答案","答案","答案","答案","答案","答案","答案","答案","答案"];
           // this.relOptions = [1, 2, 3, 4, 5, 6, 7, 8]
         } else {
-          this.qnumDisable = false
+          // this.qnumDisable = false
           this.form.optionNum = 0
           this.form.relOptionNum = 0
 
@@ -835,6 +850,10 @@ export default {
     },
 
      changeType() {
+
+      this.form.questionNum = 1
+      this.templateSelectShow? this.form.templateType = 'SingleChoose':null
+
       this.form.matchingNum = this.questionTemplate =='MatchingTemplate'?7:0
       if(this.editable) {
         this.changeOption()

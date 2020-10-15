@@ -16,8 +16,8 @@
     <div class="paper-wrap" v-if="questionList && questionList.length">
       <div class="paper-content-wrap" v-for="(list,index) in questionList">
         <p><span>{{$changeIndex(index+1)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
-        <div v-for="list1 in list.list">
-          <singleQuestion :list="list1" :index="index" shadow="none" :showAction='false'>
+        <div v-for="(list1, index1) in list.list">
+          <singleQuestion :list="list1" :index="index1" shadow="none" :showAction='false'>
           
           </singleQuestion>
         </div>
@@ -190,13 +190,19 @@ export default {
         })
       }
 
-      //知识点
-      item.knowledgesPoint = []
+
+      //章节
+      item.chapterPoint = []
       if(item.chapters && item.chapters.length) {
         item.chapters.forEach(item1=>{
-          item.knowledgesPoint.push(item1.name)
+          item.chapterPoint.push(item1.name)
         })
-      }else if(item.knowledges && item.knowledges.length) {
+      }
+
+
+      //知识点
+      item.knowledgesPoint = []
+      if(item.knowledges && item.knowledges.length) {
         item.knowledges.forEach(item1=>{
           item.knowledgesPoint.push(item1.name)
         })

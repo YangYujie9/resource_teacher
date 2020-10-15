@@ -10,7 +10,7 @@
       class="pageTree"
       :props="defaultProps"
       :expand-on-click-node="false"
-      :highlight-current="true"
+      :highlight-current="!showCheckbox"
       @check="getCheckedNodes"
       :filter-node-method="filterNode"
       @node-click="handleNodeClick"
@@ -95,7 +95,8 @@ export default {
       isInit:false,/*是否已初始化*/
       currentComponentId:null,/*树UUID*/
       firstSchool:null,/*第一个学校节点*/
-      currenttNode:''
+      currenttNode:'',
+      currenttSelectNode:[],
       
     };
   },
@@ -133,11 +134,19 @@ export default {
       
       this.getTreeData()
     },
+
+    showCheckbox() {
+      console.log(666)
+      this.$refs.tree.setCheckedNodes(this.currenttSelectNode);
+
+      this.$emit('handleNodeClick',this.currenttSelectNode)
+    },
     treeData: {
       
       handler: function(newVal, oldVal) {
           this.initTreeData(JSON.parse(JSON.stringify(newVal)));
           this.currenttNode = this.defaultSelectedNode
+          // console.log(this.currenttNode)
           this.$emit('selectnode',this.currenttNode )
           
           // this.$nextTick(()=>{
@@ -153,20 +162,26 @@ export default {
   },
   methods: {
     getCheckedNodes(node, data) {
+      if(this.showCheckbox) {
 
       // console.log(node,data)
       let arr = [];
 
       data.checkedNodes.forEach(node => {
-        if(node.memberType == 'Volume') {
-          data.checkedKeys.splice(data.checkedKeys.indexOf(node.resourceId.id),1)
-        }else {
-          (data.checkedKeys.indexOf(node.parentId.id) >-1)?null:arr.push(node)
-        }
+
+
+        (data.checkedKeys.indexOf(node.parentId.id) >-1)?null:arr.push(node)
+        // if(node.memberType == 'Volume') {
+        //   data.checkedKeys.splice(data.checkedKeys.indexOf(node.resourceId.id),1)
+        // }else {
+        //   (data.checkedKeys.indexOf(node.parentId.id) >-1)?null:arr.push(node)
+        // }
         
           
       });
       this.$emit('getCheckedNodes',arr) ;
+
+      }
 
     },
 
@@ -303,16 +318,16 @@ export default {
 
     handleNodeClick(data) {
 
-      this.$emit('handleNodeClick',data)
-      // if(data.memberType == "Organization" && !this.orgSelectable) {
-      //     this.$nextTick(()=>{
-      //       this.$refs.tree.setCurrentKey(this.currenttNode .resourceId.id);
-            
-      //     })
-      // }else {
-      //   this.currenttNode = data
-      //   
-      // }
+
+      this.currenttSelectNode = []
+      this.currenttSelectNode.push(data)
+
+
+      if(!this.showCheckbox){
+
+        this.$emit('handleNodeClick',this.currenttSelectNode)
+
+      }
       
     },
 

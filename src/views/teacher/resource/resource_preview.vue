@@ -2,6 +2,7 @@
   <div class="rescoure-preview" >
     <div class="bread-div">
       <span style=""><i class="iconfont iconshouye iconclass"></i>当前位置：首页 > {{resourceInfo.resourceName}}详情</span>
+      <span><el-button type="text" @click="$router.go(-1)">返回</el-button></span>
     </div>
 
     <div class="rescoure-preview-wrap" :class="{fixclass:isfixTab}">
@@ -140,7 +141,9 @@
           <p style=" height: 40px;line-height: 40px;">资源贡献者</p>
 
           <div class="personinfo">
-            <div style="width: 60px;height: 60px;background-color: #e2e2e2;"></div>
+            <div style="width: 60px;height: 60px;background-color: #ebeef6;text-align: center;padding-top: 10px;">
+              <i class="iconfont icontouxiang2" style="font-size: 36px;color: #b5b5ae;"></i>
+            </div>
             <div style="margin-left: 10px;">
               <p>{{resourceInfo.userName}}</p>
               <p>贡献于{{resourceInfo.createTime}}</p>
@@ -155,7 +158,7 @@
           </div>
 
           <div v-for="item in boutiqueList">
-            <span><i class="iconfont iconppt ppticon"></i> {{item.name}}</span>
+            <span class="cursor" @click="resource_preview(item.resourceId)"><i class="iconfont iconppt ppticon"></i> {{item.name}}</span>
 
           </div>
         </div>
@@ -201,13 +204,13 @@ import moment from 'moment'
 import pdfPreview from '@/components/PdfPreview/pdfPreview'
 export default {
   props:['isfixTab'],
+  inject: ['reload'],
   components:{
     pdfPreview
   },
   data() {
     return {
       score: 3,
-      resourceId: this.$route.query.id,
       resourceInfo:{},
       previewTab: true,
       //预览
@@ -238,11 +241,6 @@ export default {
 
     };
   },
-
-  watch: {
-
-
-  },
   computed: {
 
     ...mapGetters([
@@ -251,8 +249,22 @@ export default {
 
     ]),
 
+    resourceId() {
+      return this.$route.query.id
+    }
+
  
   },
+  watch: {
+    resourceId(val) {
+      if(val) {
+        this.$router.push({path: '/teacher/resourceRreview', query: {id:val}})
+        this.reload()
+      }
+    }
+
+  },
+
   mounted() {
     this.getResourceInfo()
     this.findClazzByTeacher()
@@ -480,22 +492,27 @@ export default {
         case 'PPT':
           obj = {
             iconppt:true,
-            ppticon: true
+            // ppticon: true
           }
           break;
         case 'WORD':
           obj = {
             iconword:true,
-            wordicon: true
+            // wordicon: true
           }
           break;
         default:
           obj = {
             iconword:true,
-            wordicon: true
+            // wordicon: true
           }
       } 
       return obj;
+    },
+
+    resource_preview(resourceId) {
+      this.$router.push({path: '/teacher/resourceRreview', query: {id:resourceId}})
+      this.reload()
     }
     
   }
@@ -544,6 +561,13 @@ export default {
   .pdficon {
     color: #dc2e1b;
     font-size: 1.3rem;
+  }
+
+
+  .bread-div {
+    display: flex;
+    justify-content: space-between;
+    align-items:center;
   }
   &-wrap {
     display: flex;

@@ -106,6 +106,12 @@ export default {
   components: {
     paperPreview
   },
+  props:{
+    chapterIds: Array,
+    knowledgeIds: Array,
+    resourceType:String,
+    fileTypeList:Array,
+  },
   data() {
     return {
       search: {
@@ -163,7 +169,6 @@ export default {
 
 
     getTableData: debounce(function() {
-
 
 
       let params = {

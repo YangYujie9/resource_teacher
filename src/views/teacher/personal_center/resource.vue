@@ -138,9 +138,9 @@ export default {
   	},
 
 
-  	grade(val) {
-  		this.resetPage()
-  	},
+  	// grade(val) {
+  	// 	this.resetPage()
+  	// },
 
   	chapterIds(val) {
   		this.resetPage()
@@ -150,7 +150,8 @@ export default {
   	},
   },
   mounted() {
-  	// this.getTableData()
+
+  	this.getTableData()
   },
   methods: {
 

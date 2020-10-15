@@ -357,6 +357,7 @@ export default {
       }
       let knowledgeIds = []
       let chapterIds = []
+
       this.knowledgeTags.forEach(item=>{
         knowledgeIds.push(item.id)
       })
@@ -375,7 +376,7 @@ export default {
                 if(result.status == '200') {
                   this.$message({message:'更新成功',type:'success'});
 
-                  this.reload()
+                  this.$router.push('/teacher/personal/myResources')
                   // this.toPageBack();
                }
               })

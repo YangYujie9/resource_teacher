@@ -27,8 +27,10 @@
               <div v-for="(list1,index1) in list.smallQuestions">
 
                 <div class="qt1"  v-if="list1.name">
-                  <span>{{index1+1}}</span><span>、</span>
-                  <span v-html="list1.name"></span>
+                  <div class="small-one">
+                    <span>{{index1+1}}</span><span>、</span>
+                    <span v-html="list1.name"></span>
+                  </div>
                 </div>
                 <div class="qt2" v-if="list1.options.length">
                   <ul>
@@ -55,7 +57,7 @@
                 <p v-if="list.knowledgesPoint">{{list.knowledgesPoint.join()}}</p>
               </div>
 
-              <div  v-if="list.fillAnswers.length ||list.smallQuestions.length">
+              <div  v-if="list.answers.length">
                 <p class="title">【答案】</p>
                 <p>
                   <span v-for="(item,index1) in list.answers">
@@ -451,11 +453,12 @@ export default {
 	      padding-bottom: 10px;
 	      cursor: pointer;
 
-        img {
-          float: right;
-          position: relative;
-        }
 
+        .small-one {
+          display: flex;
+          flex-wrap: wrap;
+          padding-left: 20px;
+        }
         
 	      .ques-body {
 	        display: flex;
@@ -473,7 +476,7 @@ export default {
 
 	    .qt2 {
 	      //padding: 0px 20px 20px 20px;
-
+        padding-left: 20px;
 	      ul {
 	        display: flex;
 	        flex-wrap: wrap;

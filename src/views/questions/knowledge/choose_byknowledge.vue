@@ -26,7 +26,7 @@
               </p>
             </div>
             <div class="tree-class" :class="{treeclassfixed:isfixTab}">
-              <pointTree chooseType="knowledge"  :subjectCode="subjectCode"  @getCheckedNodes="getCheckedNodes" ref="knowledgeTree" :showCheckbox="isMulti"></pointTree>
+              <pointTree chooseType="knowledge"  :subjectCode="subjectCode"  @getCheckedNodes="getCheckedNodes" @handleNodeClick="getCheckedNodes" ref="knowledgeTree" :showCheckbox="isMulti"></pointTree>
             </div>
             <!-- <el-scrollbar
               :wrap-class="{treeclassfixed:isfixTab}"
@@ -288,11 +288,12 @@ export default {
     getCheckedNodes(list) {
 
       this.knowledgeList = list
-
       this.resetPage()
       
 
     },
+
+
 
     getquestionType() {
 
@@ -341,7 +342,6 @@ export default {
       this.getTableData()
     },
     getTableData: debounce(function() {
-      // console.log(this.filter.grade.value)
       if(!this.filter.grade.key) {return false}
       let knowledgeIds = []
       this.knowledgeList.forEach(item=>{

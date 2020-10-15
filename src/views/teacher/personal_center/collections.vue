@@ -386,6 +386,7 @@ export default {
     this.getregion()
     this.getyearList()
     this.gettypeList()
+    this.getTableData()
 
   },
   methods: {

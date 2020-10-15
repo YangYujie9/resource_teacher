@@ -17,6 +17,10 @@ const state = {
   partDifficultyList: [],
   paperId:'',
   isReady: false,
+  siteInfo: {
+    picture:'',
+    copyright:''
+  },
 }
 
 const getters = {
@@ -57,6 +61,11 @@ const getters = {
   isReady: state => {
 
     return state.isReady
+  },
+
+  getsiteInfo: state => {
+
+    return state.siteInfo
   },
 
 }
@@ -110,9 +119,23 @@ const mutations = {
     
   },
 
+  setsiteInfo(state, data) {
 
+    state.siteInfo.picture = data.picture
+    state.siteInfo.copyright = data.copyright
+    
+  },
 }
 function getBasicList(id,context) {
+
+
+    Vue.$http.get(`/api/internal/configuration/logo`) 
+    .then(data=>{
+      if(data.status == '200') {
+        context.commit('setsiteInfo',data.data)
+      }
+    })
+    
 
 
     Vue.$http.get(`/api/open/common/grades/${id}`)

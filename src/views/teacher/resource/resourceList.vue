@@ -6,7 +6,7 @@
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left">
           <div class="search-wrap" style="text-align: center;">
-            <el-radio-group v-model="activeType" size="mini" @click="handleClick">
+            <el-radio-group v-model="activeType" size="mini" @change="handleClick">
               <el-radio-button label="chapter">章节目录</el-radio-button>
               <el-radio-button label="knowledge">知识点</el-radio-button>
             </el-radio-group>
@@ -29,8 +29,8 @@
           <div class="tree-content">
 
             <div class="tree-class">
-              <pointTree chooseType="chapter" :volumeId="volumeId"  @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='chapter'"></pointTree>
-              <pointTree chooseType="knowledge" :subjectCode="subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType=='knowledge'"></pointTree>
+              <pointTree chooseType="chapter" :volumeId="volumeId" @selectnode="defaultChapterCheck" @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='chapter'"></pointTree>
+              <pointTree chooseType="knowledge" :subjectCode="subjectCode" @selectnode="defaultKnowsCheck" @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType=='knowledge'"></pointTree>
             </div>
     
                   
@@ -138,6 +138,7 @@ import { mapGetters } from 'vuex'
 import topPopover from "@/components/Popover/topPopover";
 import leftFixedNav from "@/components/Nav/leftFixedNav";
 import { getfileType } from '@/utils/basic.service.js'
+import { debounce } from '@/utils/public.js'
 export default {
 
 
@@ -224,17 +225,18 @@ export default {
  
   },
   mounted() {
-    this.init()
+    // this.init()
     this.getfileType()
   },
 
   methods: {
 
     init() {
-      this.gradeList.length? this.filter.grade = this.gradeList[0]: null
+      // this.gradeList.length? this.filter.grade = this.gradeList[0]: null
       this.getresourceList()
     },
     handleClick() {
+      this.resetPage()
       // if(this.activeType == 'Chapter') {
       //   this.tagList = this.chapterIds
       // }else {
@@ -249,12 +251,19 @@ export default {
         }
       })
     },
+
+    defaultChapterCheck(list) {
+      this.chapterLists[0] = list
+      this.getresourceList()
+    },
     getCheckedChapters(list) {
       this.chapterLists = list
       this.resetPage()
 
     },
-
+    defaultKnowsCheck(list) {
+      this.knowledgeLists[0] = list
+    },
     getCheckedKnows(list) {
       this.knowledgeLists = list
       this.resetPage()
@@ -280,6 +289,7 @@ export default {
 
       
     },
+
     resourcePreview(resourceId) {
 
       this.$router.push({path: '/teacher/resourceRreview', query: {id:resourceId}})
@@ -308,7 +318,7 @@ export default {
     	this.search.page = 1
     	this.getresourceList()
     },
-    getresourceList() {
+    getresourceList:debounce(function() {
 
       let chapterIds = []
 
@@ -327,7 +337,9 @@ export default {
         fileName: this.search.fileName,
         resourceType: this.resourceType.id,
         // oeseType:'',
-        grade: this.filter.grade.key,
+        // grade: this.filter.grade.key,
+        // oeseId:,
+        oeseBookId: this.volumeId,
         // startTime:'',
         // endTime:'',
         // filterPaper: this.$route.params.resourceType=='ExaminationPaper'?1:'',
@@ -335,16 +347,21 @@ export default {
         page: this.search.page - 1,
         size: this.search.size
       }
+      if(this.activeType == 'chapter') {
+        knowledgeIds = []
+      }else {
+        params.oeseBookId = ''
+        chapterIds = []
+      }
 
-      // if(this.activeType == 'Chapter') {
-      //   params.knowledgeIds = []
-      // }else {
-      //   params.chapterIds = []
-      // }
 
 
+      let type = this.$route.query.type
 
-    	this.$http.post(`/api/open/resources/1/resourceList`, {
+      let method = type?type:1
+
+
+    	this.$http.post(`/api/open/resources/${method}/resourceList`, {
         chapterIds: chapterIds,
         knowledgeIds:knowledgeIds},params)
 
@@ -354,7 +371,7 @@ export default {
     			this.total = data.data.totalElements
     		}
     	})
-    },
+    }),
 
     setClass(fileType) {
     	let obj = {};

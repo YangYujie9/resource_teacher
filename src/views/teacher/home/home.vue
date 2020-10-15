@@ -50,31 +50,34 @@
         </div>
       </div>
 
-      <div class="home-nav">
-        <span>精品资源</span>
-        <el-button type="text" style="color: #ffffff;" @click="getBoutiqueList" >换一批</el-button>
-      </div>
-      <div class="home-content">
-        <div class="resource-wrap">
-          <div class="one-resource" v-for="item in boutiqueList" @click="resourcePreview(item.resourceId)">
+
+      <div v-for="list in NavigationBars">
+        <div class="home-nav">
+          <span>{{list.navigationName}}</span>
+          <el-button type="text" style="color: #ffffff;" @click="getResourceList(list)" >换一批</el-button>
+        </div>
+        <div class="home-content">
+          <div class="resource-wrap">
+            <div class="one-resource" v-for="item in list.resourceList" @click="resourcePreview(item.resourceId)">
 
 
-            <img :src="item.surfaceUrl" alt="" class="pic-class" v-if="item.surfaceUrl">
-            <img src="@/assets/images/default.jpg" style="width: 100%;" v-if="!item.surfaceUrl">
-            <p class="title-class" style="">{{item.name}}</p>
-            <p class="foot-tag">
-              <span>{{item.preview}}人阅读</span>
-              <!-- <span><i class="iconfont iconpinglun1 tag-icon" ></i>{{item.download}}</span>   评论数-->
-              <span><i class="el-icon-download tag-icon" ></i>{{item.download}}</span>
-              <span><i class="iconfont icondianzan tag-icon"></i>{{item.thumbUp}}</span>
-            </p>
+              <img :src="item.surfaceUrl" alt="" class="pic-class" v-if="item.surfaceUrl">
+              <img src="@/assets/images/default.jpg" style="width: 100%;" v-if="!item.surfaceUrl">
+              <p class="title-class" style="">{{item.name}}</p>
+              <p class="foot-tag">
+                <span>{{item.preview}}人阅读</span>
+                <!-- <span><i class="iconfont iconpinglun1 tag-icon" ></i>{{item.download}}</span>   评论数-->
+                <span><i class="el-icon-download tag-icon" ></i>{{item.download}}</span>
+                <span><i class="iconfont icondianzan tag-icon"></i>{{item.thumbUp}}</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
 
 
-      <div class="home-nav">
+<!--       <div class="home-nav">
         <span>热门资源</span>
         <el-button type="text" style="color: #ffffff;" @click="getHotList" >换一批</el-button>
       </div>
@@ -93,7 +96,8 @@
             </p>
           </div>
         </div>
-      </div>
+      </div> -->
+
     </div>  
 
 
@@ -130,6 +134,9 @@ export default {
       hotList:[],
       volumeId:'',
       subjectCode:'',
+      NavigationBars:[],
+
+
 
     };
   },
@@ -160,12 +167,14 @@ export default {
 
   mounted() {
 
+
     this.gradeList.length? this.filter.grade = this.gradeList[0]: null
     // this.subjectCode = this.getuserInfo.subjectCode
     this.getResourceCount()
-    this.getBoutiqueList()
-    this.getHotList()
+
     this.getResourceStatic()
+
+    this.getNavigationBars()
 
 
     
@@ -227,7 +236,8 @@ export default {
     //获取n条精品资源
     getBoutiqueList(){
       this.$http.get(`/api/open/resources/list/number`,{
-          grade:this.filter.grade.key,
+          // grade:this.filter.grade.key,
+
           type:'boutique',
           number:10})
         .then((result)=>{
@@ -240,7 +250,7 @@ export default {
     //获取n条最热资源
     getHotList(){
       this.$http.get(`/api/open/resources/list/number`,{
-          grade:this.filter.grade.key,
+          // grade:this.filter.grade.key,
           type:'hot',
           number:10})
         .then((result)=>{
@@ -250,6 +260,47 @@ export default {
         })
     },
 
+    getResourceList(item) {
+      this.$http.get(`/api/open/resources/list/number`,{
+          // grade:this.filter.grade.key,
+          learningSection: this.getuserInfo.learningSection,
+          subject: this.getuserInfo.subjectCode,
+          type:item.url,
+          number:10
+        })
+        .then((data)=>{
+          if(data.status == '200') {
+
+            item.resourceList = data.data
+          }
+        })
+    },
+
+    getNavigationBars() {
+      this.$http.get(`/api/open/common/enabledNavigationBars/1`)
+      .then((data)=>{
+        if(data.status = '200') {
+
+          this.NavigationBars = data.data
+
+          this.NavigationBars.forEach(item=>{
+
+            // item.resourceList = []
+            this.$set( item, 'resourceList', [] )
+            this.getResourceList(item)
+
+          })
+
+
+
+
+          // console.log(this.NavigationBars)
+          
+          
+        }
+        
+      })
+    },
     resourcePreview(resourceId) {
 
       this.$router.push({path: '/teacher/resourceRreview', query: {id:resourceId}})

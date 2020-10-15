@@ -290,31 +290,25 @@ export default {
         })
       }
 
+
+
+      //章节
+      item.chapterPoint = []
+
+      if(item.chapters && item.chapters.length) {
+        item.chapters.forEach(item1=>{
+          item.chapterPoint.push(item1.name)
+        })
+      } 
       //知识点
       item.knowledgesPoint = []
-      if(this.knowledgeType == 'chapter') {
-        if(item.chapters && item.chapters.length) {
-          item.chapters.forEach(item1=>{
-            item.knowledgesPoint.push(item1.name)
-          })
-        }      
-      }else if(this.knowledgeType == 'knowledge') {
-        if(item.knowledges && item.knowledges.length) {
-          item.knowledges.forEach(item1=>{
-            item.knowledgesPoint.push(item1.name)
-          })
-        }     
-      }else {
-        if(item.chapters && item.chapters.length) {
-          item.chapters.forEach(item1=>{
-            item.knowledgesPoint.push(item1.name)
-          })
-        }else if(item.knowledges && item.knowledges.length) {
-          item.knowledges.forEach(item1=>{
-            item.knowledgesPoint.push(item1.name)
-          })
-        }
-      }
+
+      if(item.knowledges && item.knowledges.length) {
+        item.knowledges.forEach(item1=>{
+          item.knowledgesPoint.push(item1.name)
+        })
+      }     
+
       
 
 
@@ -510,6 +504,7 @@ export default {
         .small-one {
           display: flex;
           flex-wrap: wrap;
+          padding-left: 20px;
         }
 
         .ques-body {

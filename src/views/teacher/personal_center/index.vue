@@ -8,7 +8,7 @@
       <div class="personal-wrap">
         <div class="tab-wrap" v-show="showTree && $route.fullPath.indexOf('myExampaper')==-1">
           <div>
-            <el-tabs v-model="resourceType" @tab-click="handleClick"  v-if="$route.fullPath.indexOf('myWarehouse')==-1 ">
+            <el-tabs v-model="resourceType" v-if="$route.fullPath.indexOf('myWarehouse')==-1 ">
               <el-tab-pane :label="list.name" :name="list.id" v-for="list in resourceList"></el-tab-pane>
               
             </el-tabs>
@@ -43,15 +43,14 @@
                     <i class="iconfont iconshezhi settingicon"></i>
                   </p>
                 </div>
-                <div slot="popover">
-                </div>
+
               </top-popover>
 
               <div class="tree-content">
-                <el-tabs stretch v-model="activeType">
+                <el-tabs stretch v-model="activeType"  @tab-click="handleClick" >
                   <el-tab-pane label="按章节" name="chapter">
                     <div class="tree-class" :class="{treeclassfixed:isfixTab}">
-                      <pointTree chooseType="chapter" :volumeId="volumeId"  @getCheckedNodes="getCheckedChapters" ref="chapterTree" ></pointTree>
+                      <pointTree chooseType="chapter" :volumeId="volumeId" @selectnode="defaultChapterCheck" @getCheckedNodes="getCheckedChapters" ref="chapterTree" ></pointTree>
                     </div>
                   </el-tab-pane>
                   <el-tab-pane label="按考点" name="knowledge">
@@ -63,7 +62,7 @@
                       </p>
                     </div>
                     <div class="tree-class">
-                      <pointTree chooseType="knowledge" :subjectCode="subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" :showCheckbox="isMulti" ></pointTree>
+                      <pointTree chooseType="knowledge" :subjectCode="subjectCode" @selectnode="defaultKnowsCheck" @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" :showCheckbox="isMulti" ></pointTree>
                     </div>
                   </el-tab-pane>
                 </el-tabs>
@@ -72,7 +71,7 @@
             </div>
           </div>
           <div class="right-content-wrap" :class="{fixedright:isfixTab}">
-              <router-view :chapterIds="chapterIds" :knowledgeIds="knowledgeIds" :grade="filter.grade.key" :resourceType="resourceType" :fileTypeList="fileTypeList"></router-view>
+              <router-view :chapterIds="chapterIds" :knowledgeIds="knowledgeIds" :resourceType="resourceType" :fileTypeList="fileTypeList" v-if="isOk"></router-view>
           </div>
         </div>
       </div>  
@@ -109,12 +108,17 @@ export default {
       },
       isMulti: false,
       activeType: "chapter",
+      chapterList:[],
       chapterIds:[],
+      knowledgeList:[],
       knowledgeIds:[],
       resourceType:'',
       fileTypeList:[],
       volumeId:'',
       subjectCode:'',
+      chapterRootId:[],
+      knowledgeRootId:[],
+      isOk: false,
     };
   },
 
@@ -158,12 +162,12 @@ export default {
 
   watch: {
 
-    gradeList(val) {
-      if(val.length) {
-        this.filter.grade = val[0]
-      }
+    // gradeList(val) {
+    //   if(val.length) {
+    //     this.filter.grade = val[0]
+    //   }
 
-    },
+    // },
 
     $route() {
       this.init()
@@ -193,6 +197,11 @@ export default {
           this.resourceType = '0'
           this.$refs.chapterTree.clearNodeCheck();
           this.$refs.knowledgeTree.clearNodeCheck();  
+
+          this.chapterIds = this.activeType == 'chapter'?this.chapterRootId:[]
+          this.knowledgeIds = this.activeType == 'chapter'?[]:this.knowledgeRootId
+
+          this.isOk = true
         })
     
       }
@@ -205,7 +214,6 @@ export default {
       this.volumeId = volumeId
 
       this.subjectCode = subjectCode
-
       
     },
     getfileType() {
@@ -216,14 +224,35 @@ export default {
         }
       })
     },
+
+    defaultChapterCheck(list) {
+      if(list && list.id) {
+        this.chapterRootId[0] = list.id
+        // this.activeType == 'chapter'?this.chapterIds[0] = list.id:null
+      }
+      
+    },
     getCheckedChapters(list) {
 
       let arr = [] 
       list.forEach(item=>{
         arr.push(item.id)
       })
-      this.chapterIds = arr
+      this.chapterList = arr
+      this.chapterIds = this.activeType == 'chapter'?this.chapterIds = arr:[]
     },
+
+
+    defaultKnowsCheck(list) {
+
+      if(list && list.id) {
+        this.knowledgeRootId[0] = list.id
+        // this.activeType == 'chapter'?null:this.knowledgeIds[0] = list.id
+      }
+
+
+    },
+
 
     getCheckedKnows(list) {
 
@@ -231,12 +260,22 @@ export default {
       list.forEach(item=>{
         arr.push(item.id)
       })
-      this.knowledgeIds = arr
+
+      this.knowledgeList = arr
+      this.knowledgeIds = this.activeType == 'chapter'?[]:arr
     },
 
-    handleClick(tab) {
-      // this.resourceType = tab.name
-      // console.log(this.resourceType)
+    handleClick(tab, event) {
+      console.log(this.chapterIds,this.knowledgeIds)
+      this.chapterIds = this.chapterList.length? this.chapterList:this.chapterRootId
+
+      this.knowledgeIds = this.knowledgeList.length?this.knowledgeList:this.knowledgeRootId
+
+      if(this.activeType == 'chapter') {
+        this.knowledgeIds = []
+      }else {
+        this.chapterIds = []
+      }
     }
   }
 };

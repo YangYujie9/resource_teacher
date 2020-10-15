@@ -16,7 +16,7 @@
         <router-view :isfixTab="isfixTab" @backToTop="backToTop"  v-if="isReady"></router-view>
 
       </div>
-      <div class="footer"></div>
+      <div class="footer">{{getsiteInfo.copyright}}</div>
 
 <!--     </el-scrollbar> -->
   </div>
@@ -76,7 +76,8 @@ export default {
 
     ...mapGetters([
       'getuserInfo',
-      'isReady'
+      'isReady',
+      'getsiteInfo'
 
     ]),
 
@@ -196,6 +197,7 @@ export default {
 
     .nav {
       min-width: 1300px;
+      padding: 0 12.5%;
       height: 40px;
       line-height: 40px;
       color: #ffffff;
@@ -205,10 +207,14 @@ export default {
       ul {
         display: flex;
         justify-content: center;
+        min-width: 1100px;
         font-size: 1.1rem;
 
         li {
           margin: 0px 30px;
+          text-align: center;
+          flex-grow: 1;
+          word-wrap: nowrap;
           padding: 0 20px;
           cursor: pointer;
 
@@ -239,6 +245,8 @@ export default {
     height: 60px;
     line-height: 60px;
     background-color: #75777c;
+    text-align: center;
+    color: #ffffff;
   }
 }
 </style>
