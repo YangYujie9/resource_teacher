@@ -225,7 +225,7 @@ export default {
       this.$http.get(`/api/open/common/enabledNavigationBars/0`)
       .then((data)=>{
         if(data.status = '200') {
-
+          // console.log(this.NavList)
           let arr = []
 
           for(let i=0;i<data.data.length;i++) {

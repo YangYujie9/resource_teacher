@@ -320,7 +320,6 @@ export default {
     },
     setClass(fileType) {
       let obj = {};
-     //  obj[fileType[item]] = true;
       switch(fileType) {
         case 'PDF':
           obj = {
@@ -330,19 +329,19 @@ export default {
           break;
         case 'PPT':
           obj = {
-            iconppt:true,
+            iconppt1:true,
             ppticon: true
           }
           break;
         case 'WORD':
           obj = {
-            iconword:true,
+            iconword2:true,
             wordicon: true
           }
           break;
         default:
           obj = {
-            iconword:true,
+            iconword2:true,
             wordicon: true
           }
       } 

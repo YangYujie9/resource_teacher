@@ -855,8 +855,9 @@ export default {
       this.templateSelectShow? this.form.templateType = 'SingleChoose':null
 
       this.form.matchingNum = this.questionTemplate =='MatchingTemplate'?7:0
+      this.changeOption()
       if(this.editable) {
-        this.changeOption()
+        // this.changeOption()
         // if (this.questionType == "SingleChoose" || this.questionType == "MultipleChoose") {
         //   this.optionList = [
         //     { label: "A", check: true, content: "" },
@@ -961,7 +962,7 @@ export default {
     choose_quesnum(list) {
       this.save_prev(true);
 
-      
+      console.log(this.questionOtions,list)
       this.activeName = list.showQuestionTab? 'stems': "analysis"
 
 
@@ -998,13 +999,13 @@ export default {
 
         this.answers = list.answers
         
-        if(this.templateKey == "SingleChoose" ||this.templateKey == "MultipleChoose" ||this.templateKey == "BoolenQuestion") {
+        // if(this.templateKey == "SingleChoose" ||this.templateKey == "MultipleChoose" ||this.templateKey == "BoolenQuestion") {
           this.$nextTick(()=>{
             this.optionList.forEach(item=>{
               this.$refs[`ck${item.label}`].setData(item.content)
             })
           })
-        }
+        // }
         
         // this.$refs.ueA.setData(this.optionList[0].content);
         this.form.optionNum = list.optionNum;

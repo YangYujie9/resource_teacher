@@ -84,7 +84,7 @@
                         type="textarea"
                         class="input-class"
                         :autosize="{ minRows: 3, maxRows: 5}"
-                        maxlength="300"
+                        maxlength="255"
                         show-word-limit
                         placeholder="请输入评论"
                         v-model="commentForm.content">
@@ -368,32 +368,32 @@ export default {
 
 
     setClass(fileType) {
-    	let obj = {};
+      let obj = {};
       switch(fileType) {
-		    case 'PDF':
-		      obj = {
-		      	iconpdf:true,
-		      	pdficon: true
-		      }
-		      break;
-		    case 'PPT':
-	        obj = {
-		      	iconppt:true,
-		      	ppticon: true
-		      }
-	        break;
-	      case 'WORD':
-	        obj = {
-		      	iconword:true,
-		      	wordicon: true
-		      }
-	        break;
-		    default:
-	        obj = {
-		      	iconword:true,
-		      	wordicon: true
-		      }
-			} 
+        case 'PDF':
+          obj = {
+            iconPDF:true,
+            pdficon: true
+          }
+          break;
+        case 'PPT':
+          obj = {
+            iconppt1:true,
+            ppticon: true
+          }
+          break;
+        case 'WORD':
+          obj = {
+            iconword2:true,
+            wordicon: true
+          }
+          break;
+        default:
+          obj = {
+            iconword2:true,
+            wordicon: true
+          }
+      } 
       return obj;
     }
     

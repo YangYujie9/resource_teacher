@@ -128,7 +128,7 @@ html,body{
 
 /* 滚动条 */
 *::-webkit-scrollbar {width:7px; height:10px; background-color:transparent;} /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
-*::-webkit-scrollbar-track {background-color:#f0f6ff;  } /*定义滚动条轨道 内阴影+圆角*/
+*::-webkit-scrollbar-track {background-color:   #f0f6ff;  } /*定义滚动条轨道 内阴影+圆角*/
 *::-webkit-scrollbar-thumb {background-color:rgba(144,147,153,.3); border-radius:6px;} /*定义滑块 内阴影+圆角*/
 .scrollbarHide::-webkit-scrollbar{display: none}
 .scrollbarShow::-webkit-scrollbar{display: block}
@@ -155,4 +155,9 @@ input:focus {
 
 .el-pagination.is-background .btn-next, .el-pagination.is-background .btn-prev, .el-pagination.is-background .el-pager li {
   background-color:transparent;
+}
+
+
+figure {
+  width: auto !important;
 }

@@ -55,7 +55,7 @@
               <p v-if="list.knowledgesPoint">{{list.knowledgesPoint.join()}}</p>
             </div>
 
-            <div  v-if="(list.fillAnswers && list.fillAnswers.length) || (list.smallQuestions && list.smallQuestions.length)">
+            <div  v-if="list.answers.length">
               <p class="title">【答案】</p>
               <p>
                 <span v-for="(item,index1) in list.answers" style="margin-right: 10px;">
@@ -434,15 +434,15 @@ export default {
       }
     }
 
-  // .el-card {
-  //   border: 1px solid #e2e2e2;
-  //   .qt1 img {
-  //     vertical-align: middle;
-  //     float: right;
-  //     max-height: 200px;
-  //     width: auto;
-  //   }
-  // }
+  .el-card {
+    // border: 1px solid #e2e2e2;
+    .qt1 img {
+      vertical-align: middle;
+      float: right;
+      max-height: 200px;
+      width: auto;
+    }
+  }
 }
 </style>
 <style scoped lang="less">

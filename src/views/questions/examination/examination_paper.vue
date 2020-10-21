@@ -39,8 +39,8 @@
         <div style="margin-left:20px;">
           <el-button type="primary" size="mini" @click="scoredialogVisible=true">分值设定</el-button>
           <el-button type="primary" size="mini" @click="analysisdialogVisible=true">试卷分析</el-button>
-          <el-button type="primary" size="mini" @click="finishExam">完成组卷</el-button>
-          <el-button type="primary" size="mini" @click="$router.push('/questions/chooseBychapter')">继续挑题</el-button>
+          <el-button type="primary" size="mini" @click="savePaperVisible = true">完成组卷</el-button>
+          <el-button type="primary" size="mini" @click="continueChoose" v-if="$route.query.paperId">继续挑题</el-button>
           <el-button type="primary" size="mini" @click="cleardialogVisible=true">清空试卷</el-button>
         </div>
 
@@ -67,7 +67,7 @@
 
                     <ul>
                       <li style="width: 100%;" class="selectoption" v-for="list2 in list1.selectoption">
-                        <span style="margin-right: 10px;font-style: italic;">{{list2.key}}.</span>{{list2}}
+                        <span style="margin-right: 10px;font-style: italic;">{{list2.key}}.</span>
                         <div v-html="list2.value"></div>
                       </li>
 
@@ -109,7 +109,7 @@
                     <p>{{list1.knowledgesPoint.join()}}</p>
                   </div>
 
-                  <div  v-if="list1.fillAnswers.length ||list1.smallQuestions.length">
+                  <div  v-if="list1.answers.length">
                     <p class="anstitle">【答案】</p>
                     <p>
                       <span v-for="(list3,index3) in list1.answers"style="margin-right: 10px;">
@@ -171,9 +171,19 @@
       </span>
     </el-dialog>
 
-    <scoredialog :dialogVisible="scoredialogVisible" :paperId="paperId" @close="closescore" :paperName="paperName" :tableData="questionList" @getData="getPaperDetail"></scoredialog>
-    <analysisdialog :dialogVisible="analysisdialogVisible" :paperId="paperId" @close="closeanalysis"></analysisdialog>
-    <downloaddialog :dialogVisible="downloadVisible" :paperId="paperId" @close="closedownload"></downloaddialog>
+
+    <el-dialog :visible.sync="savePaperVisible" width="600px">
+      <p style="margin-top:20px;">保存我的试卷？</p>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="finishExam" size="mini">保 存</el-button>
+        <el-button @click="savePaperVisible = false" size="mini">取 消</el-button>
+      </span>
+    </el-dialog>
+
+
+    <scoredialog :dialogVisible="scoredialogVisible" :paperId="currentPaperId" @close="closescore" :paperName="paperName" :tableData="questionList" @getData="getPaperDetail"></scoredialog>
+    <analysisdialog :dialogVisible="analysisdialogVisible" :paperId="currentPaperId" @close="closeanalysis"></analysisdialog>
+    <downloaddialog :dialogVisible="downloadVisible" :paperId="currentPaperId" @close="closedownload"></downloaddialog>
   </div>
 </template>
 
@@ -203,6 +213,7 @@ export default {
       analysisdialogVisible: false,
       downloadVisible: false,
       cleardialogVisible: false,
+      savePaperVisible: false,
       score: "",
       checkDelete:[],
       download: {
@@ -210,7 +221,8 @@ export default {
         size: "",
         type: "",
         ifparse: false
-      }
+      },
+      currentPaperId:''
     };
   },
   computed: {
@@ -222,6 +234,9 @@ export default {
   mounted() {
 
     // this.paperId = this.$route.params.paperId
+
+    this.currentPaperId = this.$route.query.paperId?this.$route.query.paperId:this.paperId
+
     this.getPaperDetail()
 
 
@@ -264,27 +279,30 @@ export default {
     },
 
     closedownload() {
+      
       this.downloadVisible = false;
     },
 
     finishExam() {
 
-      this.$http.put(`/api/open/paper/addPaper/${this.paperId}`)
+      this.$http.put(`/api/open/paper/addPaper/${this.currentPaperId}`)
       .then((data)=>{
         if(data.status == '200') {
-          this.$confirm("组卷完成，是否下载", {
-            confirmButtonText: "下载试卷",
-            cancelButtonText: "重新挑题",
-            center: true,
-            //type: "warning"
-          })
-            .then(() => {
-              this.downloadVisible = true;
 
-            })
-            .catch(() => {
-              this.$router.push('/questions/chooseBychapter')
-            });
+          this.$router.push('/teacher/personal/myExampaper')
+          // this.$confirm("组卷完成，是否下载", {
+          //   confirmButtonText: "下载试卷",
+          //   cancelButtonText: "重新挑题",
+          //   center: true,
+          //   //type: "warning"
+          // })
+          //   .then(() => {
+          //     this.downloadVisible = true;
+
+          //   })
+          //   .catch(() => {
+          //     this.$router.push('/questions/chooseBychapter')
+          //   });
         }
       })
 
@@ -292,7 +310,7 @@ export default {
     },
     clearBasket() {
 
-      this.$http.delete(`/api/open/paper/deleteAll/${this.paperId}`)
+      this.$http.delete(`/api/open/paper/deleteAll/${this.currentPaperId}`)
       .then(data=>{
         if(data.status == '200') {
 
@@ -344,7 +362,7 @@ export default {
       })
       .then(() => {
 
-        this.$http.delete(`/api/open/paper/${this.paperId}/${questionId}`)
+        this.$http.delete(`/api/open/paper/${this.currentPaperId}/${questionId}`)
         .then(data=>{
           if(data.status == '200') {
             this.getPaperDetail()
@@ -364,8 +382,27 @@ export default {
 
     },
 
+
+
+    continueChoose() {
+
+
+
+      this.$http.post(`/api/open/paper/continueQuestions/${this.$route.query.paperId}`)
+      .then(data=>{
+        if(data.status == '200') {
+          this.$router.push('/questions/chooseBychapter')
+        }
+      })
+
+      
+    },
+
     getPaperDetail() {
-      this.$http.get(`/api/open/paper/${this.paperId}`)
+
+      
+
+      this.$http.get(`/api/open/paper/${this.currentPaperId}`)
       .then((data)=>{
         if(data.status == '200') {
           this.paperName = data.data.paperName
@@ -394,7 +431,7 @@ export default {
             })
           }
 
-          console.log(list)
+          // console.log(list)
 
 
           this.questionList = list
@@ -465,8 +502,8 @@ export default {
         arr.push(`${list.questionId},${list.score}`)
       }
 
-      this.$http.put(`/api/open/paper/${this.paperId}`,{
-        paperId: this.paperId,
+      this.$http.put(`/api/open/paper/${this.currentPaperId}`,{
+        paperId: this.currentPaperId,
         name: this.paperName,
         questions: arr
       })
@@ -483,7 +520,7 @@ export default {
 
 
     changeAnother(questionId) {
-      this.$http.put(`/api/open/paper/changeOneQuestion/${this.paperId}/${questionId}`)
+      this.$http.put(`/api/open/paper/changeOneQuestion/${this.currentPaperId}/${questionId}`)
       .then(data=>{
         if(data.status == '200') {
           this.getPaperDetail()

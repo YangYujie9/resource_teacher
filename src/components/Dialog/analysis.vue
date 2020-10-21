@@ -31,7 +31,7 @@
                 width="80">
               </el-table-column> -->
               <el-table-column
-                prop="level"
+                prop="key"
                 align="center"
                 label="试题难易程度">
               </el-table-column>
@@ -39,16 +39,22 @@
                 prop="num"
                 align="center"
                 label="题量">
+                <template  slot-scope="scope">
+                  {{scope.row.value?scope.row.value.length:0}}
+                </template>
               </el-table-column>
-              <el-table-column
+              <!-- <el-table-column
                 prop="index"
                 align="center"
                 label="题号">
-              </el-table-column>
+              </el-table-column> -->
               <el-table-column
                 prop="pencent"
                 align="center"
                 label="题量占比">
+                <template  slot-scope="scope">
+                  {{scope.row.value?(scope.row.value.length*100/total).toFixed(2):0}}%
+                </template>
               </el-table-column>
             </el-table>
         </div>
@@ -64,12 +70,12 @@
                 width="80">
               </el-table-column> -->
               <el-table-column
-                prop="point"
+                prop="key"
                 align="center"
                 label="知识点">
               </el-table-column>
               <el-table-column
-                prop="num"
+                prop="value"
                 align="center"
                 label="题量">
               </el-table-column>
@@ -78,6 +84,9 @@
                 prop="pencent"
                 align="center"
                 label="题量占比">
+                <template  slot-scope="scope">
+                  {{(scope.row.value*100/total).toFixed(2)}}%
+                </template>
               </el-table-column>
             </el-table>
         </div>
@@ -107,35 +116,9 @@ export default {
   data() {
     return {
       activetype: "entirety",
-      difficultyData: [{
-        level: '易',
-        num:12,
-        index: '2,3,4,5,6',
-        pencent:'12%'
-      },{
-        level: '难',
-        num:12,
-        index: '2,3,4,5,6',
-        pencent:'12%'
-      },{
-        level: '很难',
-        num:12,
-        index: '2,3,4,5,6',
-        pencent:'12%'
-      }],
-      pointData:[{
-        point: '易',
-        num:12,
-        pencent:'12%'
-      },{
-        point: '难',
-        num:12,
-        pencent:'12%'
-      },{
-        point: '很难',
-        num:12,
-        pencent:'12%'
-      }],
+      total: 0,
+      difficultyData: [],
+      pointData:[],
       circle_one_option: {
         title: {
           text: "试题总体分析",
@@ -150,14 +133,15 @@ export default {
         legend: {
           x: "center",
           y: "bottom",
-          data: ["客观题", "主观题"],
+          data: [],
           //icon: "circle",
           padding: 0,
           itemGap: 6,
           itemWidth: 16,
-          formatter: function(name) {
-            return name+'20';
-          },
+          // formatter: function(name) {
+          //   console.log(option)
+          //   // return name+'20';
+          // },
           textStyle: {
             color: "#949494"
           }
@@ -182,8 +166,7 @@ export default {
               }
             },
             data: [
-              { name: "客观题", value: 123 },
-              { name: "主观题", value: 154 }
+      
             ],
             itemStyle: {
               emphasis: {
@@ -201,7 +184,7 @@ export default {
           left: "center",
           top: "0%"
         },
-        color: ["#4fa0f7", "#95c8ff", "#2489f6"],
+        color: ["#4fa0f7", "#95c8ff", "#2489f6","#89b5e6", "#79aee8","#0f77e6"],
         tooltip: {
           trigger: "item",
           formatter: "{b} : {c} ({d}%)"
@@ -209,7 +192,7 @@ export default {
         legend: {
           x: "center",
           y: "bottom",
-          data: ["选择题", "填空题", "解答题"],
+          data: [],
           //icon: "circle",
           padding: 0,
           itemGap: 6,
@@ -237,11 +220,7 @@ export default {
                 formatter: "{d}%"
               }
             },
-            data: [
-              { name: "选择题", value: 123 },
-              { name: "填空题", value: 154 },
-              { name: "解答题", value: 154 }
-            ],
+            data: [],
             itemStyle: {
               emphasis: {
                 shadowBlur: 10,
@@ -289,35 +268,72 @@ export default {
 
     getdata() {
 
+
       this.$http.get(`/api/open/paper/getPaperAnalysis/${this.paperId}`)
       .then((data)=>{
         if(data.status == '200') {
-          console.log(data)
+          // data.data.questionList.forEach(list=>{
+
+          // })
+          this.total = 0
+          this.pointData = []
+          this.circle_one_option.legend.data = []
+          this.circle_one_option.series[0].data = []
+
+          this.circle_two_option.legend.data = []
+          this.circle_two_option.series[0].data = []
+
+          this.difficultyData = data.data.questionList
+
+          for(let key in data.data.typeMap) {
+            this.total += Number(data.data.typeMap[key])
+            this.circle_one_option.legend.data.push(key)
+            // this.circle_one_option.legend.formatter = function(name) {
+            //   return name + data.data.typeMap[key]
+            // }
+            this.circle_one_option.series[0].data.push({name: key, value:data.data.typeMap[key]})
+
+          }
+
+
+          for(let key in data.data.questionTypeMap) {
+            this.circle_two_option.legend.data.push(key)
+            this.circle_two_option.series[0].data.push({name: key, value:data.data.questionTypeMap[key]})
+          }
+
+          for(let key in data.data.knowledgeMap) {
+            this.pointData.push({key: key,value:data.data.knowledgeMap[key]})
+          }
+
+
+
+          if (circle_one_chart) {
+            circle_one_chart.clear();
+            circle_one_chart = null;
+          }
+          // console.log(document.getElementById("circle_one"));
+
+          this.$nextTick(() => {
+
+            circle_one_chart = echarts.init(document.getElementById("circle_one"));
+            circle_one_chart.setOption(this.circle_one_option);
+          });
+
+          if (circle_two_chart) {
+            circle_two_chart.clear();
+            circle_two_chart = null;
+          }
+
+          this.$nextTick(() => {
+            circle_two_chart = echarts.init(document.getElementById("circle_two"));
+            circle_two_chart.setOption(this.circle_two_option);
+          });
         }
       })
 
 
 
-      if (circle_one_chart) {
-        circle_one_chart.clear();
-        circle_one_chart = null;
-      }
-      console.log(document.getElementById("circle_one"));
 
-      this.$nextTick(() => {
-        circle_one_chart = echarts.init(document.getElementById("circle_one"));
-        circle_one_chart.setOption(this.circle_one_option);
-      });
-
-      if (circle_two_chart) {
-        circle_two_chart.clear();
-        circle_two_chart = null;
-      }
-
-      this.$nextTick(() => {
-        circle_two_chart = echarts.init(document.getElementById("circle_two"));
-        circle_two_chart.setOption(this.circle_two_option);
-      });
     }
   }
 };

@@ -41,7 +41,7 @@
         <div class="singal-paper" v-for="list in tableData">
           <div>
             <p class="p1">{{list.name}}</p>
-            <p class="p2"><span>组卷日期：{{list.createTime}}</span><span style="margin-left:20px;">下载日期：未下载</span></p>
+            <p class="p2"><span>组卷日期：{{list.createTime}}</span><span style="margin-left:20px;">下载日期：{{list.downloadedTime?list.downloadedTime:'未下载'}}</span></p>
           </div>
           <div style="min-width: 90px;flex-shrink: 0;">
             <el-button type="text" @click="browsePaper(list.paperId)">浏览</el-button>
@@ -220,11 +220,12 @@ export default {
 
     },
     editPaper(paperId) {
-      this.$store.commit('setpaperId',paperId)
 
-      Cookies.set("paperId", paperId)
+      // this.$store.commit('setpaperId',paperId)
 
-      this.$router.push('/questions/examinationPaper')
+      // Cookies.set("paperId", paperId)
+
+      this.$router.push({path: '/questions/examinationPaper', query: {paperId: paperId}})
     },
     deletePaper(paperId) {
         this.$confirm('此操作将永久删除该组卷吗?', '提示', {

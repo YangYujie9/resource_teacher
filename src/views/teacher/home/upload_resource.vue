@@ -67,11 +67,11 @@
                 </el-upload>
               </el-form-item>
 
-              <el-form-item prop="surface" v-show="showAnswerUpload" :label="resourceFileAttach">
+              <el-form-item prop="answerFile" v-if="showAnswerUpload" :label="resourceFileAttach" :required="true">
                 <el-upload
                   class="upload-demo"
                   accept="file"
-                  ref="surface"
+                  ref="answerFile"
                   action="/api/open/common/file/initUpload"
                   :before-remove="beforeRemove"
                   :on-remove="removeAnswer"
@@ -314,8 +314,12 @@ export default {
       } else {
         this.$message({message:'请上传资源',type:'error'});
       }
-      if (this.uploadAnswerList.length > 0){
-        this.resourceForm.answerFile = {id:this.uploadAnswerList[0].id};
+      if (this.resourceForm.resourceType=='4') {
+        if(this.uploadAnswerList.length > 0) {
+          this.resourceForm.answerFile = {id:this.uploadAnswerList[0].id};
+        }else {
+          return this.$message({message:'请上传套题试卷的答案',type:'error'});
+        }
       }
       let knowledgeIds = []
       let chapterIds = []

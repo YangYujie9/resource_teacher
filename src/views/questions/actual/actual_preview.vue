@@ -36,19 +36,21 @@ export default {
 
   data() {
     return {
-    	paperId:'',
+    	
       isAnswer: false,
 
     };
   },
   computed: {
 
-
+    paperId() {
+      return this.$route.query.paperId
+    }
 
 	},
   mounted() {
 
-    this.paperId = this.$route.query.paperId
+    
 
   },
   methods: {
@@ -108,19 +110,6 @@ export default {
   }
 
 
-  .pt1,.pt2,.middle {
-    p,div,span {
-      background-color:transparent !important;
-      font-size: 1rem;
-      font-family: "JyeMath", "JyeMathLetters", "Times New Roman", "微软雅黑",
-          Arial, "宋体" !important;
-    }
-
-    img {
-      vertical-align: middle;
-      height: 30px;
-    }
-  }
 
 
   .el-card__body {

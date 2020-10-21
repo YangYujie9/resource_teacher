@@ -4,6 +4,7 @@
       :visible.sync="dialogVisible"
       width="800px"
       custom-class="down-wrap"
+      :before-close="closeDialog"
       >
       <div class="down-body">
         <el-form :model="download" ref="ruleForm" label-width="100px" class="demo-ruleForm">

@@ -206,6 +206,10 @@ export default {
     color: #fff;
     border-radius: 0px;
   }
+
+  .el-input-group {
+    border:2px solid #5182f4;
+  }
 }
 </style>
 <style scoped lang="less">
@@ -283,7 +287,7 @@ export default {
       .search {
         width: 750px;
         .search_s {
-          border: 2px solid #5182f4;
+          // border: 2px solid #5182f4;
         }
       }
     }

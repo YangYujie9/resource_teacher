@@ -82,7 +82,7 @@
                         type="textarea"
                         class="input-class"
                         :autosize="{ minRows: 3, maxRows: 5}"
-                        maxlength="300"
+                        maxlength="255"
                         show-word-limit
                         placeholder="请输入评论"
                         v-model="commentForm.content">
@@ -108,9 +108,9 @@
               <div >
                 <p style="height: 36px;line-height: 36px;">读者评论（{{totalCommit}}人参与）</p>  
                 <div class="one-commit" v-for="list in commentList">
-                  <div class="one-commit-left"></div>
+                  <!-- <div class="one-commit-left"></div> -->
                   <div class="one-commit-right">
-                    <p style="">{{list.content}}</p>
+                    <p style="word-break: break-all;">{{list.content}}</p>
                     <p style="display: flex;align-items: center;color: #808182;font-size: 0.9rem;">
                       <span style="margin-right: 10px;">{{list.userName}} </span> 
                       <span style="margin-right: 10px;">{{list.createdDate}}</span>
@@ -158,7 +158,7 @@
           </div>
 
           <div v-for="item in boutiqueList">
-            <span class="cursor" @click="resource_preview(item.resourceId)"><i class="iconfont iconppt ppticon"></i> {{item.name}}</span>
+            <span class="cursor" @click="resource_preview(item.resourceId)"><i class="iconfont" :class="setClass(item.fileType)"></i> {{item.name}}</span>
 
           </div>
         </div>
@@ -491,20 +491,20 @@ export default {
           break;
         case 'PPT':
           obj = {
-            iconppt:true,
-            // ppticon: true
+            iconppt1:true,
+            ppticon: true
           }
           break;
         case 'WORD':
           obj = {
-            iconword:true,
-            // wordicon: true
+            iconword2:true,
+            wordicon: true
           }
           break;
         default:
           obj = {
-            iconword:true,
-            // wordicon: true
+            iconword2:true,
+            wordicon: true
           }
       } 
       return obj;

@@ -374,33 +374,32 @@ export default {
     }),
 
     setClass(fileType) {
-    	let obj = {};
-     //  obj[fileType[item]] = true;
+      let obj = {};
       switch(fileType) {
-		    case 'PDF':
-		      obj = {
-		      	iconPDF:true,
-		      	pdficon: true
-		      }
-		      break;
-		    case 'PPT':
-	        obj = {
-		      	iconppt:true,
-		      	ppticon: true
-		      }
-	        break;
-	      case 'WORD':
-	        obj = {
-		      	iconword:true,
-		      	wordicon: true
-		      }
-	        break;
-		    default:
-	        obj = {
-		      	iconword:true,
-		      	wordicon: true
-		      }
-			} 
+        case 'PDF':
+          obj = {
+            iconPDF:true,
+            pdficon: true
+          }
+          break;
+        case 'PPT':
+          obj = {
+            iconppt1:true,
+            ppticon: true
+          }
+          break;
+        case 'WORD':
+          obj = {
+            iconword2:true,
+            wordicon: true
+          }
+          break;
+        default:
+          obj = {
+            iconword2:true,
+            wordicon: true
+          }
+      } 
       return obj;
     }
     

@@ -214,7 +214,7 @@
             <div class="singal-paper" v-for="list in tableData">
               <div class="singal-paper-left">
                 <div   class="left-title">
-                  <p><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
+                  <p @click="resourcePreview(list.resourceId)"><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
                 </div>
                 <p>
                   <span>贡献者：{{list.userName}}</span>
@@ -390,6 +390,10 @@ export default {
 
   },
   methods: {
+
+    resourcePreview(resourceId) {
+      this.$router.push({path: '/teacher/resourceRreview', query: {id:resourceId}})
+    },
 
     close_similarity() {
       this.similarityVisible = false
@@ -675,8 +679,8 @@ export default {
       })
     },
     setClass(fileType) {
+
       let obj = {};
-     //  obj[fileType[item]] = true;
       switch(fileType) {
         case 'PDF':
           obj = {
@@ -686,19 +690,19 @@ export default {
           break;
         case 'PPT':
           obj = {
-            iconppt:true,
+            iconppt1:true,
             ppticon: true
           }
           break;
         case 'WORD':
           obj = {
-            iconword:true,
+            iconword2:true,
             wordicon: true
           }
           break;
         default:
           obj = {
-            iconword:true,
+            iconword2:true,
             wordicon: true
           }
       } 

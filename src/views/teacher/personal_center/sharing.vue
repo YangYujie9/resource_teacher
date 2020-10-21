@@ -50,7 +50,7 @@
                 <div class="singal-paper" v-for="list in tableData">
                   <div class="singal-paper-left">
 			              <div	 class="left-title">
-			              	<p><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
+			              	<p @click="resourcePreview(list.resourceId)"><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
 			              </div>
 			              <p>
 			                <span>贡献者：{{list.userName}}</span>
@@ -156,6 +156,10 @@ export default {
   },
   methods: {
 
+    resourcePreview(resourceId) {
+      this.$router.push({path: '/teacher/resourceRreview', query: {id:resourceId}})
+    },
+
     // 分页
     handleSizeChange(val) {
       this.search.size = val
@@ -208,33 +212,32 @@ export default {
     	})
     }),
     setClass(fileType) {
-    	let obj = {};
-     //  obj[fileType[item]] = true;
+      let obj = {};
       switch(fileType) {
-		    case 'PDF':
-		      obj = {
-		      	iconPDF:true,
-		      	pdficon: true
-		      }
-		      break;
-		    case 'PPT':
-	        obj = {
-		      	iconppt:true,
-		      	ppticon: true
-		      }
-	        break;
-	      case 'WORD':
-	        obj = {
-		      	iconword:true,
-		      	wordicon: true
-		      }
-	        break;
-		    default:
-	        obj = {
-		      	iconword:true,
-		      	wordicon: true
-		      }
-			} 
+        case 'PDF':
+          obj = {
+            iconPDF:true,
+            pdficon: true
+          }
+          break;
+        case 'PPT':
+          obj = {
+            iconppt1:true,
+            ppticon: true
+          }
+          break;
+        case 'WORD':
+          obj = {
+            iconword2:true,
+            wordicon: true
+          }
+          break;
+        default:
+          obj = {
+            iconword2:true,
+            wordicon: true
+          }
+      } 
       return obj;
     },
 

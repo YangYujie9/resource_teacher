@@ -142,7 +142,7 @@ export default {
             let smallscore = 0
             
             item1.smallQuestions.forEach(item2=>{
-              smallscore += item2.score
+              smallscore += Number(item2.score)
               arr.push(`${item2.questionId},${item2.score}`)
             })
 

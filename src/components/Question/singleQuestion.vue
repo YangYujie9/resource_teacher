@@ -378,15 +378,15 @@ export default {
       }
     }
 
-  // .el-card {
-  //   border: 1px solid #e2e2e2;
-  //   .qt1 img {
-  //     vertical-align: middle;
-  //     float: right;
-  //     max-height: 200px;
-  //     width: auto;
-  //   }
-  // }
+  .el-card {
+    // border: 1px solid #e2e2e2;
+    .qt1 img {
+      vertical-align: middle;
+      float: right;
+      max-height: 200px;
+      width: auto;
+    }
+  }
 
 }
 </style>
