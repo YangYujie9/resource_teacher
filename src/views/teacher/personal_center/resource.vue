@@ -179,8 +179,9 @@ export default {
     },
     getTableData: debounce(function() {
         let params = {
+          searchType : 'person',
            fileType:this.search.fileType,
-          fileName:this.search.fileName,
+          resourceName:this.search.fileName,
           resourceType: this.resourceType=='0'?'':this.resourceType,
           // oeseType:'',
           //grade: this.grade,
@@ -191,10 +192,7 @@ export default {
           size: this.search.size
         }
 
-
-
-
-       this.$http.post(`/api/open/resources/0/resourceList`, {
+       this.$http.post(`/api/open/resources/list`, {
             chapterIds: this.chapterIds,
             knowledgeIds: this.knowledgeIds
           },

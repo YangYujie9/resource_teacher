@@ -17,7 +17,7 @@
       </span>
     </div>
 
-    <paperPreview :paperId="paperId" :isActual="true" :isAnswer="isAnswer"></paperPreview>
+    <paperPreview :paperId="paperId" :isActual="true" :isAnswer="isAnswer" :scoredialogVisible="scoredialogVisible" @close="closeScore"></paperPreview>
 
 
   </div>
@@ -38,13 +38,14 @@ export default {
     return {
     	
       isAnswer: false,
+      scoredialogVisible: false,
 
     };
   },
   computed: {
 
     paperId() {
-      return this.$route.query.paperId
+      return this.$route.query.paperId ||this.$route.query.resourceId
     }
 
 	},
@@ -55,7 +56,9 @@ export default {
   },
   methods: {
 
-
+    closeScore() {
+      this.scoredialogVisible = false
+    }
 
 
 

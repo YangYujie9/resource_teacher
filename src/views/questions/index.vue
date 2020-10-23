@@ -119,16 +119,16 @@ export default {
 
     choose_nau(list) {
 
-      if(this.getuserInfo.userType == 'Teacher') {
+      // if(this.getuserInfo.userType == 'Teacher') {
         this.navList.forEach(list => {
           list.check = false;
         });
         list.check = true;
         this.$router.push(list.route);
-      }else {
+      // }else {
 
-        return this.$message.warning('您无进入此页面的权限')
-      }
+      //   return this.$message.warning('您无进入此页面的权限')
+      // }
 
     },
 

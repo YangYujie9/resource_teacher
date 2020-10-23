@@ -354,8 +354,8 @@ export default {
         questionType: this.search.type,
         difficultyType: this.search.difficulty,
         name: this.search.keyword,
-        grade: this.filter.grade.key,
-        
+        // grade: this.filter.grade.key,
+        subjectCode:this.subjectCode,
         page: this.search.page - 1,
         size: this.search.size,
         // subject:this.subjectCode

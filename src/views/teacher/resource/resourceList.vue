@@ -332,9 +332,13 @@ export default {
         knowledgeIds.push(item.id)
       })
 
+      let type = this.$route.query.type
+
+
       let params = {
+        searchType: type?'school':'open',
         fileType: this.search.fileType,
-        fileName: this.search.fileName,
+        resourceName: this.search.fileName,
         resourceType: this.resourceType.id,
         // oeseType:'',
         // grade: this.filter.grade.key,
@@ -356,12 +360,8 @@ export default {
 
 
 
-      let type = this.$route.query.type
 
-      let method = type?type:1
-
-
-    	this.$http.post(`/api/open/resources/${method}/resourceList`, {
+    	this.$http.post(`/api/open/resources/list`, {
         chapterIds: chapterIds,
         knowledgeIds:knowledgeIds},params)
 

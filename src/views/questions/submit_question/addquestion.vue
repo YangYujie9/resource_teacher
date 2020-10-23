@@ -222,7 +222,8 @@
               <ckeditor ref="ckF" v-show="currentOption.label == 'F'" :readOnly="isError&&optionReadonly"></ckeditor>
               <ckeditor ref="ckG" v-show="currentOption.label == 'G'" :readOnly="isError&&optionReadonly"></ckeditor>
               <ckeditor ref="ckH" v-show="currentOption.label == 'H'" :readOnly="isError&&optionReadonly"></ckeditor>
-              
+              <ckeditor ref="ck✓" v-show="currentOption.label == '✓'" :readOnly="isError&&optionReadonly"></ckeditor>
+              <ckeditor ref="ck×" v-show="currentOption.label == '×'" :readOnly="isError&&optionReadonly"></ckeditor>
             </div>
             <!-- <div v-if="templateKey=='BoolentemplateKey'">
               <ckeditor ref="ckY" v-show="currentOption.label == 'Y'"></ckeditor>
@@ -674,7 +675,7 @@ export default {
       .then(data=>{
         if(data.status == '200') {
 
-          if(data.data && data.data.oese) {
+          if(data.data && data.data.oese&& data.data.oese.id) {
             this.versionList.push({oeseId:data.data.oese.id,name:data.data.oese.name})
 
             let arr = []
@@ -689,7 +690,7 @@ export default {
               callback: action => {
 
                 this.$router.push(`/questions/actualPaper/maintain/${this.actualPaper.paperId}`)
-                console.log(action)
+                
               }
             });
           }
@@ -806,13 +807,13 @@ export default {
           // this.qnumDisable = true
           
           this.optionList = [
-            { label: "A", content: "" },
-            { label: "B", content: "" }
+            { label: "×", content: "" },
+            { label: "✓", content: "" }
           ];
           this.currentOption = this.optionList[0]
           this.form.optionNum = 2;
           this.form.relOptionNum = 1;
-          this.answers = [{value:"A"}];
+          this.answers = [{value:"✓"}];
         } else if (this.templateKey == "FillingQuestionTemplate") {
           
           // this.form.questionNum = 1
@@ -962,7 +963,7 @@ export default {
     choose_quesnum(list) {
       this.save_prev(true);
 
-      console.log(this.questionOtions,list)
+      // console.log(this.questionOtions,list)
       this.activeName = list.showQuestionTab? 'stems': "analysis"
 
 
@@ -1103,13 +1104,23 @@ export default {
 
             this.questionType = this.typeList.filter(item=>{
               return item.name == this.actualPaper.questionType
-            })[0].code            
+            })[0].code 
+
+            this.templateSelectShow? this.form.templateType = 'SingleChoose':null           
             
-            
+
           }else if(this.isError) {
             this.questionType = this.typeList.filter(item=>{
               return item.code == this.questionDetail.questionType
             })[0].code 
+            if(this.templateKey == 'BoolenQuestion') {
+              this.optionList = [
+                { label: "×", content: "" },
+                { label: "✓", content: "" }
+              ];
+              this.form.optionNum = 2;
+            }
+
           }
           else {
              this.questionType = this.typeList[0].code;

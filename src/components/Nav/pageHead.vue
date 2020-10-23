@@ -53,7 +53,7 @@
 
     <div class="middle">
       <div class="middle-wrap">
-        <div class="logo">
+        <div class="logo cursor" @click="$router.push('/teacher/home')">
           <img src="@/assets/images/logo3.png" alt width="280px" v-if="!getsiteInfo.picture" />
           <img :src="getsiteInfo.picture" alt width="260px" v-if="getsiteInfo.picture" />
         </div>

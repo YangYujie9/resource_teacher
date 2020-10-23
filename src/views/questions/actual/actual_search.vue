@@ -50,7 +50,7 @@
           label="试卷标题">
           <template slot-scope="scope">
             <div>
-              <p>{{scope.row.name}}</p>
+              <p @click="previewPaper(scope.row)" class="cursor">{{scope.row.name}}</p>
               <p style="color: #bcbec2;">
                 <span>{{scope.row.gradeName}}</span>
                 <el-divider direction="vertical"></el-divider>

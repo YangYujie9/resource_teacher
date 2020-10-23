@@ -49,7 +49,7 @@
             <el-input v-model="paperName" placeholder="请输入内容" style="width:360px;" @change="setScore"></el-input>
           </p>
           <div class="content">
-            <el-button type="primary" size="mini" class="uploadbtn" @click="downloadVisible = true">试卷下载</el-button>
+            <!-- <el-button type="primary" size="mini" class="uploadbtn" @click="downloadVisible = true">试卷下载</el-button> -->
             <div v-for="(list,index) in questionList" class="singlediv">
               <p><span>{{$changeIndex(index+1)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
               <div class="singleques" v-for="(list1,index1) in list.list">
@@ -496,10 +496,13 @@ export default {
     setScore(list) {
 
 
+
       let arr = []
       // console.log(list)
       if(list && list.questionId) {
         arr.push(`${list.questionId},${list.score}`)
+      }else {
+        return 
       }
 
       this.$http.put(`/api/open/paper/${this.currentPaperId}`,{

@@ -124,7 +124,7 @@ export default {
 						})
 
 					}else {
-						this.$http.post(`/api/internal/user/login`,this.loginForm)
+						this.$http.post(`/api/open/user/recorderLogin`,this.loginForm)
 
 						.then(data => {
 

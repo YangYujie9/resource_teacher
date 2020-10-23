@@ -143,17 +143,24 @@ export default {
             
             item1.smallQuestions.forEach(item2=>{
               smallscore += Number(item2.score)
-              arr.push(`${item2.questionId},${item2.score}`)
+              item2.score?arr.push(`${item2.questionId},${item2.score}`):null
             })
 
             arr.push(`${item1.questionId},${smallscore}`)
             
           }else {
-            arr.push(`${item1.questionId},${item1.score}`)
+            item1.score?arr.push(`${item1.questionId},${item1.score}`):null
           }
         })
 
       })
+
+
+      if(arr && arr.length) {
+
+      }else {
+        return this.$message.warning('未设定分值')
+      }
 
       // console.log(arr)
 
@@ -186,6 +193,7 @@ export default {
 
   .el-input__inner {
     background-color: transparent !important;
+    text-align: center;
   }
 
 

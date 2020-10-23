@@ -1,6 +1,7 @@
 <template>
   <div class="rescoure-preview" >
-    <div class="bread-div">
+    <el-backtop target=".ques-home .el-scrollbar__wrap" :bottom="80"></el-backtop>
+    <div class="bread-div" style="width: 80%;padding-right: 20px;">
       <span style=""><i class="iconfont iconshouye iconclass"></i>当前位置：首页 > {{resourceInfo.resourceName}}详情</span>
       <span><el-button type="text" @click="$router.go(-1)">返回</el-button></span>
     </div>
@@ -65,8 +66,10 @@
                 <div class="bottomContent" v-if="showPreview === 'pdf' && pdfPreviewUrl">
                   <div class="bottomLeft">
                         <pdf-preview 
+                          v-if="totalPages"
                           :pdf-url='pdfPreviewUrl'
-                          :pdf-pagenum='totalPages'>
+                          :pdf-pagenum='totalPages'
+                          :currentPageNum="currentPageNum">
                         </pdf-preview >      
                   </div>
                 </div>    
@@ -214,7 +217,8 @@ export default {
       resourceInfo:{},
       previewTab: true,
       //预览
-      totalPages:1,
+      totalPages:0,
+      currentPageNum:10,
       pdfPreviewUrl:'',
       picturePreviewUrl:'',
       showPreview :'pdf',
@@ -314,6 +318,7 @@ export default {
                 this.previewFile(this.resourceInfo.previewFile.id)
               } else {
                 this.previewTab = false;
+                return this.$message.warning('该文件类型暂不支持预览')
               }
               break;
             case 'Picture':
@@ -322,6 +327,7 @@ export default {
               break;
             default:
               this.previewTab = false;
+              return this.$message.warning('该文件类型暂不支持预览')
           }   
         }
       })
@@ -536,7 +542,7 @@ export default {
 </style>
 <style scoped lang="less">
 .rescoure-preview {
-  width: 70%;
+  width: 75%;
   margin: 0 auto;
 
 

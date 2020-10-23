@@ -129,7 +129,7 @@
                 label="试卷标题">
                 <template slot-scope="scope">
                   <div>
-                    <p>{{scope.row.name}}</p>
+                    <p @click="previewPaper(scope.row)" class="cursor">{{scope.row.name}}</p>
                     <p style="color: #bcbec2;">
                       <span>{{scope.row.gradeName}}</span>
                       <el-divider direction="vertical"></el-divider>
@@ -156,6 +156,12 @@
               </el-table-column> -->
               <el-table-column
                 prop="createTime"
+                label="上传日期"
+                align="center"
+                width="200">
+              </el-table-column>
+              <el-table-column
+                prop="collectTime"
                 label="收藏日期"
                 align="center"
                 width="200">
@@ -430,7 +436,9 @@ export default {
       this.testBasket = num
     },
 
-
+    previewPaper(row) {
+      this.$router.push({path: `/questions/actualPaper/actualPreview`,query: row})
+    },
     chooseFolder(list) {
       this.folderNameList.forEach(item=>{
         item.check = false

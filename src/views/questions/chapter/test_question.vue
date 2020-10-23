@@ -88,7 +88,6 @@
     </div>
 
     <div class="card-wrap">
-
        <!-- <div v-for="(list,index) in tableData">
           <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder">
             
@@ -297,7 +296,7 @@ export default {
         
         page: this.search.page - 1,
         size: this.search.size,
-        subject:this.subjectCode
+        subjectCode:this.subjectCode
         // knowledgeId: this.search.difficulty,
       }
       this.$http.post(`/api/open/question/1/questions`,{

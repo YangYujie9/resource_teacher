@@ -58,6 +58,9 @@ export default {
     isAnswer: {
       type: Boolean,
       
+    },
+    scoredialogVisible: {
+      type: Boolean
     }
   },
 
@@ -68,7 +71,6 @@ export default {
       paperName: "",
       paperType:'',
       items: [],
-      scoredialogVisible: false,
       analysisdialogVisible: false,
       downloadVisible: false,
       cleardialogVisible: false,
@@ -89,7 +91,6 @@ export default {
   },
   watch: {
     paperId(val) {
-
       val?this.getPaperDetail():null
     },
 
@@ -122,7 +123,7 @@ export default {
   methods: {
 
     closescore() {
-      this.scoredialogVisible = false;
+      this.$emit('close')
     },
 
 

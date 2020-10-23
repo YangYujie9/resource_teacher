@@ -65,6 +65,14 @@
                   :on-exceed="exceedFile">
                   <el-button size="mini" type="primary">点击上传</el-button>
                 </el-upload>
+                <div v-for="(item, index) in uploadSiteList" :key="index">
+                    <el-progress 
+                      :percentage="item.percent || 0"
+                      :stroke-width="5" 
+                      :status="item.status" >
+                    </el-progress>
+                </div>
+
               </el-form-item>
 
               <el-form-item prop="answerFile" v-if="showAnswerUpload" :label="resourceFileAttach" :required="true">
@@ -82,6 +90,13 @@
                   :on-exceed="exceedFile">
                   <el-button size="mini" type="primary">点击上传</el-button>
                 </el-upload>
+                <div v-for="(item, index) in uploadAnswerList" :key="index">
+                    <el-progress 
+                      :percentage="item.percent || 0"
+                      :stroke-width="5" 
+                      :status="item.status" >
+                    </el-progress>
+                </div>
               </el-form-item>
 
               <p class="top-p">2、资源信息</p>
@@ -369,6 +384,8 @@ export default {
       this.uploadAnswerList = [];
     },
 
+
+
     handleBeforeUploadSite(file) {
       this.handleBeforeUpload(file,'site');
     },
@@ -385,12 +402,15 @@ export default {
         if (curUpload === 'site'){
           this.uploadSiteList = [...this.uploadSiteList, {
             name: file.name,
-            id: ''
+            id: '',
+            percent: 10,
+            
           }]
         } else {
           this.uploadAnswerList = [...this.uploadAnswerList, {
             name: file.name,
-            id: ''
+            id: '',
+            percent: 10,
           }]
         }
         
@@ -400,16 +420,29 @@ export default {
           name: file.name,
           size: file.size
         }).then((res)=>{
-          
+
+          const totalPieces = file.size > this.bytesPerPiece ? Math.ceil(file.size / this.bytesPerPiece) : 1;
+          const percentAdd = Math.floor((100 - 15) / totalPieces); //上传进度增长值，预留15%给前后
+
           uploadFilesBySteaps({
             file: file,
             uploadUrl:res.data.uploadUrl, 
             limitSize: this.bytesPerPiece,
-            callBack: ()=>{},
-            errBack: ()=>{
+            callBack: ()=>{
               if (curUpload === 'site'){
+                this.uploadSiteList[currentKey].percent+=percentAdd;
                 //this.uploadSiteList = [];
               } else {
+                this.uploadAnswerList[currentKey].percent+=percentAdd;
+                //this.uploadAnswerList = [];
+              }
+            },
+            errBack: ()=>{
+              if (curUpload === 'site'){
+                this.uploadSiteList[currentKey].status == 'exception';
+                //this.uploadSiteList = [];
+              } else {
+                this.uploadAnswerList[currentKey].status == 'exception';
                 //this.uploadAnswerList = [];
               }
             },
@@ -421,7 +454,11 @@ export default {
                 this.confirmUpload(mergeResponse.data.id, currentKey,curUpload);
               }).catch((mergeError)=>{
                 this.$message({message:'上传失败，请删除并重新上传',type:'error'});
-                
+                if (curUpload === 'site'){
+                  this.uploadSiteList[currentKey].status == 'exception';
+                } else {
+                  this.uploadAnswerList[currentKey].status == 'exception';
+                }
               })
             } else {
               this.confirmUpload(uploadResponse[0].id, currentKey,curUpload);
@@ -430,7 +467,12 @@ export default {
             this.$message({message:'网络状况不佳，请删除并重新上传',type:'error'});
           })
         }).catch((initErr)=>{
-          
+
+          if (curUpload === 'site'){
+            this.uploadSiteList[currentKey].status == 'exception';
+          } else {
+            this.uploadAnswerList[currentKey].status == 'exception';
+          }
         })
         return false;
       },
@@ -443,11 +485,20 @@ export default {
           this.$message({message:'上传成功',type:'success'});
           if (curUpload === 'site'){
             this.uploadSiteList[currentKey].id = id;
+            this.uploadSiteList[currentKey].percent = 100;
+            this.uploadSiteList[currentKey].status = 'success';
           } else {
             this.uploadAnswerList[currentKey].id = id;
+            this.uploadAnswerList[currentKey].percent = 100;
+            this.uploadAnswerList[currentKey].status = 'success';
           }
         }).catch((completeErr)=>{
           this.$message({message:completeErr || '上传失败',type:'warning'});
+          if (curUpload === 'site'){
+            this.uploadSiteList[currentKey].status == 'exception';
+          } else {
+            this.uploadAnswerList[currentKey].status == 'exception';
+          }
         })
       },
   }

@@ -136,7 +136,7 @@ export default {
     },
 
     showCheckbox() {
-      console.log(666)
+
       this.$refs.tree.setCheckedNodes(this.currenttSelectNode);
 
       this.$emit('handleNodeClick',this.currenttSelectNode)
@@ -229,15 +229,14 @@ export default {
           this.defaultSelectedNode = node;
           this.constructTreeData(node, data.members);
           this.isDisable? node.disabled = true:null
-          treeData.push(node);
-
+          // treeData = node.children
+          treeData.push(node)
           if (!this.defaultRoot) {
             this.firstSchool = this.deepFirstSearch(node);
           }
           this.originalTreeData = treeData;
 
         }
-        // console.log(this.originalTreeData)
 
       }
       
