@@ -3,6 +3,14 @@
     <div class="search-div el-radio-costom">
       <ul>
         <li>
+          <p>学科</p>
+          <div class="div2">
+            <el-radio-group v-model="search.subjectCode" size="mini" @change="getTruePaperList" :disabled="subjectEditable">
+              <el-radio-button :label="list.code" :key="list.code" v-for="list in SubjectList1">{{list.subjectName}}</el-radio-button>
+            </el-radio-group>
+          </div>
+        </li>
+        <li>
           <p>年级</p>
           <div class="div2">
             <el-radio-group v-model="search.grade" size="mini" @change="getTruePaperList">
@@ -26,6 +34,19 @@
             </el-radio-group>
           </div>
         </li>
+<!--         <li>
+          <p>学科</p>
+          <div class="div2">
+             <el-select v-model="search.regionId" placeholder="请选择" size="mini" clearable @change="getTruePaperList">
+              <el-option
+                v-for="item in regionList"
+                :key="item.key"
+                :label="item.value"
+                :value="item.key">
+              </el-option>
+            </el-select>
+          </div>
+        </li> -->
         <li>
           <p>地区</p>
           <div class="div2">
@@ -128,6 +149,7 @@ export default {
       paperList:[],
       tableData:[],
       search: {
+        subjectCode:'',
         type: '',
         grade: "",
         year: "全部",
@@ -135,7 +157,7 @@ export default {
         page: 1,
         size: 20,
       },
-
+      subjectEditable: false,
       total:0,
     };
   },
@@ -154,6 +176,15 @@ export default {
 
 
 
+    },
+
+    SubjectList1() {
+      let arr1 = []
+      arr1.push({code:'',subjectName:'全部'})
+      this.subjectList.forEach(item=>{
+        arr1.push(item)
+      })
+      return arr1 
     },
 
     gradeList1() {
@@ -188,13 +219,16 @@ export default {
 
   watch: {
     isComplete(val) {
-      this.getTruePaperList()
-      this.search.type = ''
-      this.search.grade = ''
-      this.search.year = "全部"
-      this.search.region = ''
-      this.search.page = 1
-      this.search.size = 20
+      if(typeof(val) !== 'undefined') {
+        this.getTruePaperList()
+        this.search.type = ''
+        this.search.grade = ''
+        this.search.year = "全部"
+        this.search.region = ''
+        this.search.page = 1
+        this.search.size = 20
+      }
+
     },
 
 
@@ -207,7 +241,20 @@ export default {
 
   mounted() {
 
+    
+
+    if(this.getuserInfo.userType == 'Teacher') {
+      this.subjectEditable = true
+      this.search.subjectCode = this.subjectList.filter(item=>{
+        return item.code == this.getuserInfo.subjectCode
+      })[0].code
+    }else {
+      this.search.subjectCode = ''
+      
+    }
+
     this.getTruePaperList()
+
   },
   methods: {
 
@@ -250,6 +297,7 @@ export default {
         testPaperType: this.search.type,
         year:this.search.year == '全部'?'':this.search.year,
         regionId: this.search.regionId,
+        subjectCode: this.search.subjectCode,
         page: this.search.page - 1,
         size: this.search.size
       }
@@ -325,6 +373,16 @@ export default {
       border-color:#409EFF;
     }
   }
+
+  .div2 {
+    .el-radio-button__orig-radio:disabled:checked+.el-radio-button__inner {
+      background-color: #a5a7a9;
+      border-color: #a5a7a9;
+      box-shadow: -1px 0 0 0 #a5a7a9;
+    }
+  }
+
+
 
   .el-table th, {
     background-color: #9cb9ff; 

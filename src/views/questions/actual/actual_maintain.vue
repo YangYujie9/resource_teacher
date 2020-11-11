@@ -16,7 +16,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="设置试卷学科：" prop="subject">
-          <el-select v-model="form.subject" placeholder="请选择" @change="getquestionType" disabled>
+          <el-select v-model="form.subject" placeholder="请选择" @change="getquestionType" :disabled="subjectDisabled">
             <el-option
               v-for="item in subjectList"
               :key="item.code"
@@ -87,7 +87,7 @@
     </div>
 
     <div v-else>
-      <div v-for="(list,index) in tableData">
+      <div v-for="(list,index) in tableData" style="padding-bottom: 20px;">
         <p style="line-height: 36px;">
           <span>{{$changeIndex(index+1)}}</span>、
           <span>{{list.questionTypeName}}</span>
@@ -125,7 +125,7 @@ export default {
       activePage: '真题查询',
       isTemplate: false,
       questionTypeList:[],
-
+      subjectDisabled: false,
       tableData:[],
       isCompleted: false,
       submitdIndex:'',
@@ -199,6 +199,8 @@ export default {
 
 
   mounted() {
+
+    this.subjectDisabled = this.getuserInfo.userType == 'Teacher'?true: false
     this.init()
   },
   methods: {
@@ -321,7 +323,7 @@ export default {
 
 
     finishSubmit() {
-      this.$http.put(`/api/open/paper/addPaper/${this.paperId}`)
+      this.$http.put(`/api/open/paper/addPaper/${this.paperId}/false`)
       .then((data)=>{
         if(data.status == '200') {
           this.$confirm('组卷完成，是否进入真题试卷？', '', {
@@ -336,7 +338,9 @@ export default {
 
 
             }).catch(() => {
-              this.reload()
+              
+              this.$router.push(`/questions/actualPaper/search/false`)
+              // this.reload()
             });
           
         }

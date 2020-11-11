@@ -5,11 +5,11 @@
         <section class="content cursor" @click="list.showDetail=!list.showDetail">
           <div class="qt1">
             <div class="ques-body">
-              <span v-if="showSimilarity" class="order">{{index+1}}、</span>
+              <span v-if="showSimilarity" class="order"><span>{{index+1}}、</span></span>
               <div v-html="list.name" style="width: 100%;"></div>
             </div>
           </div>
-          <div class="qt2" v-if="list.options && list.options.length">
+          <div class="qt2" v-if="list.options && list.options.length && list.questionTypeTemplate!='BoolenQuestionTemplate'">
             <ul>
               <li style="width: 100%;" class="selectoption" v-for="list1 in list.selectoption">
                 <span style="margin-right: 10px;font-style: italic;">{{list1.key}}.</span>
@@ -20,27 +20,29 @@
           </div>
 
           <!-- 小题 -->
-          <div class="" v-if="list.smallQuestions && list.smallQuestions.length" style="margin: 10px 0 0 10px;">
+          <div class="" v-if="list.smallQuestions && list.smallQuestions.length" style="margin: 10px 0 0 10px;" >
             <div v-for="(list1,index1) in list.smallQuestions">
+              <!-- 无问题单独录入不显示小题题干 -->
+              <div :class="{qtwrap:list.questionTypeTemplate=='GestaltFillsUpTemplate'||list1.questionType=='NoAloneEnter'}" v-if="list1.questionType!='NoAloneEnter'">
+                <div class="qt1">
+                  <div class="small-one">
+                    <span class="order"><span>{{index1+1}}、</span></span>
+                    <span v-html="list1.name"></span>
+                  </div>
 
-              <div class="qt1" v-if="list1.name">
-                <div class="small-one">
-                  <span>{{index1+1}}</span><span>、</span>
-                  <span v-html="list1.name"></span>
                 </div>
+                <div class="qt2" v-if="list1.options.length && list1.questionType!='BoolenQuestion'">
+                  <ul>
+                    <li style="width: 100%;" class="selectoption" v-for="item in list1.selectoption">
 
-              </div>
-              <div class="qt2" v-if="list1.options.length">
-                <ul>
-                  <li style="width: 100%;" class="selectoption" v-for="item in list1.selectoption">
-
-                    <span>{{item.key}}</span>
-                    <span>、</span>
-                    <span v-html="item.value"></span> 
-                  </li>
+                      <span>{{item.key}}</span>
+                      <span>、</span>
+                      <span v-html="item.value"></span> 
+                    </li>
 
 
-                </ul>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -59,8 +61,8 @@
               <p class="title">【答案】</p>
               <p>
                 <span v-for="(item,index1) in list.answers" style="margin-right: 10px;">
-                 <span  v-if="list.smallQuestions.length" style="margin-left: 0px;">{{index1+1}}.</span>
-                 <span style="margin-left: 0px;" v-html="item"></span>
+                 <span  v-if="list.smallQuestions.length" style="margin-left: 0px;">{{item.index}}.</span>
+                 <span style="margin-left: 0px;" v-html="item.name"></span>
                 </span>
               </p>
             </div>
@@ -84,33 +86,36 @@
             <span>难度：{{list.difficultyTypeName}}</span>
             <span>题型：{{list.questionTypeName}}</span>
           </p>
-          <p class="pt2" v-if="showAction">
-            <span @click.stop="getSimilarity(list.questionId)" class="foot-icon" v-if="showSimilarity">
-              <i class="iconfont iconpaibanguanli iconcolor"></i> 相似题
-            </span>
-            <span @click.stop="errorCorrection(list.questionId)" class="foot-icon">
-              <i class="iconfont iconjiucuo iconcolor"></i> 纠错
-            </span>
-            <span class="foot-icon" @click.stop="addCollectFolder(list.questionId)">
-              <!-- <i class="iconfont iconshoucang1" style="color:#ffda33;"></i> -->
-              <i class="iconfont iconshoucang2 iconcolor"></i>
-              收藏
-            </span>
+          <p class="pt2" >
+
+            <span v-if="showAction">
+              <span @click.stop="getSimilarity(list.questionId)" class="foot-icon" v-if="showSimilarity">
+                <i class="iconfont iconpaibanguanli iconcolor"></i> 相似题
+              </span>
+              <span @click.stop="errorCorrection(list)" class="foot-icon">
+                <i class="iconfont iconjiucuo iconcolor"></i> 纠错
+              </span>
+              <span class="foot-icon" @click.stop="addCollectFolder(list.questionId)">
+                <!-- <i class="iconfont iconshoucang1" style="color:#ffda33;"></i> -->
+                <i class="iconfont iconshoucang2 iconcolor"></i>
+                收藏
+              </span>
 
 
-            <span class="foot-icon" @click.stop="list.showDetail=!list.showDetail" v-if="showSimilarity">
-              <i class="iconfont iconxiangqing1 iconcolor"></i> {{list.showDetail?'收起':'详情'}}
-            </span>
-<!--             <span class="foot-icon" @click="list.showDetail=false" v-if="list.showDetail && showSimilarity">
-              <i class="iconfont iconxiangqing1 iconcolor"></i> 题干
-            </span> -->
+              <span class="foot-icon" @click.stop="list.showDetail=!list.showDetail" v-if="showSimilarity">
+                <i class="iconfont iconxiangqing1 iconcolor"></i> {{list.showDetail?'收起':'详情'}}
+              </span>
+  <!--             <span class="foot-icon" @click="list.showDetail=false" v-if="list.showDetail && showSimilarity">
+                <i class="iconfont iconxiangqing1 iconcolor"></i> 题干
+              </span> -->
 
 
-            <span class="foot-icon" @click.stop="list.showDetail=true" v-if="!list.showDetail && !showSimilarity">
-              <i class="iconfont iconwenbensousuo iconcolor"></i>显示解析
-            </span>
-            <span class="foot-icon" @click.stop="list.showDetail=false" v-if="list.showDetail && !showSimilarity">
-              <i class="iconfont iconwenbensousuo iconcolor"></i>隐藏解析
+              <span class="foot-icon" @click.stop="list.showDetail=true" v-if="!list.showDetail && !showSimilarity">
+                <i class="iconfont iconwenbensousuo iconcolor"></i>显示解析
+              </span>
+              <span class="foot-icon" @click.stop="list.showDetail=false" v-if="list.showDetail && !showSimilarity">
+                <i class="iconfont iconwenbensousuo iconcolor"></i>隐藏解析
+              </span>
             </span>
             <!--<span class="foot-icon">
               <i class="iconfont iconwenbensousuo iconcolor"></i>
@@ -124,8 +129,8 @@
       </div>
     </el-card>
 
-    <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket"></similarityDialog>
-    <errorDialog :dialogVisible="errorVisible" :questionId="errorId" @close="close_error"></errorDialog>
+    <similarityDialog :dialogVisible="similarityVisible" :subjectCode="subjectCode" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket"></similarityDialog>
+    <errorDialog :dialogVisible="errorVisible" :questionId="error.errorId" @close="close_error" :typeTemplate="error.typeTemplate"></errorDialog>
     <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog>
   </div>
 </template>
@@ -135,6 +140,7 @@ import { mapGetters } from 'vuex'
 import similarityDialog from '@/components//Dialog/similarity'
 import errorDialog from '@/components/Dialog/error'
 import favoriteDialog from '@/components/Dialog/favorite'
+import { handleQuestion } from '@/utils/public.js';
 export default {
   name:'singleQuestion',
   props: {
@@ -166,6 +172,9 @@ export default {
     knowledgeType: {
       type:String,
       default:'All'
+    },
+    subjectCode: {
+      type: String,
     }
 
   },
@@ -182,7 +191,11 @@ export default {
       favoriteVisible: false,
       similarityId:'',
       collectId:'', 
-      errorId: '',   
+      error: {
+        errorId: '', 
+        typeTemplate:'', 
+      }
+       
     };
   },
   computed: {
@@ -251,15 +264,20 @@ export default {
   },
   methods: {
     initTableData(data) {
+
       let arr = []
-      data.forEach(item=>{
-        arr.push(item)
+
+      data.forEach((item,index)=>{
+        // 
         item.showDetail = false
+
         item.answers = []
-        this.handleQuestion(item,item)
 
+        handleQuestion(item,item)
 
+        arr.push(item)
       })
+
       this.questionList = arr
 
       this.$nextTick(()=>{
@@ -267,58 +285,59 @@ export default {
 
       })
     },
-    handleQuestion(item,item0) {
-      //选项
-      item.selectoption = []
-      if(item.options && item.options.length) {
-        item.options.forEach(item1=>{
-          item.selectoption.push({key:item1.key,id:item1.value.id,value:item1.value.name})
-          // for(let key in item1) {
-          //   item.selectoption.push({word:key,value:item1[key]})
-          // }
-        })
-      }
-      //答案
-      //item.answers = []
-      if(item.fillAnswers && item.fillAnswers.length) {
-        item.fillAnswers.forEach(item1=>{
-          item0.answers.push(item1.value.name)
+    // handleQuestion(item,item0,index) {
+    //   //选项
+    //   item.selectoption = []
+    //   if(item.options && item.options.length) {
+    //     item.options.forEach(item1=>{
+    //       item.selectoption.push({key:item1.key,id:item1.value.id,value:item1.value.name})
+    //       // for(let key in item1) {
+    //       //   item.selectoption.push({word:key,value:item1[key]})
+    //       // }
+    //     })
+    //   }
+    //   //答案
+    //   //item.answers = []
+    //   if(item.fillAnswers && item.fillAnswers.length) {
+    //     item0.answers.push({index:index+1,name:''})
+    //     item.fillAnswers.forEach(item1=>{
+          
+    //       item0.answers[item0.answers.length-1].name += item1.value.name + ' '
+    //       // for(let key in item1) {
+    //       //   item0.answers.push(item1[key])
+    //       // }
+    //     })
+    //   }
 
-          // for(let key in item1) {
-          //   item0.answers.push(item1[key])
-          // }
-        })
-      }
 
 
+    //   //章节
+    //   item.chapterPoint = []
 
-      //章节
-      item.chapterPoint = []
+    //   if(item.chapters && item.chapters.length) {
+    //     item.chapters.forEach(item1=>{
+    //       item.chapterPoint.push(item1.name)
+    //     })
+    //   } 
+    //   //知识点
+    //   item.knowledgesPoint = []
 
-      if(item.chapters && item.chapters.length) {
-        item.chapters.forEach(item1=>{
-          item.chapterPoint.push(item1.name)
-        })
-      } 
-      //知识点
-      item.knowledgesPoint = []
-
-      if(item.knowledges && item.knowledges.length) {
-        item.knowledges.forEach(item1=>{
-          item.knowledgesPoint.push(item1.name)
-        })
-      }     
+    //   if(item.knowledges && item.knowledges.length) {
+    //     item.knowledges.forEach(item1=>{
+    //       item.knowledgesPoint.push(item1.name)
+    //     })
+    //   }     
 
       
 
 
-      if(item.smallQuestions && item.smallQuestions.length) {
-        item.smallQuestions.forEach(item1=>{
-          this.handleQuestion(item1,item)
-        })
+    //   if(item.smallQuestions && item.smallQuestions.length) {
+    //     item.smallQuestions.forEach((item1,index1)=>{
+    //       this.handleQuestion(item1,item,index1)
+    //     })
         
-      }
-    },
+    //   }
+    // },
     getSimilarity(id) {
       // console.log(id)
       // this.$emit('getSimilarity',id)
@@ -326,9 +345,11 @@ export default {
       this.similarityVisible = true
     },
 
-    errorCorrection(id) {
+    errorCorrection(list) {
 
-      this.errorId = id
+      this.error.errorId = list.id
+
+      this.error.typeTemplate = list.questionTypeTemplate
       
       this.errorVisible = true
     },
@@ -360,7 +381,9 @@ export default {
           type:'warning'
         })
       }
-      this.$http.post(`/api/open/paper/addTestBasket/hand/${id}`)
+      this.$http.post(`/api/open/paper/addTestBasket/hand/${id}`,{},{
+        subjectCode: this.subjectCode,
+      })
       .then((data)=>{
         if(data.status == '200') {
           this.isReset = false
@@ -402,6 +425,52 @@ export default {
 };
 </script>
 <style lang="less">
+
+
+.MathJye {
+    direction: ltr;
+    display: inline-block;
+    float: none;
+    font-family: "Times New Roman","宋体";
+    font-size: 15px;
+    font-style: normal;
+    font-weight: normal;
+    letter-spacing: 1px;
+    line-height: normal;
+    text-align: left;
+    text-indent: 0px;
+    text-transform: none;
+    white-space: nowrap;
+    word-spacing: normal;
+    overflow-wrap: normal;
+    text-size-adjust: none;
+    border-width: 0px;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+    margin: 0px;
+    padding: 0px;
+
+    table {
+      display: inline-block;
+      vertical-align: middle;
+
+      td {
+        text-align: center;
+      }
+    }
+
+    span {
+      display: inline;
+      position: static;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      vertical-align: 0;
+      line-height: normal;
+      text-decoration: none;
+    }
+}
 .single-question {
     .el-card__body {
       padding: 0px;
@@ -448,7 +517,7 @@ export default {
 <style scoped lang="less">
 .single-question {
   .box-card {
-    margin-top: 15px;
+    margin-bottom: 15px;
     border-radius: 8px;
     position: relative;
     .maskdiv {
@@ -487,6 +556,10 @@ export default {
       background-color: #f0f3f9;
 
       // border-radius: 50% 0;
+      .order {
+        flex-shrink: 0;
+      }
+
 
       .qt1 {
         overflow: hidden;
@@ -503,8 +576,8 @@ export default {
 
         .small-one {
           display: flex;
-          flex-wrap: wrap;
-          padding-left: 20px;
+          // flex-wrap: wrap;
+          padding-left: 10px;
         }
 
         .ques-body {
@@ -512,9 +585,7 @@ export default {
           // flex-wrap: wrap;
           // align-items: flex-end;
 
-          .order {
-            flex-shrink: 0;
-          }
+
         }
 
 
@@ -523,6 +594,7 @@ export default {
 
       .qt2 {
         //padding: 0px 20px 20px 20px;
+        width: 100%;
         padding-left: 20px;
 
         ul {
@@ -551,6 +623,20 @@ export default {
         }
       }
 
+
+      //
+      .qtwrap {
+        display: flex;
+        align-items: center;
+
+        .qt1 {
+          padding-bottom: 0px;
+        }
+
+        .qt2 ul {
+          flex-wrap: nowrap;
+        }
+      }
       // .top {
       //   border-bottom: 1px dashed #dbdee4;
       //   padding-bottom: 20px;

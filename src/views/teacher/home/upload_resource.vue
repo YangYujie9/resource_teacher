@@ -43,9 +43,9 @@
 
           <div class="content-warp el-radio-costom">
             
-            <el-form :model="resourceForm" ref="resourceForm" :rules="resourceRules"  size="small" label-width="100px" class="demo-ruleForm" :show-message='false'>
+            <el-form :model="resourceForm" ref="resourceForm" :rules="rules"  size="small" label-width="100px" class="demo-ruleForm" >
               <p class="top-p">1、选择资源</p>
-              <el-form-item label="资源类型" :required="true" >
+              <el-form-item label="资源类型" :required="true" prop="resourceType" >
                 <el-radio-group v-model="resourceForm.resourceType" @change="resourceTypeChange">
                   <el-radio-button :label="item.id" :value="item.id" v-for="item in resourceTypeList">{{item.name}}</el-radio-button>
                 </el-radio-group>
@@ -104,7 +104,7 @@
               <el-form-item label="资源名称" prop="name" :required="true">
                 <el-input v-model="resourceForm.name" placeholder="请输入名称"></el-input>
               </el-form-item>
-              <el-form-item label="资源简介">
+              <el-form-item label="资源简介" prop="synopsis">
                 <el-input
                   type="textarea"
                   class="input-class"
@@ -122,9 +122,9 @@
                 </el-select>
               </el-form-item>
 
-              <el-form-item label="科目" prop="subjectId" >
-                  <el-select v-model="resourceObject.subjectName"  placeholder="请选择" class="input-class" disabled >
-                    <el-option :label="resourceObject.subjectName" value="subjectId">{{resourceObject.subjectName}}</el-option>
+              <el-form-item label="科目" >
+                  <el-select v-model="resourceObject.subjectName"  placeholder="请选择" class="input-class" :disabled="subjectDisabled" >
+                    <el-option :label="list.subjectName" :value="list.code" :key="list.code" v-for="list in subjectList"></el-option>
                   </el-select>
               </el-form-item>
 
@@ -185,17 +185,21 @@ export default {
         grade:'',
         chapterIdList:[],
         knowledgeIdList:[],
-        openState:'Privately',
+        openState:'Open',
         oeseId:'',
-        oeseBookId:''
+        oeseBookId:'',
+        learningSection:'',
+        subjectCode:''
       },
-     resourceRules: {
+      rules: {
         resourceType: [{ required: true, message: '请选择资源类型', trigger: 'change' }],
         name:[
           { required: true, message: '请输入资源名称', trigger: 'blur' },
-          { max: 30, message: "允许的最大长度是30位", trigger: "blur" }
+          { max: 60, message: "允许的最大长度是60位", trigger: "blur" }
         ],
+        resourceSite:[{ required: true, message: '请上传资源', trigger: 'change' }],
         synopsis:[{ max: 200, message: "允许的最大长度是200位", trigger: "blur" }],
+        grade: [{ required: true, message: '请选择年级', trigger: 'change' }],
         openState: [{required: true, message: '请设置权限', trigger: 'change' }]
       },
       resourceObject:{
@@ -214,6 +218,7 @@ export default {
       bytesPerPiece: 50 * 1024 * 1024,
       volumeId:'',
       subjectCode:'',
+      subjectDisabled:false,
 
     };
   },
@@ -222,16 +227,27 @@ export default {
     leftFixedNav
   },
   watch: {
-    getuserInfo(val) {
+    isReady(val) {
       if(val) {
-        this.resourceObject.subjectName = this.getuserInfo.subject.name
+        if(this.getuserInfo.userType == 'Teacher') {
+          this.resourceObject.subjectName = this.getuserInfo.subjectCode
+          this.subjectDisabled = true
+        }else {
+          this.resourceObject.subjectName = this.subjectList[0].code
+        }
+
+
+        // this.resourceObject.subjectName = this.getuserInfo.subject.name
         this.resourceForm.learningSection = this.getuserInfo.learningSection
+
+        this.resourceForm.grade = this.gradeList[0].key;
       }
     },
   },
   computed: {
     ...mapGetters([
       'gradeList',
+      'subjectList',
       'getuserInfo',
       'isReady'
     ]),
@@ -245,12 +261,18 @@ export default {
     }
   },
   mounted() {
-    if(this.getuserInfo && this.getuserInfo.subject) {
-      this.resourceObject.subjectName = this.getuserInfo.subject.name
+    
+    if(this.isReady) {
+      if(this.getuserInfo.userType == 'Teacher') {
+        this.resourceObject.subjectName = this.getuserInfo.subjectCode
+        this.subjectDisabled = true
+      }else {
+        this.resourceObject.subjectName = this.subjectList[0].code
+      }
       this.resourceForm.learningSection = this.getuserInfo.learningSection
-    }
-    if(this.gradeList.length) {
+
       this.resourceForm.grade = this.gradeList[0].key;
+   
     }
 
   },
@@ -336,6 +358,11 @@ export default {
           return this.$message({message:'请上传套题试卷的答案',type:'error'});
         }
       }
+      
+      if(!this.knowledgeTags.length && !this.chapterTags.length) {
+        return this.$message.warning('请选择关联的章节或者知识点');
+      }
+      
       let knowledgeIds = []
       let chapterIds = []
       this.knowledgeTags.forEach(item=>{
@@ -344,9 +371,12 @@ export default {
       this.chapterTags.forEach(item=>{
         chapterIds.push(item.id)
       })
+
+
       this.resourceForm.chapterIdList = chapterIds;
       this.resourceForm.knowledgeIdList = knowledgeIds;
       this.resourceForm.oeseBookId = this.volumeId
+      this.resourceForm.subjectCode = this.subjectCode
 
       this.$refs.resourceForm.validate((valid)=>{
           if(valid){
@@ -359,9 +389,7 @@ export default {
                   // this.toPageBack();
                 }
               })
-   
           } else {
-            this.$message({message:'valid no pass',type:'warning'});
             return false;
           }
       })

@@ -3,13 +3,11 @@
     <!-- <ul><li v-for="i in 89">{{i}}</li></ul> -->
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left">
-        <!-- <div class="tree-wrap" :class="{fixedclass:isfixTab}"> -->
-          <div class="tab-class">
-            <top-popover v-if="isReady" chooseType="knowledge" ref="filter" @setparams="setparams">
+        <selectPointTree ref="tree" @getPointIds="getPointIds" treeType="knowledge"></selectPointTree>
+<!--             <top-popover v-if="isReady" chooseType="knowledge" ref="filter" @setparams="setparams">
               <div slot="reference">
                 <p class="top-title">
                   <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
-                  <!-- <span v-if="$refs.filter" >{{$refs.filter.volume.name}}</span> -->
                   
                   <i class="iconfont iconshezhi settingicon"></i>
                 </p>
@@ -25,27 +23,11 @@
                 <span :class="{active:isMulti}" @click="isMulti=true">[多选]</span>
               </p>
             </div>
-            <div class="tree-class" :class="{treeclassfixed:isfixTab}">
-              <pointTree chooseType="knowledge"  :subjectCode="subjectCode"  @getCheckedNodes="getCheckedNodes" @handleNodeClick="getCheckedNodes" ref="knowledgeTree" :showCheckbox="isMulti"></pointTree>
-            </div>
-            <!-- <el-scrollbar
-              :wrap-class="{treeclassfixed:isfixTab}"
-              wrap-style="max-height: calc(100vh - 400px);margin-bottom:0px;"
-              view-class="view-box"
-              view-style="height:100%;"
-              :native="false"
-            > 
-
-                <el-tree
-                :data="treeData.data"
-                :show-checkbox="isMulti"
-                node-key="id"
-                check-on-click-node
-              ></el-tree> 
-
-             </el-scrollbar>  -->
-          </div>
-        <!-- </div> -->
+            <div class="tree-content">
+              <div class="tree-class" :class="{treeclassfixed:isfixTab}">
+                <pointTree chooseType="knowledge"  :subjectCode="subjectCode"  @getCheckedNodes="getCheckedNodes" @handleNodeClick="getCheckedNodes" ref="knowledgeTree" :showCheckbox="isMulti"></pointTree>
+              </div>
+            </div> -->
       </div>
 
       <div slot="right" class="right">
@@ -129,7 +111,7 @@
           <!-- <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" :tableData="tableData">
             
           </singleQuestion> -->
-          <questionList :isAnswer="isAnswer" :tableData="tableData" knowledgeType="knowledge" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" ></questionList>
+          <questionList :isAnswer="isAnswer" :subjectCode="subjectCode" :tableData="tableData" knowledgeType="knowledge" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" ></questionList>
 
 
           <div class="pagination">
@@ -161,7 +143,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import leftFixedNav from "@/components/Nav/leftFixedNav";
-import topPopover from "@/components/Popover/topPopover";
+// import topPopover from "@/components/Popover/topPopover";
 import basketTag from "@/components/Popover/basketTag";
 // import similarityDialog from '@/components/Dialog/similarity'
 // import errorDialog from '@/components/Dialog/error'
@@ -171,11 +153,12 @@ import questionList from '@/components/Question/questionList'
 import { getquestionType } from '@/utils/basic.service.js'
 import { debounce } from '@/utils/public.js'
 // import { getmyTestBasket } from '@/utils/basic.service.js'
-
+import selectPointTree from "@/components/Popover/selectPointTree";
 export default {
   components: {
     leftFixedNav,
-    topPopover,
+    // topPopover,
+    selectPointTree,
     basketTag,
     // similarityDialog,
     // errorDialog,
@@ -215,8 +198,7 @@ export default {
       errorVisible: false,
       favoriteVisible:false,
       subjectCode:'',
-      knowledgeList:[],
-      volumeId:'',
+      knowledgeIds:[]
     };
   },
   computed: {
@@ -260,17 +242,25 @@ export default {
 
 
   },
-
+  activated() {
+    this.getmyTestBasket()
+    this.getTableData()
+  },
   methods: {
-    setparams(volumeId,subjectCode) {
+    // setparams(volumeId,subjectCode) {
 
-      this.volumeId = volumeId
+    //   this.volumeId = volumeId
 
-      this.subjectCode = subjectCode
+    //   if(this.subjectCode != subjectCode) {
+        
+    //     this.subjectCode = subjectCode
 
-      this.getquestionType()
+    //     this.getquestionType()
+    //   }
+
       
-    },
+      
+    // },
     close_similarity() {
       this.similarityVisible = false
       this.getTableData()
@@ -285,13 +275,13 @@ export default {
     },
 
 
-    getCheckedNodes(list) {
+    // getCheckedNodes(list) {
 
-      this.knowledgeList = list
-      this.resetPage()
+    //   this.knowledgeList = list
+    //   this.resetPage()
       
 
-    },
+    // },
 
 
 
@@ -337,17 +327,37 @@ export default {
       this.$emit('backToTop')
     },
 
+
+    getPointIds(list1,list2,subjectCode) {
+
+      if(!list2.length) {
+        this.tableData = []
+        this.total = 0
+
+        return
+      }
+
+      this.knowledgeIds = list2
+
+      if(this.subjectCode != subjectCode) {
+        
+        this.subjectCode = subjectCode
+
+        this.getquestionType()
+      }
+      
+      this.resetPage()
+    },
     resetPage() {
       this.search.page = 1
       this.getTableData()
     },
     getTableData: debounce(function() {
-      if(!this.filter.grade.key) {return false}
-      let knowledgeIds = []
-      this.knowledgeList.forEach(item=>{
-        knowledgeIds.push(item.id)
-      })
-
+      // if(!this.filter.grade.key) {return false}
+      // let knowledgeIds = []
+      // this.knowledgeList.forEach(item=>{
+      //   knowledgeIds.push(item.id)
+      // })
 
       let params = {
         method:1,
@@ -362,7 +372,7 @@ export default {
         // knowledgeId: this.search.difficulty,
       }
       this.$http.post(`/api/open/question/1/questions`,{
-        knowledgeIds: knowledgeIds,
+        knowledgeIds: this.knowledgeIds,
       },params)
       .then((data)=>{
         
@@ -483,7 +493,8 @@ export default {
       })
 
       this.$http.post(`/api/open/paper/addTestBasket/batchAdd`,{
-        questionIds:ids.join()
+        questionIds:ids.join(),
+        subjectCode: this.subjectCode
       })
       .then((data)=>{
         if(data.status == '200') {
@@ -573,7 +584,8 @@ export default {
     font-weight: 600;
     display: flex;
     justify-content: space-between;
-    padding-left: 30px;
+    padding-left: 50px;
+    padding-right: 20px;
 
     .p2 {
       color: #abb4ca;

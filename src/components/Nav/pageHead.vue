@@ -36,12 +36,12 @@
 
               </el-popover>
             </li> -->
-            <li @click="$router.push({path: '/teacher/home',query:{type:'2'}})">
+            <li @click="$router.push({path: '/teacher/home',query:{type:'2'}})" :class="{activelink:searchType=='school'}">
               <!-- <img src="@/assets/images/ben.png" alt /> -->
               <i class="iconfont iconboshimao iconclass1"></i>
               <span> 校本资源</span>
             </li>
-            <li @click="$router.push({path: '/teacher/home'})">
+            <li @click="$router.push({path: '/teacher/home'})" :class="{activelink:searchType=='open'}">
               <!-- <img src="@/assets/images/zi.png" alt /> -->
               <i class="iconfont iconkapian iconclass1"></i>
               <span> 公共资源</span>
@@ -58,7 +58,7 @@
           <img :src="getsiteInfo.picture" alt width="260px" v-if="getsiteInfo.picture" />
         </div>
         <div class="search">
-          <el-radio-group v-model="type" size="medium">
+          <!-- <el-radio-group v-model="type" size="medium">
             <el-radio-button label="课件"></el-radio-button>
             <el-radio-button label="学案"></el-radio-button>
             <el-radio-button label="教案"></el-radio-button>
@@ -68,10 +68,16 @@
             <el-radio-button label="在线课程"></el-radio-button>
             <el-radio-button label="学校"></el-radio-button>
             <el-radio-button label="老师"></el-radio-button>
-          </el-radio-group>
+          </el-radio-group> -->
 
           <div class="search_s">
+            <!-- <el-select v-model="selectSource" placeholder="请选择" style="width: 120px;">
+                <el-option :label="list.navigationName" :value="list.navigationId.id" v-for="list in resourceTypeList"></el-option>
+              </el-select> -->
             <el-input placeholder="请输入内容" v-model="keyword" class="input-with-select">
+              <el-select v-model="selectSource" slot="prepend" placeholder="请选择">
+                <el-option :label="list.navigationName" :value="list.navigationId.id" v-for="list in resourceTypeList"></el-option>
+              </el-select>
               <el-button slot="append" type="primary">搜索</el-button>
             </el-input>
           </div>
@@ -113,11 +119,23 @@ export default {
       type: "上海",
 			keyword: "",
       logo:'',
+      searchType:'',
+      selectSource: '',
+      resourceTypeList:[]
     };
   },
 
   watch: {
+    $route(to,from) {
 
+
+      if(to.fullPath.indexOf('/teacher')==0 && to.fullPath.indexOf('/teacher/personal')==-1) {
+
+        this.searchType = to.query.type == '2'?'school':'open'
+      }else {
+        this.searchType = ''
+      }
+    },
   },
   computed: {
     
@@ -129,6 +147,13 @@ export default {
 
   },
   mounted() {
+
+
+    this.getNavigationBars()
+    if(this.$route.fullPath.indexOf('/teacher')==0 && this.$route.fullPath.indexOf('/teacher/personal')==-1) {
+
+      this.searchType = this.$route.query.type == '2'?'school':'open'
+    }
 
   },
   methods: {
@@ -146,14 +171,28 @@ export default {
     personalInfo() {
       this.$router.push('/teacher/personal')
     },
-    choose_nau(index) {
-      this.NauList.forEach(item => {
-        item.check = false;
-      });
-      this.NauList[index].check = true;
-      this.$router.push(this.NauList[index].route);
-    },
 
+    getNavigationBars() {
+      this.$http.get(`/api/open/common/enabledNavigationBars/0`)
+      .then((data)=>{
+        if(data.status = '200') {
+          // console.log(this.NavList)
+          let arr = []
+
+          for(let i=0;i<data.data.length;i++) {
+
+            if(data.data[i].navigationName != '首页' && data.data[i].navigationName != '题库') {
+
+              arr.push(data.data[i])
+            }
+          }
+          this.resourceTypeList = arr
+
+          this.selectSource = this.resourceTypeList.length?this.resourceTypeList[0].navigationId.id:''
+        }
+        
+      })
+    },
     handleCommand(command) {
       if(command == 'personal') {
         this.$router.push('/teacher/personal')
@@ -200,13 +239,17 @@ export default {
     border-color: #5182f4;
   }
   .el-input-group__append,
-  .el-input-group__prepend {
+  .el-input-group__prepend{
     background-color: #5182f4;
     border: 1px solid #5182f4;
     color: #fff;
     border-radius: 0px;
   }
-
+  .el-input-group__prepend {
+    width: 120px;
+    // background-color: transparent; 
+    // border-right: 2px solid #5182f4;
+  }
   .el-input-group {
     border:2px solid #5182f4;
   }
@@ -240,6 +283,10 @@ export default {
         li {
           margin-left: 20px;
           cursor: pointer;
+        }
+
+        .activelink {
+          color: #409EFF;
         }
       }
     }
@@ -285,7 +332,7 @@ export default {
       align-items: center;
 
       .search {
-        width: 750px;
+        width: 720px;
         .search_s {
           // border: 2px solid #5182f4;
         }

@@ -220,7 +220,7 @@
             <div class="singal-paper" v-for="list in tableData">
               <div class="singal-paper-left">
                 <div   class="left-title">
-                  <p @click="resourcePreview(list.resourceId)"><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
+                  <p @click="resourcePreview(list.resourceId)" class="hiddentext"><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
                 </div>
                 <p>
                   <span>贡献者：{{list.userName}}</span>
@@ -281,7 +281,7 @@
         
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="addFolder" size="small">添 加</el-button>
+        <el-button type="primary" @click="addFolder" size="small">确 定</el-button>
         <el-button @click="dialogVisible = false" size="small">取 消</el-button>
       </span>
     </el-dialog>
@@ -384,6 +384,11 @@ export default {
     knowledgeIds(val) {
       this.resetPage()
     },
+  },
+  activated() {
+    
+    this.getTableData()
+
   },
   mounted() {
     this.getquestionType()
@@ -492,7 +497,7 @@ export default {
     },
     addFolder() {
       if(this.editfolderId) {
-        this.$http.post(`/api/open/collectFolder/updateFolder`,{
+        this.$http.put(`/api/open/collectFolder/updateFolder`,{
           folderId: this.editfolderId,
           folderName: this.newfolderName
         })
@@ -500,6 +505,7 @@ export default {
           if(data.status == '200') {
             
             this.dialogVisible = false
+            this.$message.success('新建成功')
             this.getFolderNameList()  
           }
         })
@@ -513,6 +519,7 @@ export default {
           if(data.status == '200') {
             
             this.dialogVisible = false
+            this.$message.success('编辑成功')
             this.getFolderNameList()  
           }
         })
@@ -521,7 +528,7 @@ export default {
     },
 
     deleteFolder(folderId) {
-        this.$confirm('确定删除该收藏夹吗', '提示', {
+        this.$confirm('删除收藏夹后该收藏夹下的收藏记录也将删除，确定删除吗', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -550,6 +557,11 @@ export default {
     },
     getTableData: debounce(function() {
 
+      if(!this.chapterIds.length && !this.knowledgeIds.length) {
+          this.tableData = []
+          this.total = 0
+          return 
+      }
       //题库
       if(this.resourceType == 'question') {
 
@@ -927,6 +939,8 @@ export default {
           &-left {
 
             width: 70%;
+            min-width: 0px;
+
             .left-title {
               padding-right: 20px;
               font-size: 1.2rem;

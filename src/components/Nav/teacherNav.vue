@@ -69,6 +69,13 @@ export default {
   watch: {
 
   },
+  activated() {
+    
+    this.meauList.forEach(list=>{
+      this.$route.fullPath.indexOf(list.index)>-1?this.activeIndex = list.index:null
+    })
+
+  },
   mounted() {
 
       this.meauList.forEach(list=>{

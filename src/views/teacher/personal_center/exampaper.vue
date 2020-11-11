@@ -39,14 +39,14 @@
       </div>
       <div class="wrap-content-right-wrap">
         <div class="singal-paper" v-for="list in tableData">
-          <div>
-            <p class="p1">{{list.name}}</p>
+          <div style="min-width: 0px;padding-right: 10px;">
+            <p class="p1 hiddentext">{{list.name}}</p>
             <p class="p2"><span>组卷日期：{{list.createTime}}</span><span style="margin-left:20px;">下载日期：{{list.downloadedTime?list.downloadedTime:'未下载'}}</span></p>
           </div>
           <div style="min-width: 90px;flex-shrink: 0;">
             <el-button type="text" @click="browsePaper(list.paperId)">浏览</el-button>
             <el-button type="text" @click="downloadPaper(list.paperFileId)">下载</el-button>
-            <el-button type="text" @click="editPaper(list.paperId)">编辑</el-button>
+            <el-button type="text" @click="editPaper(list.paperId)">重新编辑</el-button>
             <el-button type="text" @click="deletePaper(list.paperId)">删除</el-button>
           </div>
         </div>
@@ -90,7 +90,7 @@
         </div>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="" size="mini">确 定</el-button>
+        <!-- <el-button type="primary" @click="" size="mini">确 定</el-button> -->
         <el-button @click="dialogVisible = false" size="mini">取 消</el-button>
       </span>
     </el-dialog>
@@ -144,6 +144,12 @@ export default {
       this.resetPage()
     },
   },
+
+  activated() {
+    
+    this.getTableData()
+
+  },
   mounted() {
     this.getTableData()
   },
@@ -169,7 +175,12 @@ export default {
 
 
     getTableData: debounce(function() {
-
+      
+      if(!this.chapterIds.length && !this.knowledgeIds.length) {
+          this.tableData = []
+          this.total = 0
+          return 
+      }
 
       let params = {
         name: this.search.keyword,
@@ -203,7 +214,6 @@ export default {
     browsePaper(paperId) {
 
       this.paperId = paperId
-      console.log(this.paperId)
       this.dialogVisible = true
 
     },
@@ -221,11 +231,29 @@ export default {
     },
     editPaper(paperId) {
 
-      // this.$store.commit('setpaperId',paperId)
+      this.$confirm('重新编辑将会清空试题篮，保存将生成新试卷，是否继续？', '温馨提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$http.post(`/api/open/paper/continueQuestions/${paperId}`)
+        .then(data=>{
+          if(data.status == '200') {
 
-      // Cookies.set("paperId", paperId)
+            this.$store.commit('setpaperId',data.data.id)
 
-      this.$router.push({path: '/questions/examinationPaper', query: {paperId: paperId}})
+            Cookies.set("paperId", data.data.id)
+
+            this.$router.push('/questions/examinationPaper')
+          }
+        })
+        
+        
+      }).catch(() => {
+                  
+      });
+
+      
     },
     deletePaper(paperId) {
         this.$confirm('此操作将永久删除该组卷吗?', '提示', {

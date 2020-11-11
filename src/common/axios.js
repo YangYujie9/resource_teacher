@@ -5,7 +5,7 @@ import store from '../store'
 // import iView from 'iview';
 import { Message } from 'element-ui';
 import Cookies from 'js-cookie'
-
+import router from '@/router/index'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
@@ -73,7 +73,7 @@ axiosService.interceptors.response.use(
     NProgress.done()
     if (response.status !== 200) {
       response.config.httpConfig.loading //&& iView.LoadingBar.error();
-      !response.config.httpConfig.clsoeMessage && Message.error('网络异常');
+      !response.config.httpConfig.clsoeMessage && Message.error(response.data.data.msg ||'网络异常');
       return Promise.reject(response.data);
     } else {
       if(response.data.status !== "200") {
@@ -82,14 +82,14 @@ axiosService.interceptors.response.use(
         if(response.data.status === "401") {
           // 清空失效 token，防止无效 token 重复请求
           Cookies.remove('resource-teacher');
-          localStorage.removeItem('Author-Info');
+          localStorage.removeItem('resource-teacher');
           setTimeout(function(){
             window.location.href = "/login";
           }, 3000)
         }
         return Promise.reject(response.data);
       } else {
-        response.config.httpConfig.loading //&& iView.LoadingBar.finish();
+        response.config.httpConfig.loading //&& NProgress.done()
         return response.data;
       }
     }
@@ -97,6 +97,19 @@ axiosService.interceptors.response.use(
   error => {
     error.config.httpConfig.loading //&& iView.LoadingBar.error();
     !error.config.httpConfig.clsoeMessage && Message.error(error.code === 'ECONNABORTED' ? '请求超时' : '网络异常' );
+
+    // 获取状态码
+    // const status = error.response.status;
+    console.log(error)
+
+    // 错误状态处理
+    // if (status === 401) {
+    //   router.push('/login')
+    // } else if (status === 403) {
+    //   router.push('/login')
+    // } else if (status >= 404 && status < 422) {
+    //   router.push('/404')
+    // }
     return Promise.reject(error)
   }
 )

@@ -1,7 +1,7 @@
 <template>
   <div id="app">
 
-    <router-view v-if="isRouterAlive" />
+    <router-view v-if="isRouterAlive"></router-view>
   </div>
 </template>
 
@@ -12,6 +12,7 @@
 
 </style>
 <script>
+  import { mapGetters } from 'vuex'
 export default {
   name: 'App',
   provide () {
@@ -23,6 +24,17 @@ export default {
     return {
       isRouterAlive: true
     }
+  },
+
+  computed: {
+
+    ...mapGetters([
+      'gradeList',
+      'isReady',
+      'difficultyList',
+      'getuserInfo'
+
+    ]),
   },
   methods: {
     reload () {

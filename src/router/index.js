@@ -20,6 +20,11 @@ Vue.use(VueRouter)
     redirect:'/login'
   },
   {
+    path: '/404', 
+    hide:true, 
+    component: () => import('@/components/networkError')
+  },
+  {
     path: '/login',
     name: 'login',
     component:  ()=>import('@/views/login'),
@@ -50,14 +55,23 @@ Vue.use(VueRouter)
         path: 'chooseBychapter',
         name: 'chooseBychapter',
         component: ()=>import('@/views/questions/chapter/choose_bychapter'),
+        meta: {
+          keepAlive: true
+        }
       },{
         path: 'chooseByknowledge',
         name: 'chooseByknowledge',
         component: ()=>import('@/views/questions/knowledge/choose_byknowledge'),
+        meta: {
+          keepAlive: true
+        }
       },{
-        path: 'chooseByIntelligent',
-        name: 'chooseByIntelligent',
+        path: 'chooseByIntelligents',
+        name: 'chooseByIntelligents',
         component: ()=>import('@/views/questions/intelligent/choose_byIntelligent'),
+        meta: {
+          keepAlive: true
+        }
       },{
         path: 'examinationPaper',
         name: 'examinationPaper',
@@ -71,14 +85,23 @@ Vue.use(VueRouter)
         name: 'actualPaper',
         redirect: '/questions/actualPaper/search/true',
         component: ()=>import('@/views/questions/actual/index'),
+        meta: {
+          keepAlive: true
+        },
         children: [{
           path: 'search/:isComplete',
           name: 'actualSearch',
           component: ()=>import('@/views/questions/actual/actual_search'),
+          meta: {
+            keepAlive: true
+          },
         },{
           path: 'maintain/:paperId?',
           name: 'actualMaintain',
           component: ()=>import('@/views/questions/actual/actual_maintain'),
+          // meta: {
+          //   keepAlive: true
+          // },
         }]
       }]
     },
@@ -90,6 +113,9 @@ Vue.use(VueRouter)
         path: 'home',
         name: 'home',
         component: ()=>import('@/views/teacher/home/home'),
+        meta: {
+          keepAlive: true
+        }
       },{
         path: 'uploadResource',
         name: 'uploadResource',
@@ -99,6 +125,9 @@ Vue.use(VueRouter)
         path: 'resource/:resourceType',
         name: 'resource',
         component: ()=>import('@/views/teacher/resource/resourceList'),
+        meta: {
+          keepAlive: true
+        }
       },
       // {
       //   path: 'courseware',
@@ -122,36 +151,55 @@ Vue.use(VueRouter)
           path: 'profile',
           name: 'profile',
           component: ()=>import('@/views/teacher/personal_center/profile'),
-        },,{
+        },{
           path: 'myResources',
           name: 'myResources',
           component: ()=>import('@/views/teacher/personal_center/resource'),
+          meta: {
+            keepAlive: true
+          }
         },{
           path: 'myCollections',
           name: 'myCollections',
           component: ()=>import('@/views/teacher/personal_center/collections'),
+          meta: {
+            keepAlive: true
+          }
         },{
           path: 'myWarehouse',
           name: 'myWarehouse',
           component: ()=>import('@/views/teacher/personal_center/warehouse'),
+          meta: {
+            keepAlive: true
+          }
         },{
           path: 'myExampaper',
           name: 'myExampaper',
           component: ()=>import('@/views/teacher/personal_center/exampaper'),
+          meta: {
+            keepAlive: true
+          }
         },{
           path: 'mySharing',
           name: 'mySharing',
           component: ()=>import('@/views/teacher/personal_center/sharing'),
+          meta: {
+            keepAlive: true
+          }
         },{
           path: 'myDownload',
           name: 'myDownload',
           component: ()=>import('@/views/teacher/personal_center/download'),
+          meta: {
+            keepAlive: true
+          }
         },{
           path: 'myResourceUpdate',
           name: 'myResourceUpdate',
           component: ()=>import('@/views/teacher/personal_center/resource_update'),
         }]
       },
+
       // {
       //   path: 'myWarehouse',
       //   name: 'myWarehouse',
@@ -164,6 +212,25 @@ Vue.use(VueRouter)
       //   component: ()=>import('@/views/teacher/collections'),
       // },
       ]
+    },
+    {
+      path: '/pcView',
+      name: 'pcView',
+      component: ()=>import('@/views/pcviews/choose_questions/index'),
+      children:[{
+          path: 'chooseByManual',
+          name: 'chooseByManual',
+          component: ()=>import('@/views/pcviews/choose_questions/choose_by_manual'),
+      },{
+          path: 'chooseByIntelligent',
+          name: 'chooseByIntelligent',
+          component: ()=>import('@/views/pcviews/choose_questions/choose_by_auto'),
+      }]
+    },
+    {
+      path: '/pcView/exampaperDetail',
+      name: 'exampaperDetail',
+      component: ()=>import('@/views/pcviews/exampaper_detail'),
     }
 ]
 

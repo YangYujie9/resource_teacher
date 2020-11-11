@@ -2,19 +2,19 @@
   <div class="single-question">
     <el-card class="box-card" :shadow="shadow" >
 
-      <div class="cursor" @click="list.showDetail=!list.showDetail" >
+      <div class="cursor" @click="question.showDetail=!question.showDetail" >
 
         <div :class="{questionwrap: !showSimilarity}">
           <section class="content">
             <div class="qt1">
               <div class="ques-body">
                 <span v-if="showSimilarity" class="order">{{index+1}}、</span>
-                <div v-html="list.name" style="width: 100%;"></div>
+                <div v-html="question.name" style="width: 100%;"></div>
               </div>
             </div>
-            <div class="qt2" v-if="list.options.length">
+            <div class="qt2" v-if="question.options && question.options.length && question.questionTypeTemplate!='BoolenQuestionTemplate'">
               <ul>
-                <li style="width: 100%;" class="selectoption" v-for="list1 in list.selectoption">
+                <li style="width: 100%;" class="selectoption" v-for="list1 in question.selectoption">
                   <span style="margin-right: 10px;font-style: italic;">{{list1.key}}.</span>
                   <div v-html="list1.value"></div>
                 </li>
@@ -23,56 +23,68 @@
             </div>
     
             <!-- 小题 -->
-            <div class="" v-if="list.smallQuestions.length" style="margin-top: 10px;">
-              <div v-for="(list1,index1) in list.smallQuestions">
-
-                <div class="qt1"  v-if="list1.name">
-                  <div class="small-one">
-                    <span>{{index1+1}}</span><span>、</span>
-                    <span v-html="list1.name"></span>
+            <div class="" v-if="question.smallQuestions && question.smallQuestions.length" style="margin: 10px 0 0 10px;">
+              <div v-for="(list1,index1) in question.smallQuestions">
+                <div :class="{qtwrap:question.questionTypeTemplate=='GestaltFillsUpTemplate'||list1.questionType=='NoAloneEnter'}"  v-if="list1.questionType!='NoAloneEnter'">
+                  <div class="qt1">
+                    <div class="small-one">
+                      <span class="order">{{index1+1}}</span><span>、</span>
+                      <span v-html="list1.name"></span>
+                    </div>
                   </div>
-                </div>
-                <div class="qt2" v-if="list1.options.length">
-                  <ul>
-                    <li style="width: 100%;" class="selectoption" v-for="item in list1.selectoption">
+                  <div class="qt2" v-if="list1.options.length && list1.questionType!='BoolenQuestion'">
+                    <ul v-if="list.questionTypeTemplate!='GestaltFillsUpTemplate'">
+                      <li style="width: 100%;" class="selectoption" v-for="item in list1.selectoption">
 
-                      <span>{{item.key}}</span>
-                      <span>、</span>
-                      <span v-html="item.value"></span> 
-                    </li>
+                        <span>{{item.key}}</span>
+                        <span>、</span>
+                        <span v-html="item.value"></span> 
+                      </li>
 
 
-                  </ul>
+                    </ul>
+                    <ul v-if="list.questionTypeTemplate=='GestaltFillsUpTemplate'">
+                      <li style="width: 100%;" class="selectoption" v-for="item in list1.selectoption">
+
+                        <span>{{item.key}}</span>
+                        <span>、</span>
+                        <span v-html="item.value"></span> 
+                      </li>
+
+
+                    </ul>
+                  </div>
+
                 </div>
               </div>
             </div>
           </section>
 
 
-          <section class="content" style="border-top: 1px dashed #dbdee4;" v-show="list.showDetail">
+          <section class="content" style="border-top: 1px dashed #dbdee4;" v-show="question.showDetail">
 
             <div class="middle">
               <div>
                 <p class="title">【知识点】</p>
-                <p v-if="list.knowledgesPoint">{{list.knowledgesPoint.join()}}</p>
+                <p v-if="question.knowledgesPoint && question.knowledgesPoint.length">{{question.knowledgesPoint.join()}}</p>
               </div>
 
-              <div  v-if="list.answers.length">
+              <div  v-if="question.answers&&question.answers.length">
                 <p class="title">【答案】</p>
                 <p>
-                  <span v-for="(item,index1) in list.answers">
-                   <span  v-if="list.smallQuestions.length" style="margin-left: 0px;">{{index1+1}}.</span>
-                   <span style="margin-left: 0px;">{{item}}</span>
+                  <span v-for="(item,index1) in question.answers" style="margin-right: 10px;">
+                   <span  v-if="question.smallQuestions.length" style="margin-left: 0px;">{{item.index}}.</span>
+                   <span style="margin-left: 0px;" v-html="item.name"></span>
                   </span>
                 </p>
               </div>
               <div>
                 <p class="title">【分析】</p>
-                <p v-html="list.analysis"></p>
+                <p v-html="question.analysis"></p>
               </div>
               <div>
                 <p class="title">【详解】</p>
-                <p v-html="list.detailedAnalysis"></p>
+                <p v-html="question.detailedAnalysis"></p>
               </div>
             </div>
           </section>
@@ -82,35 +94,35 @@
 
         <section class="foot-wrap">
           <p class="pt1">
-            <span>收录：{{list.createTime}}</span>
-            <span>组卷：{{list.groupCount}}</span>
-            <span>难度：{{list.difficultyTypeName}}</span>
-            <span>题型：{{list.questionTypeName}}</span>
+            <span>收录：{{question.createTime}}</span>
+            <span>组卷：{{question.groupCount}}</span>
+            <span>难度：{{question.difficultyTypeName}}</span>
+            <span>题型：{{question.questionTypeName}}</span>
           </p>
           <p class="pt2" v-if="showAction">
-            <span @click.stop="getSimilarity(list.questionId)" class="foot-icon" v-if="showSimilarity">
+            <span @click.stop="getSimilarity(question.questionId)" class="foot-icon" v-if="showSimilarity">
               <i class="iconfont iconpaibanguanli iconcolor"></i> 相似题
             </span>
-            <span @click.stop="showError(list.questionId)" class="foot-icon">
+            <span @click.stop="showError(question.questionId)" class="foot-icon">
               <i class="iconfont iconjiucuo iconcolor"></i> 纠错
             </span>
-            <span class="foot-icon" @click.stop="addCollectFolder(list.questionId)">
+            <span class="foot-icon" @click.stop="addCollectFolder(question.questionId)">
               <!-- <i class="iconfont iconshoucang1" style="color:#ffda33;"></i> -->
               <i class="iconfont iconshoucang2 iconcolor"></i>
               收藏
             </span>
 
 
-            <span class="foot-icon" @click.stop="list.showDetail=!list.showDetail" v-if="showSimilarity">
-              <i class="iconfont iconxiangqing1 iconcolor"></i> {{list.showDetail?'收起':'详情'}}
+            <span class="foot-icon" @click.stop="question.showDetail=!question.showDetail" v-if="showSimilarity">
+              <i class="iconfont iconxiangqing1 iconcolor"></i> {{question.showDetail?'收起':'详情'}}
             </span>
             <!-- <span class="foot-icon" @click="list.showDetail=false" v-if="list.showDetail && showSimilarity">
               <i class="iconfont iconxiangqing1 iconcolor"></i> 题干
             </span> -->
 
 
-            <span class="foot-icon" @click.stop="list.showDetail=!list.showDetail" v-if="!showSimilarity">
-              <i class="iconfont iconwenbensousuo iconcolor"></i>{{list.showDetail?'隐藏解析':'显示解析'}}
+            <span class="foot-icon" @click.stop="question.showDetail=!question.showDetail" v-if="!showSimilarity">
+              <i class="iconfont iconwenbensousuo iconcolor"></i>{{question.showDetail?'隐藏解析':'显示解析'}}
             </span>
             <!-- <span class="foot-icon" @click="list.showDetail=false" v-if="list.showDetail && !showSimilarity">
               <i class="iconfont iconwenbensousuo iconcolor"></i>隐藏解析
@@ -120,8 +132,8 @@
               <span v-if="!isAnswer" @click="isAnswer=true"></span>
               <span v-else @click="isAnswer=false"></span>
             </span> -->
-            <el-button type="warning" size="mini" v-if="list.isTestBasket" @click.stop="deleteTestBasket(list.questionId)">移除试卷</el-button>
-            <el-button type="primary" size="mini" v-if="!list.isTestBasket"  @click.stop="addTestBasket(list.questionId)">加入试卷</el-button>
+            <el-button type="warning" size="mini" v-if="question.isTestBasket" @click.stop="deleteTestBasket(question.questionId)">移除试卷</el-button>
+            <el-button type="primary" size="mini" v-if="!question.isTestBasket"  @click.stop="addTestBasket(question.questionId)">加入试卷</el-button>
           </p>
         </section>
         </div>
@@ -138,6 +150,7 @@ import { mapGetters } from 'vuex'
 import similarityDialog from '@/components//Dialog/similarity'
 import errorDialog from '@/components/Dialog/error'
 import favoriteDialog from '@/components/Dialog/favorite'
+import { handleQuestion } from '@/utils/public.js';
 export default {
 	name:'singleQuestion',
   props: {
@@ -164,6 +177,13 @@ export default {
     showAction: {
       type: Boolean,
       default: true
+    },
+    subjectCode: {
+      type: String,
+    },
+    isAnswer: {
+      type: Boolean,
+      default: false
     }
 
   },
@@ -179,7 +199,8 @@ export default {
     	favoriteVisible: false,
     	similarityId:'',
     	collectId:'', 
-      errorId:'',   
+      errorId:'', 
+      question:{},  
     };
   },
   computed: {
@@ -189,12 +210,18 @@ export default {
       ]),
   },
   watch: {
+    list(val) {      
+      if(val.questionId) {
 
+        this.question = val
+        // this.initTableData(JSON.parse(JSON.stringify(val)));
+      }
+    },
     // isAnswer(value) {
     //   if(value) {
-    //     this.list.showDetail = true
+    //     this.question.showDetail = true
     //   }else {
-    //     this.list.showDetail = false
+    //     this.question.showDetail = false
     //   }
     // }
     // list(val) {
@@ -203,6 +230,12 @@ export default {
     // }
   },
   mounted() {
+
+    if(this.list.questionId) {
+
+      this.question = this.list
+      // this.initTableData(JSON.parse(JSON.stringify(this.list)));
+    }
     this.$nextTick(() => {
 
       MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
@@ -232,46 +265,17 @@ export default {
     document.oncopy = null
   },
   methods: {
+    initTableData(data) {
 
-    handleQuestion(item,item0) {
+      data.check = data.check?data.check:false
+      data.showDetail = false
+      data.answers = []
+      handleQuestion(data);
 
-      // item.selectoption = []
-      // if(item.options && item.options.length) {
-      //   item.options.forEach(item1=>{
-      //     item.selectoption.push(item1)
-      //     // for(let key in item1) {
-      //     //   item.selectoption.push({key:key,value:item1[key]})
-      //     // }
-      //   })
-      // }
-      // //答案
-      // //item.answers = []
-      // if(item.fillAnswers && item.fillAnswers.length) {
-      //   item.fillAnswers.forEach(item1=>{
-      //     item0.answers.push(item1.value)
-      //     // for(let key in item1) {
-      //     //   item0.answers.push(item1[key])
-      //     // }
-      //   })
-      // }
+      this.question = data
 
-      // //知识点
-      // item.knowledgesPoint = []
-      // if(item.chapters && item.chapters.length) {
-      //   item.chapters.forEach(item1=>{
-      //     item.knowledgesPoint.push(item1.name)
-      //   })
-      // }
-
-      // if(item.smallQuestions && item.smallQuestions.length) {
-      //   item.smallQuestions.forEach(item1=>{
-      //     this.handleQuestion(item1,item)
-      //   })
-        
-      // }
-
-      //console.log(item) 
     },
+
     getSimilarity(id) {
       // console.log(id)
       this.$emit('getSimilarity',id)
@@ -304,7 +308,9 @@ export default {
     },
 
     addTestBasket(id) {
-      this.$http.post(`/api/open/paper/addTestBasket/hand/${id}`)
+      this.$http.post(`/api/open/paper/addTestBasket/hand/${id}`,{},{
+        subjectCode: this.subjectCode,
+      })
       .then((data)=>{
         if(data.status == '200') {
           this.isReset = false
@@ -376,6 +382,18 @@ export default {
         font-family: "JyeMath", "JyeMathLetters", "Times New Roman", "微软雅黑",
             Arial, "宋体" !important;
       }
+
+      .table {
+        table {
+          // border: 1px solid #333;
+          border-collapse:collapse;
+
+          td {
+            padding: 3px 5px;
+            border: 1px solid #333;
+          }
+        }
+      }
     }
 
   .el-card {
@@ -439,7 +457,9 @@ export default {
       background-color: #f0f3f9;
 
 	    // border-radius: 50% 0;
-
+      .order {
+        flex-shrink: 0;
+      }
 	    .qt1 {
 	      overflow: hidden;
 	      zoom: 1;
@@ -456,8 +476,8 @@ export default {
 
         .small-one {
           display: flex;
-          flex-wrap: wrap;
-          padding-left: 20px;
+          // flex-wrap: wrap;
+          padding-left: 10px;
         }
         
 	      .ques-body {
@@ -465,9 +485,7 @@ export default {
 	        // flex-wrap: wrap;
 	        // align-items: flex-end;
 
-          .order {
-            flex-shrink: 0;
-          }
+
 	      }
 
 
@@ -476,6 +494,7 @@ export default {
 
 	    .qt2 {
 	      //padding: 0px 20px 20px 20px;
+        width: 100%;
         padding-left: 20px;
 	      ul {
 	        display: flex;
@@ -502,6 +521,19 @@ export default {
 	        }
 	      }
 	    }
+
+      .qtwrap {
+        display: flex;
+        align-items: center;
+
+        .qt1 {
+          padding-bottom: 0px;
+        }
+
+        .qt2 ul {
+          flex-wrap: nowrap;
+        }
+      }
 
 	    // .top {
 	    //   border-bottom: 1px dashed #dbdee4;

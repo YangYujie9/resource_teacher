@@ -93,7 +93,7 @@
           </section>
         </el-card> -->
         <div v-if="similarityList.length" >
-          <singleQuestion shadow="never" :showSimilarity="false" :list="question" :index="1" :isAnswer="isAnswer" @getData="getSimilarity" @addCollectFolder="addCollectFolder" @getmyTestBasket="getmyTestBasket" @errorCorrection="errorCorrection">
+          <singleQuestion shadow="never" :showSimilarity="false" :list="question" :index="1" :isAnswer="isAnswer" :subjectCode="subjectCode" @getData="getSimilarity" @addCollectFolder="addCollectFolder" @getmyTestBasket="getmyTestBasket" @errorCorrection="errorCorrection">
             
           </singleQuestion>
         </div>
@@ -118,7 +118,7 @@ import favoriteDialog from '@/components/Dialog/favorite'
 
 
 export default {
-  props: ['dialogVisible','questionId','knowledgeType'],
+  props: ['dialogVisible','questionId','knowledgeType','subjectCode'],
   components: {
     singleQuestion: () => import('@/components/Question/singleQuestion'),
     // similarityDialog,
@@ -225,7 +225,7 @@ export default {
     },
 
 
-    handleQuestion(item,item0) {
+    handleQuestion(item,item0,index) {
       item.selectoption = []
       if(item.options && item.options.length) {
         item.options.forEach(item1=>{
@@ -238,41 +238,35 @@ export default {
       //答案
       //item.answers = []
       if(item.fillAnswers && item.fillAnswers.length) {
+        item0.answers.push({index:index+1,name:''})
         item.fillAnswers.forEach(item1=>{
-          item0.answers.push(item1.value.name)
+          item0.answers[item0.answers.length-1].name += item1.value.name + ' '
+          // item0.answers.push(item1.value.name)
 
         })
       }
 
+
+      //章节
+      item.chapterPoint = []
+
+      if(item.chapters && item.chapters.length) {
+        item.chapters.forEach(item1=>{
+          item.chapterPoint.push(item1.name)
+        })
+      } 
       //知识点
       item.knowledgesPoint = []
-      if(this.knowledgeType == 'chapter') {
-        if(item.chapters && item.chapters.length) {
-          item.chapters.forEach(item1=>{
-            item.knowledgesPoint.push(item1.name)
-          })
-        }      
-      }else if(this.knowledgeType == 'knowledge') {
-        if(item.knowledges && item.knowledges.length) {
-          item.knowledges.forEach(item1=>{
-            item.knowledgesPoint.push(item1.name)
-          })
-        }     
-      }else {
-        if(item.chapters && item.chapters.length) {
-          item.chapters.forEach(item1=>{
-            item.knowledgesPoint.push(item1.name)
-          })
-        }else if(item.knowledges && item.knowledges.length) {
-          item.knowledges.forEach(item1=>{
-            item.knowledgesPoint.push(item1.name)
-          })
-        }
-      }
+
+      if(item.knowledges && item.knowledges.length) {
+        item.knowledges.forEach(item1=>{
+          item.knowledgesPoint.push(item1.name)
+        })
+      } 
 
       if(item.smallQuestions && item.smallQuestions.length) {
-        item.smallQuestions.forEach(item1=>{
-          this.handleQuestion(item1,item)
+        item.smallQuestions.forEach((item1,index)=>{
+          this.handleQuestion(item1,item,index)
         })
         
       }
@@ -285,7 +279,7 @@ export default {
         this.getSimilarity()
       }else {
 
-        this.$message.warning('已无更多相似题')
+        // this.$message.warning('已无更多相似题')
 
         if(this.page != 1) {
           this.page = 1

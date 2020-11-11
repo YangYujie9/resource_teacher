@@ -13,7 +13,7 @@
                 <div class="btngroup">
                   <p>
                     <el-checkbox-group v-model="checkDelete" size="mini">
-                      <el-checkbox-button v-for="(item1,index1) in item.list" :label="item1.questionId" :key="item1.questionId">{{index1+1}}</el-checkbox-button>
+                      <el-checkbox-button v-for="(item1,index1) in item.list" :label="item1.questionId" :key="item1.questionId">{{item1.index}}</el-checkbox-button>
                     </el-checkbox-group>
 
                   </p>
@@ -37,10 +37,10 @@
           </div>
         </div>
         <div style="margin-left:20px;">
-          <el-button type="primary" size="mini" @click="scoredialogVisible=true">分值设定</el-button>
+          <el-button type="primary" size="mini" @click="setScoreShow">分值设定</el-button>
           <el-button type="primary" size="mini" @click="analysisdialogVisible=true">试卷分析</el-button>
           <el-button type="primary" size="mini" @click="savePaperVisible = true">完成组卷</el-button>
-          <el-button type="primary" size="mini" @click="continueChoose" v-if="$route.query.paperId">继续挑题</el-button>
+          <!-- <el-button type="primary" size="mini" @click="continueChoose" v-if="$route.query.paperId">继续挑题</el-button> -->
           <el-button type="primary" size="mini" @click="cleardialogVisible=true">清空试卷</el-button>
         </div>
 
@@ -56,14 +56,13 @@
                 <section class=" cursor" @click="list1.showDetail=!list1.showDetail">
 
                   <div class="pt1">
-                    <span>{{index1 + 1}}</span>
-                    <span>、</span>
+                    <span style="flex-shrink: 0;">{{list1.index}}、<!-- {{index1 + 1}} --></span>
                     <div  v-html="list1.name" style="width: 100%;"></div>
                     <!-- <img src="@/assets/test1.png" /> -->
                     
                     
                   </div>
-                  <div class="pt2" v-if="list1.options.length">
+                  <div class="pt2" v-if="list1.options.length && list1.questionTypeTemplate!='BoolenQuestionTemplate'">
 
                     <ul>
                       <li style="width: 100%;" class="selectoption" v-for="list2 in list1.selectoption">
@@ -77,26 +76,27 @@
                   </div>
 
                   <!-- 小题 -->
-                  <div class="" v-if="list1.smallQuestions.length" style="margin-top: 10px;">
+                  <div class="" v-if="list1.smallQuestions.length" style="margin: 10px 0 0 20px;" >
                     <div v-for="(list4,index4) in list1.smallQuestions">
+                      <div :class="{qtwrap:list1.questionTypeTemplate=='GestaltFillsUpTemplate'||list4.questionType=='NoAloneEnter'}"  v-if="list4.questionType!='NoAloneEnter'">
+                        <div class="pt1">
+                          <!-- <img src="@/assets/test1.png" /> -->
+                          <span class="order">{{index4+1}}</span><span>、</span>
+                          <span v-html="list4.name"></span>
+                        </div>
+                        <div class="pt2" v-if="list4.options.length && list4.questionType!='BoolenQuestion'">
+                          <ul>
+                            <li style="width: 100%;" class="selectoption" v-for="item in list4.selectoption">
 
-                      <div class="pt1">
-                        <!-- <img src="@/assets/test1.png" /> -->
-                        <span>({{index4+1}})</span><span>、</span>
-                        <span v-html="list4.name"></span>
-                      </div>
-                      <div class="pt2" v-if="list4.options.length">
-                        <ul>
-                          <li style="width: 100%;" class="selectoption" v-for="item in list4.selectoption">
-
-                            <span>{{item.key}}</span>
-                            <span>、</span>
-                            <span v-html="item.value"></span> 
-                            <!-- <img src="@/assets/test1.png" /> -->
-                          </li>
+                              <span style="margin-right: 10px;font-style: italic;">{{item.key}}.</span>
+                             
+                              <span v-html="item.value"></span> 
+                              <!-- <img src="@/assets/test1.png" /> -->
+                            </li>
 
 
-                        </ul>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -113,8 +113,8 @@
                     <p class="anstitle">【答案】</p>
                     <p>
                       <span v-for="(list3,index3) in list1.answers"style="margin-right: 10px;">
-                       <span  v-if="list1.smallQuestions.length" style="margin-left: 0px;">{{index3+1}}.</span>
-                       <span style="margin-left: 0px;" v-html="list3"></span>
+                       <span  v-if="list1.smallQuestions.length" style="margin-left: 0px;">{{list3.index}}.</span>
+                       <span style="margin-left: 3px;" v-html="list3.name"></span>
                       </span>
                     </p>
                   </div>
@@ -181,7 +181,7 @@
     </el-dialog>
 
 
-    <scoredialog :dialogVisible="scoredialogVisible" :paperId="currentPaperId" @close="closescore" :paperName="paperName" :tableData="questionList" @getData="getPaperDetail"></scoredialog>
+    <scoredialog :dialogVisible="scoredialogVisible" :paperId="currentPaperId" @close="closescore" :paperName="paperName" :tableData="tableData" @getData="getPaperDetail"></scoredialog>
     <analysisdialog :dialogVisible="analysisdialogVisible" :paperId="currentPaperId" @close="closeanalysis"></analysisdialog>
     <downloaddialog :dialogVisible="downloadVisible" :paperId="currentPaperId" @close="closedownload"></downloaddialog>
   </div>
@@ -193,7 +193,7 @@ import leftFixedNav from "@/components/Nav/leftFixedNav";
 import scoredialog from "@/components/Dialog/score_setting";
 import analysisdialog from "@/components/Dialog/analysis";
 import downloaddialog from "@/components/Dialog/download_paper";
-
+import { handleQuestion } from '@/utils/public.js';
 export default {
   components: {
     leftFixedNav,
@@ -222,7 +222,8 @@ export default {
         type: "",
         ifparse: false
       },
-      currentPaperId:''
+      currentPaperId:'',
+      tableData:[],
     };
   },
   computed: {
@@ -269,8 +270,13 @@ export default {
 
   
   methods: {
-
+    setScoreShow() {
+      this.tableData = JSON.parse(JSON.stringify(this.questionList))
+      console.log(this.tableData)
+      this.scoredialogVisible=true
+    },
     closescore() {
+
       this.scoredialogVisible = false;
     },
 
@@ -285,7 +291,7 @@ export default {
 
     finishExam() {
 
-      this.$http.put(`/api/open/paper/addPaper/${this.currentPaperId}`)
+      this.$http.put(`/api/open/paper/addPaper/${this.currentPaperId}/false`)
       .then((data)=>{
         if(data.status == '200') {
 
@@ -410,28 +416,30 @@ export default {
 
 
           let list = []
+          let index = 0
           if(data.data.questionMap) {
             for(let key in data.data.questionMap) {
               list.push({type:key})
               list[list.length-1].list = []
-
-              data.data.questionMap[key].forEach((item,index)=>{
+              
+              data.data.questionMap[key].forEach((item)=>{
                 // console.log(item)
-                item.index = index + 1
+                index += 1
+                item.index = index 
                 item.showDetail = false
                 item.answers = []
-                this.handleQuestion(item,item)
+                handleQuestion(item,item,null,index)
                 list[list.length-1].list.push(item)
               })
             }
+
           }else {
             this.$message({
-              message:'试题蓝为空',
+              message:'试题篮为空',
               type: 'warning'
             })
           }
 
-          // console.log(list)
 
 
           this.questionList = list
@@ -439,70 +447,70 @@ export default {
       })
     },
 
-    handleQuestion(item,item0) {
+    // handleQuestion(item,item0,index,index1) {
 
-      item.selectoption = []
-      if(item.options && item.options.length) {
-        item.options.forEach(item1=>{
-          item.selectoption.push({key:item1.key,id:item1.value.id,value:item1.value.name})
-          // for(let key in item1) {
-          //   item.selectoption.push({key:key,value:item1[key]})
-          // }
-        })
-      }
-      //答案
-      //item.answers = []
-      if(item.fillAnswers && item.fillAnswers.length) {
-        item.fillAnswers.forEach(item1=>{
-          item0.answers.push(item1.value.name)
-          // for(let key in item1) {
-          //   item0.answers.push(item1[key])
-          // }
-        })
-      }
+    //   item.selectoption = []
+    //   if(item.options && item.options.length) {
+    //     item.options.forEach(item1=>{
+    //       item.selectoption.push({key:item1.key,id:item1.value.id,value:item1.value.name})
+    //       // for(let key in item1) {
+    //       //   item.selectoption.push({key:key,value:item1[key]})
+    //       // }
+    //     })
+    //   }
+    //   //答案
+    //   //item.answers = []
+    //   if(item.fillAnswers && item.fillAnswers.length) {
+    //     item0.answers.push({index:index1+1,name:''})
+    //     item.fillAnswers.forEach(item1=>{
+    //       // item0.answers.push({index: index1+1,name:item1.value.name})
+    //       item0.answers[item0.answers.length-1].name += item1.value.name + ' '
+    //       // for(let key in item1) {
+    //       //   item0.answers.push(item1[key])
+    //       // }
+    //     })
+    //   }
 
 
 
-      //章节
-      item.chapterPoint = []
-      if(item.chapters && item.chapters.length) {
-        item.chapters.forEach(item1=>{
-          item.chapterPoint.push(item1.name)
-        })
-      }
+    //   //章节
+    //   item.chapterPoint = []
+    //   if(item.chapters && item.chapters.length) {
+    //     item.chapters.forEach(item1=>{
+    //       item.chapterPoint.push(item1.name)
+    //     })
+    //   }
 
-      //知识点
-      item.knowledgesPoint = []
-      if(item.knowledges && item.knowledges.length) {
-        item.knowledges.forEach(item1=>{
-          item.knowledgesPoint.push(item1.name)
-        })
-      }
+    //   //知识点
+    //   item.knowledgesPoint = []
+    //   if(item.knowledges && item.knowledges.length) {
+    //     item.knowledges.forEach(item1=>{
+    //       item.knowledgesPoint.push(item1.name)
+    //     })
+    //   }
 
-      if(item.smallQuestions && item.smallQuestions.length) {
-        item.children = []
-        item.smallQuestions.forEach((item1,index1)=>{
-          item1.index = "("+ Number(index1 + 1) + ")"
-          item.children.push(item1)
-          this.handleQuestion(item1,item)
-        })
+    //   if(item.smallQuestions && item.smallQuestions.length) {
+    //     item.children = []
+    //     item.smallQuestions.forEach((item1,index1)=>{
+    //       index += 1
+    //       item1.index = index
+    //       item.children.push(item1)
+    //       this.handleQuestion(item1,item,null,index1)
+    //     })
         
-      }
+    //   }
 
-      //console.log(item) 
-    },
+    //   //console.log(item) 
+    // },
 
 
     setScore(list) {
-
 
 
       let arr = []
       // console.log(list)
       if(list && list.questionId) {
         arr.push(`${list.questionId},${list.score}`)
-      }else {
-        return 
       }
 
       this.$http.put(`/api/open/paper/${this.currentPaperId}`,{
@@ -605,7 +613,17 @@ export default {
     }
   }
 
+  .table {
+    table {
+      // border: 1px solid #333;
+      border-collapse:collapse;
 
+      td {
+        padding: 3px 5px;
+        border: 1px solid #333;
+      }
+    }
+  }
   .el-card__body {
     padding: 0px;
   }
@@ -659,6 +677,7 @@ export default {
         .singleques {
           // margin: 20px 0px;
           //padding:10px 20px;
+          line-height: 28px;
           border: 1px solid transparent;
           transition: 0.5s;
           &:hover {
@@ -669,6 +688,11 @@ export default {
             .wrap {
               display: block;
             }
+          }
+
+
+          .order {
+            flex-shrink: 0;
           }
 
           .pt1 {
@@ -684,6 +708,7 @@ export default {
 
           }
           .pt2 {
+            width: 100%;
             padding: 0 30px 20px 50px;
 
 
@@ -721,6 +746,25 @@ export default {
 
             .fourline {
               width: 100%;
+            }
+          }
+
+
+          .qtwrap {
+            display: flex;
+            align-items: center;
+
+            .pt1 {
+              padding: 0px 20px 0 30px;
+              // padding-bottom: 0px;
+            }
+
+            .pt2 {
+              padding: 0px;
+
+              ul {
+                flex-wrap: nowrap;
+              }
             }
           }
         }

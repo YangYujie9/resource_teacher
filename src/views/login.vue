@@ -1,5 +1,5 @@
 <template>
-  <div class="login">
+  <div class="login" v-loading="loading" element-loading-text="登陆中">
 		<div class="bg-class">
 			<p class="bg-class-title">{{ msg }}</p>
 			<p class="bg-class-title bg-class-tag">Education Cloud Platform</p>
@@ -98,6 +98,10 @@ export default {
 
 						.then(data => {
 
+							// this.loading = false
+
+
+
 						  if(data.status == '200') {
 								let Authorization = data.data.tokenType + ' ' +data.data.token
 
@@ -123,6 +127,10 @@ export default {
 				
 						})
 
+						.catch(()=>{
+							this.loading = false
+						})
+
 					}else {
 						this.$http.post(`/api/open/user/recorderLogin`,this.loginForm)
 
@@ -136,7 +144,7 @@ export default {
 								this.$store.dispatch('getUserBaseInfo', this.$router)
 								
 								
-								this.$router.push("/questions/submitQuestions")
+								this.$router.push("/questions/chooseBychapter")
 								
 
 								
@@ -151,6 +159,10 @@ export default {
 								
 						  }
 				
+						})
+
+						.catch(()=>{
+							this.loading = false
 						})
 					}
 

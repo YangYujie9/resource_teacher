@@ -9,7 +9,7 @@
             <el-form :inline="true" :model="search" class="demo-form-inline " >
                 <el-form-item label="题型">
                   <el-select v-model="search.questionType" class="search-class" size="mini" clearable @change="resetPage">
-                    <el-option :label="list.value" :value="list.key" :key="list.key" v-for="list in typeList"></el-option>
+                    <el-option :label="list.name" :value="list.code" :key="list.code" v-for="list in typeList"></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item label="难度">
@@ -174,6 +174,11 @@ export default {
     this.getmyTestBasket()
 
   },
+  activated() {
+    
+    this.getTableData()
+
+  },
   methods: {
 
     close_similarity() {
@@ -254,7 +259,11 @@ export default {
     },
     getTableData:debounce(function() {
       //题库
-
+      if(!this.chapterIds.length && !this.knowledgeIds.length) {
+          this.tableData = []
+          this.total = 0
+          return 
+      }
       let params = {
         method:0,
         questionType: this.search.questionType,
@@ -355,30 +364,6 @@ export default {
 
 
 
-
-  .el-dialog__footer {
-    text-align: center;
-  }
-  .question-wrap {
-    .el-radio-group {
-      width: 100%;
-    }
-    .el-radio-button {
-      width: 100%;
-    }
-    .el-radio-button__inner {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .el-radio-button__orig-radio:checked+.el-radio-button__inner {
-      background-color:transparent;
-      border-color: transparent;
-      color: #409EFF;
-      box-shadow: 0px 0 0 0 #409EFF;
-    }
-  }
 }
 
 .newfavorite {

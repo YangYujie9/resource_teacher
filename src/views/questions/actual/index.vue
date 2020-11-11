@@ -15,6 +15,10 @@
           </div>
         </div>
         <router-view :regionList="regionList" :yearList="yearList" :testPaperTypeList="testPaperTypeList"></router-view>
+<!--         <router-view v-if="!$route.meta.keepAlive" :regionList="regionList" :yearList="yearList" :testPaperTypeList="testPaperTypeList"></router-view>
+        <keep-alive>
+          <router-view v-if="$route.meta.keepAlive" :regionList="regionList" :yearList="yearList" :testPaperTypeList="testPaperTypeList"></router-view>
+        </keep-alive> -->
         <!-- <div  v-show="activePage=='真题查询'">
 
           <actualSearch :isComplete="true"></actualSearch>
@@ -103,6 +107,7 @@ export default {
     this.gettypeList()
   },
   mounted() {
+    console.log(this.$route)
     this.typeList.forEach(item=>{
       if(this.$route.fullPath.indexOf(item.route)>-1) {
         this.activePage = item.label

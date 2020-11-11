@@ -145,19 +145,21 @@ function getBasicList(id,context) {
           context.commit('setgradeList',data.data)
 
           localStorage.setItem('gradeList',JSON.stringify(data.data))
+
+
+          Vue.$http.get(`/api/open/common/${id}/subjects`)
+          .then(data => {
+            if (data.status == "200") {
+              
+              context.commit('setsubjectList',data.data)
+
+              localStorage.setItem('subjectList',JSON.stringify(data.data))
+              context.commit('setisReady', true)
+            } 
+          })
         } 
       })
 
-    Vue.$http.get(`/api/open/common/${id}/subjects`)
-    .then(data => {
-      if (data.status == "200") {
-        
-        context.commit('setsubjectList',data.data)
-
-        localStorage.setItem('subjectList',JSON.stringify(data.data))
-        context.commit('setisReady', true)
-      } 
-    })
       
 
 }

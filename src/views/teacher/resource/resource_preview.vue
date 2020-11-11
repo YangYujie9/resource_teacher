@@ -19,12 +19,13 @@
                   disabled
                   show-score
                   text-color="#ff9900"
+                  style="flex-shrink: 0;"
                   disabled-void-color="#C0C4CC"
                   score-template="{value}">
                 </el-rate>
               </p>
               <p  style="margin-top: 10px;">
-                {{resourceInfo.subjectName}} > {{resourceInfo.oeseTypeName}} > {{resourceInfo.gradeName}}
+                {{resourceInfo.subjectName}} > {{resourceInfo.openStateName}} > {{resourceInfo.gradeName}}
               </p>
             </div>
           </div>
@@ -46,31 +47,47 @@
         <p class="title-p">{{resourceInfo.name}}</p>
         <div class="rescoure-preview-wrap-left-content">
           <div class="content-wrap"> 
-            <div class="paper-content">
+            <div class="paper-content"  v-show="previewTab">
 
-              <div class="container" v-if="previewTab && showPreview === 'picture'">
-                <div class="topFilter">
-                  <!-- <span class="theme-dark-text">{{resourceInfo.name}}</span>  
-                  <Button type="text" @click="toPageBack" style="color: #3399ff">返回</Button> -->
-                </div>
-                <div class="bottomContent" v-if="showPreview === 'picture'" >
-                   <img :src="picturePreviewUrl" style="max-width: 100%;max-height: 100%;">
+              <!-- 图片预览 -->
+              <div class="container" v-if="showPreview === 'picture'">
+
+                <div class="bottomContent" v-if="previewUrl" >
+                   <img :src="previewUrl" style="max-width: 100%;max-height: 100%;">
                 </div>    
               </div>
 
-              <div class="container" v-if="previewTab && showPreview === 'pdf'">
-                <div class="topFilter">
-                  <!-- <span class="theme-dark-text">{{resourceInfo.name}}</span>  
-                  <Button type="text" @click="toPageBack" style="color: #3399ff">返回</Button> -->
-                </div>
-                <div class="bottomContent" v-if="showPreview === 'pdf' && pdfPreviewUrl">
+              <!-- PDF预览 -->
+              <div class="container" v-if="showPreview === 'pdf'">
+
+                <div class="bottomContent" v-if="previewUrl">
                   <div class="bottomLeft">
                         <pdf-preview 
                           v-if="totalPages"
-                          :pdf-url='pdfPreviewUrl'
+                          :pdf-url='previewUrl'
                           :pdf-pagenum='totalPages'
                           :currentPageNum="currentPageNum">
                         </pdf-preview >      
+                  </div>
+                </div>    
+              </div>
+
+              <!-- MP4预览 -->
+              <div class="container" v-if="showPreview === 'video'">
+ 
+                <div class="bottomContent" v-if="previewUrl">
+                  <div class="bottomLeft">
+                    <video-player :videoUrl="previewUrl"></video-player> 
+                  </div>
+                </div>    
+              </div>
+
+              <!-- 音频预览 -->
+              <div class="container" v-if="showPreview === 'frequency'">
+
+                <div class="bottomContent" v-if="previewUrl">
+                  <div class="bottomLeft">
+                      <audio-player :audioUrl="previewUrl" :title="resourceInfo.name" :artist="resourceInfo.userName"></audio-player>
                   </div>
                 </div>    
               </div>
@@ -113,7 +130,10 @@
                 <div class="one-commit" v-for="list in commentList">
                   <!-- <div class="one-commit-left"></div> -->
                   <div class="one-commit-right">
-                    <p style="word-break: break-all;">{{list.content}}</p>
+                    <p style="display: flex;align-items: center;justify-content: space-between;word-break: break-all;">
+                      <span style="margin-right: 10px;">{{list.content}}</span>
+                      <el-button type="text" @click="deleteComment(list.commentId)" v-if="getuserInfo.userId == list.userId">删除</el-button>
+                    </p>
                     <p style="display: flex;align-items: center;color: #808182;font-size: 0.9rem;">
                       <span style="margin-right: 10px;">{{list.userName}} </span> 
                       <span style="margin-right: 10px;">{{list.createdDate}}</span>
@@ -156,12 +176,12 @@
   
         <div style="margin-top: 10px;">
           <div style="display: flex;justify-content: space-between;align-items: center;"> 
-            <span style="font-size: 1.2rem;">同类精品资源</span>
-            <el-button type="text" @click="getBoutiqueList" >换一批</el-button>
+            <span style="font-size: 1.2rem;">同类资源</span>
+            <el-button type="text" @click="getSimilarList" >换一批</el-button>
           </div>
 
-          <div v-for="item in boutiqueList">
-            <span class="cursor" @click="resource_preview(item.resourceId)"><i class="iconfont" :class="setClass(item.fileType)"></i> {{item.name}}</span>
+          <div v-for="item in similarList">
+            <span class="cursor" @click="resource_preview(item.resourceId)"><i class="iconfont" :class="setClass(item.fileType)"></i> {{item.resourceName}}</span>
 
           </div>
         </div>
@@ -204,12 +224,18 @@
 
 import { mapGetters } from 'vuex'
 import moment from 'moment'
-import pdfPreview from '@/components/PdfPreview/pdfPreview'
+import pdfPreview from '@/components/FilePreview/pdfPreview'
+
+import videoPlayer from '@/components/FilePreview/videoPlayer'
+import audioPlayer from '@/components/FilePreview/audioPlayer'
+
 export default {
   props:['isfixTab'],
   inject: ['reload'],
   components:{
-    pdfPreview
+    pdfPreview,
+    videoPlayer,
+    audioPlayer,
   },
   data() {
     return {
@@ -219,8 +245,7 @@ export default {
       //预览
       totalPages:0,
       currentPageNum:10,
-      pdfPreviewUrl:'',
-      picturePreviewUrl:'',
+      previewUrl:'',
       showPreview :'pdf',
       //分享
       dialogTitle:'资源分享',
@@ -241,7 +266,9 @@ export default {
       },
       commentList:[],
       totalCommit:0,
-      boutiqueList:[],
+      similarList:[],
+
+
 
     };
   },
@@ -272,7 +299,6 @@ export default {
   mounted() {
     this.getResourceInfo()
     this.findClazzByTeacher()
-    this.getBoutiqueList()
   },
 
   methods: {
@@ -288,9 +314,12 @@ export default {
         this.previewTab = true;
         this.showComment = false;
       } else {
-        this.previewTab = false;
-        this.showComment = true;
-        this.getCommentList();
+        if(!this.showComment) {
+          this.previewTab = false;
+          this.showComment = true;
+          this.getCommentList();
+        }
+
       }
     },
 
@@ -304,6 +333,8 @@ export default {
         if(data.status == '200') {
           this.resourceInfo = data.data
           this.totalPages = data.data.filePage ? data.data.filePage : 1
+
+          this.getSimilarList();
 
           switch(data.data.fileType) {
             case 'PDF':
@@ -325,6 +356,31 @@ export default {
               this.showPreview = 'picture';
               this.previewFile(this.resourceInfo.resourceSite.id)
               break;
+            case 'Video':
+              this.showPreview = 'video';
+              if ( this.resourceInfo.fileSuffix === 'wmv'
+                  || this.resourceInfo.fileSuffix === 'mpg'
+                  || this.resourceInfo.fileSuffix === 'avi'
+                  || this.resourceInfo.fileSuffix === '3gp'
+                  || this.resourceInfo.fileSuffix === 'flv'
+                  || this.resourceInfo.fileSuffix === 'swf'
+                  || this.resourceInfo.fileSuffix === 'rmvb' ){
+
+                this.previewTab = false;
+                return this.$message.warning('该文件类型暂不支持预览')
+              } else {
+                this.previewFile(this.resourceInfo.resourceSite.id)
+                
+              }
+              break;
+            case 'Frequency':
+              this.showPreview = 'frequency';
+              // this.videoUpload.music.title = this.resourceInfo.name;
+              // this.videoUpload.music.artist = this.resourceInfo.userName;
+              this.previewFile(this.resourceInfo.resourceSite.id)
+
+              
+              break;
             default:
               this.previewTab = false;
               return this.$message.warning('该文件类型暂不支持预览')
@@ -337,11 +393,12 @@ export default {
       this.$http.get(`/api/open/common/${fileId}/preview`)
         .then((res)=>{
             if(res.status == '200') {
-              if (this.showPreview == 'pdf'){
-                this.pdfPreviewUrl = res.data
-              } else if (this.showPreview == 'picture'){
-                this.picturePreviewUrl = res.data
-              }   
+                this.previewUrl = res.data
+                // if (this.showPreview === 'video'){
+                //   this.playerOptions.sources[0].src = res.data;
+                // } else if (this.showPreview === 'frequency'){
+                //   this.videoUpload.music.src = res.data;
+                // }
             }
         })
     },
@@ -350,6 +407,8 @@ export default {
       this.$http.get(`/api/open/resourceDownload/${this.resourceInfo.resourceId}`,{})
         .then((res)=>{
           if(res.status == '200') {
+            //下载数加1
+            this.resourceInfo.download++;
             window.open(res.data)
           }
         })
@@ -398,7 +457,8 @@ export default {
               this.commentForm.score = 0
    
               this.getCommentList();
-
+              //评论数加1
+              this.resourceInfo.commentNum++;
             }
           })
       }  
@@ -450,16 +510,14 @@ export default {
       })
     },
 
-    //获取n条精品资源
-    getBoutiqueList(){
-      this.$http.get(`/api/open/resources/list/number`,{
-          grade:this.resourceInfo.grade,
-          subject:this.resourceInfo.subjectCode,
-          type:'boutique',
+    //根据资源ID获取n条同类资源
+    getSimilarList(){
+      this.$http.get(`/api/open/resources/list/similar`,{
+          resourceId:this.resourceInfo.resourceId,
           number:6})
         .then((result)=>{
           if(result.status == '200') {
-            this.boutiqueList = result.data
+            this.similarList = result.data
           }
         })
     },
@@ -480,6 +538,10 @@ export default {
         })
         .then((res)=>{
           if(res.status == '200') {
+            this.dialogShareVisible = false;
+            this.$message({message:'分享成功',type:'success'});
+          } else {
+            this.$message({message:'分享失败',type:'error'});
           }
         })
       }   
@@ -507,10 +569,34 @@ export default {
             wordicon: true
           }
           break;
+        case 'EXCEL':
+          obj = {
+            iconExcel:true,
+            excelicon: true
+          }
+          break;
+        case 'Picture':
+          obj = {
+            icontupian:true,
+            wordicon: true
+          }
+          break;
+        case 'Video':
+          obj = {
+            iconshipin1:true,
+            wordicon: true
+          }
+          break;
+        case 'Frequency':
+          obj = {
+            iconyinpin4:true,
+            audioicon: true
+          }
+          break;
         default:
           obj = {
-            iconword2:true,
-            wordicon: true
+            iconweizhizhuangtai:true,
+            inknowicon: true
           }
       } 
       return obj;
@@ -519,6 +605,33 @@ export default {
     resource_preview(resourceId) {
       this.$router.push({path: '/teacher/resourceRreview', query: {id:resourceId}})
       this.reload()
+    },
+
+    deleteComment(commentId) {
+      this.$confirm('确认删除该评论吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+
+        this.$http.delete(`/api/open/comment/${commentId}`)
+        .then(data =>{
+          if(data.status == '200') {
+
+            //评论数减1
+            this.resourceInfo.commentNum--;
+
+            this.getCommentList()
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+          }
+        })
+
+      }).catch(() => {
+         
+      });
     }
     
   }
@@ -560,12 +673,22 @@ export default {
   }
 
   .excelicon {
-    color: #0f7b10;
+    color: #3C734D;
     font-size: 1.3rem;
   }
 
   .pdficon {
     color: #dc2e1b;
+    font-size: 1.3rem;
+  }
+
+  .audioicon {
+    color: #dc5e55;
+    font-size: 1.3rem;
+  }
+
+  .inknowicon {
+    color: red;
     font-size: 1.3rem;
   }
 
@@ -597,6 +720,7 @@ export default {
 
         .active-div {
           text-align: right;
+          flex-shrink: 0;
 
           .icon-color {
             color: #409EFF;
@@ -625,7 +749,7 @@ export default {
 
           
           .paper-content {
-            background-color: #fbf9f9;
+            background-color: transparent; //#fbf9f9;
           }
 
           .commit-wrap {

@@ -8,6 +8,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import erpAxios from './common/axios'
 import plugins from './utils/globalComponents'   //全局组件
 import './assets/css/reset.css'
+import xss from 'xss';
 
 
 Vue.use(plugins)
@@ -19,7 +20,7 @@ Vue.use(ElementUI)
 
 
 Vue.$http = Vue.prototype.$http = erpAxios
-
+Vue.prototype.xss = xss
 
 Vue.$changeIndex = Vue.prototype.$changeIndex = (str) => {
 

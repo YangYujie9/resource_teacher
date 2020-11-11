@@ -4,12 +4,11 @@
       :data="originalTreeData"
       :show-checkbox="showCheckbox"
       node-key="id"
-      check-on-click-node
       ref="tree"
-      default-expand-all
+      :default-expanded-keys="expandedKeys"
       class="pageTree"
       :props="defaultProps"
-      :expand-on-click-node="false"
+      accordion
       :highlight-current="!showCheckbox"
       @check="getCheckedNodes"
       :filter-node-method="filterNode"
@@ -47,7 +46,8 @@ export default {
       default:true,
     },
     subjectCode: {
-      type:String
+      type:String,
+      default:''
     },
     // grade: {
     //   type:String
@@ -97,6 +97,7 @@ export default {
       firstSchool:null,/*第一个学校节点*/
       currenttNode:'',
       currenttSelectNode:[],
+      expandedKeys:[]
       
     };
   },
@@ -107,7 +108,7 @@ export default {
   },
 
   mounted() {
-    // this.getTreeData()
+    this.subjectCode?this.getTreeData():null
 
   },
 
@@ -127,11 +128,9 @@ export default {
       this.$refs.tree.filter(val);
     },
     subjectCode(val) {
-
       this.getTreeData()
     },
     volumeId(val) {
-      
       this.getTreeData()
     },
 
@@ -144,9 +143,9 @@ export default {
     treeData: {
       
       handler: function(newVal, oldVal) {
+
           this.initTreeData(JSON.parse(JSON.stringify(newVal)));
           this.currenttNode = this.defaultSelectedNode
-          // console.log(this.currenttNode)
           this.$emit('selectnode',this.currenttNode )
           
           // this.$nextTick(()=>{
@@ -189,8 +188,14 @@ export default {
 
 
     getTreeData() {
+
       if(this.chooseType == 'chapter') {
-        if(!this.volumeId) {return false}
+        if(!this.volumeId) {
+          this.originalTreeData = []
+
+          this.$emit('selectnode','')
+          return
+        }
         this.$http.get(`/api/open/chapterOrKnowledge/chapterTree/${this.volumeId}`)
         .then(data => {
           if (data.status == "200") {
@@ -202,7 +207,7 @@ export default {
 
 
       }else if(this.chooseType == 'knowledge') {
-        
+
         this.$http.get(`/api/open/chapterOrKnowledge/knowledgeTree?learningSection=${this.getuserInfo.learningSection}&subjectCode=${this.subjectCode}`)
         .then(data => {
           if (data.status == "200") {
@@ -231,12 +236,30 @@ export default {
           this.isDisable? node.disabled = true:null
           // treeData = node.children
           treeData.push(node)
-          if (!this.defaultRoot) {
-            this.firstSchool = this.deepFirstSearch(node);
+          // if (!this.defaultRoot) {
+          //   this.firstSchool = this.deepFirstSearch(node);
+          // }
+          if(treeData.length && treeData[0].children) {
+            this.originalTreeData = treeData[0].children
+            //默认展示到二级
+            let ids = []
+            if(this.originalTreeData.length) {
+              this.originalTreeData.forEach(item=>{
+                ids.push(item.id)
+              })
+            }
+            this.expandedKeys = ids
+          }else {
+            this.originalTreeData = []
           }
-          this.originalTreeData = treeData;
+
 
         }
+
+
+
+
+
 
       }
       
@@ -377,7 +400,7 @@ export default {
   }
   .el-tree-node__expand-icon.is-leaf {
     color: transparent;
-    width: 18px;
+    width: 26px;
   }
 
 
@@ -487,6 +510,7 @@ export default {
 <style scoped lang="less">
 
 .point {
+  font-size: 13px;
   min-height: 56px;
   // margin-left: -10px;
     .custom-tree-node {

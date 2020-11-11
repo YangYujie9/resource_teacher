@@ -175,7 +175,7 @@
 import { mapGetters } from 'vuex'
 import moment from 'moment'
 import topPopover from "@/components/Popover/topPopover";
-import pdfPreview from '@/components/PdfPreview/pdfPreview'
+import pdfPreview from '@/components/FilePreview/pdfPreview'
 
 export default {
 

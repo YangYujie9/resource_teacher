@@ -118,6 +118,7 @@ export default {
     overflow: auto;
     // overflow-x: hidden;
     max-height: calc(100vh - 450px);
+    padding-bottom: 20px;
   }
 
   .treeclassfixed {
@@ -229,11 +230,13 @@ export default {
       .fixedclass {
         position: fixed;
         top: 60px;
+        left: 7%;
       }
     }
 
     .right-wrap {
       width: 90%;
+      min-width: 0px;
       min-height: calc(100vh - 328px);
     }
 

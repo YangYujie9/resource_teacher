@@ -5,43 +5,45 @@
     </div>
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left">
-          <div class="search-wrap" style="text-align: center;">
-            <el-radio-group v-model="activeType" size="mini" @change="handleClick">
-              <el-radio-button label="chapter">章节目录</el-radio-button>
-              <el-radio-button label="knowledge">知识点</el-radio-button>
-            </el-radio-group>
+        <selectPointTree ref="tree" @getPointIds="getPointIds" :isfixTab="isfixTab"></selectPointTree>
+<!--         <div class="search-wrap" style="text-align: center;">
+          <el-radio-group v-model="activeType" size="mini" @change="handleClick">
+            <el-radio-button label="chapter">章节目录</el-radio-button>
+            <el-radio-button label="knowledge">知识点</el-radio-button>
+          </el-radio-group>
+        </div>
+        <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
+          <div slot="reference">
+            <p class="top-title">
+              <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
+              <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
+              <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span>
+              
+              <i class="iconfont iconshezhi settingicon"></i>
+            </p>
           </div>
-          <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
-            <div slot="reference">
-              <p class="top-title">
-                <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
-                <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
-                <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span>
-                
-                <i class="iconfont iconshezhi settingicon"></i>
-              </p>
-            </div>
-            <div slot="popover">
-            </div>
-          </top-popover>
-
-
-          <div class="tree-content">
-
-            <div class="tree-class">
-              <pointTree chooseType="chapter" :volumeId="volumeId" @selectnode="defaultChapterCheck" @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='chapter'"></pointTree>
-              <pointTree chooseType="knowledge" :subjectCode="subjectCode" @selectnode="defaultKnowsCheck" @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType=='knowledge'"></pointTree>
-            </div>
-    
-                  
-
+          <div slot="popover">
           </div>
+        </top-popover>
+
+
+        <div class="tree-content">
+
+          <div class="tree-class">
+            <pointTree chooseType="chapter" :volumeId="volumeId" @selectnode="defaultChapterCheck" @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='chapter'"></pointTree>
+            <pointTree chooseType="knowledge" :subjectCode="subjectCode" @selectnode="defaultKnowsCheck" @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType=='knowledge'"></pointTree>
+          </div>    
+
+        </div> -->
         <!-- </div> -->
       </div>
 
       <div slot="right" class="rescoure-wrap">
         <div class="bread-div">
-          <span style=""><i class="iconfont iconshouye iconclass"></i>当前位置：首页 > {{resourceType.name}}</span>
+          <span><i class="iconfont iconshouye iconclass"></i>当前位置：首页 > 
+            <span v-if="resourceType">{{resourceType.name}}</span>
+
+          </span>
         </div>
         <div class="search-div el-radio-costom">
 
@@ -90,7 +92,10 @@
         <div class="rescoure-content-wrap">
           <div class="one-part" v-for="list in tableData">
             <div class="one-part-left">
-              <p class="left-title" @click="resourcePreview(list.resourceId)"><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
+              <p class="left-title hiddentext" @click="resourcePreview(list.resourceId)">
+                <i class="iconfont" :class="setClass(list.fileType)"></i>
+                <span class="text">{{list.name}}</span>
+              </p>
               <p>
                 <span>贡献者：{{list.userName}}</span>
                 <span class="left-tag">{{list.createTime}}</span>
@@ -139,6 +144,7 @@ import topPopover from "@/components/Popover/topPopover";
 import leftFixedNav from "@/components/Nav/leftFixedNav";
 import { getfileType } from '@/utils/basic.service.js'
 import { debounce } from '@/utils/public.js'
+import selectPointTree from "@/components/Popover/selectPointTree";
 export default {
 
 
@@ -154,6 +160,7 @@ export default {
   components: {
     leftFixedNav,
     topPopover,
+    selectPointTree,
   },
   data() {
     return {
@@ -182,6 +189,9 @@ export default {
       fileTypeList:[],
       volumeId:'',
       subjectCode:'',
+      resourceTypeId:'',
+      chapterIds:[],
+      knowledgeIds:[],
     };
   },
 
@@ -196,9 +206,22 @@ export default {
 
 
 
-    $route() {
-      this.init()
+    $route(to, from) {
+
+      if(to.fullPath.indexOf('/teacher/resource/')>-1) {
+
+        this.resourceTypeId = to.params.resourceType
+    
+        this.init()
+
+      }
+
     }
+  },
+  activated() {
+    
+    this.resourceTypeId = this.$route.params.resourceType
+
   },
   computed: {
 
@@ -210,15 +233,13 @@ export default {
     ]),
 
     resourceType() {
-      // console.log(this.$route.params)
-      // console.log(this.resourceTypeList)
+
       return this.resourceTypeList.filter(item=>{
         // console.log(item.id,this.$route.params.resourceType)
-        return item.key == this.$route.params.resourceType
+        return item.key == this.resourceTypeId
       })[0]
       
     },
-
 
 
 
@@ -226,7 +247,9 @@ export default {
   },
   mounted() {
     // this.init()
+    this.resourceTypeId = this.$route.params.resourceType
     this.getfileType()
+    // this.getresourceconsole.log(this.$refs.tree,this.$refs.tree.chapterIds)List()
   },
 
   methods: {
@@ -252,22 +275,44 @@ export default {
       })
     },
 
-    defaultChapterCheck(list) {
-      this.chapterLists[0] = list
-      this.getresourceList()
-    },
-    getCheckedChapters(list) {
-      this.chapterLists = list
-      this.resetPage()
+    getPointIds(list1,list2,subjectCode,volumeId) {
+
+      if(!list1.length && !list2.length) {
+        this.tableData = []
+        this.total = 0
+
+      }else {
+        if(this.subjectCode != subjectCode) {
+          
+          this.subjectCode = subjectCode
+
+        }
+
+        this.volumeId = volumeId
+        
+        this.chapterIds = list1
+        this.knowledgeIds = list2
+        this.resetPage()
+      }
 
     },
-    defaultKnowsCheck(list) {
-      this.knowledgeLists[0] = list
-    },
-    getCheckedKnows(list) {
-      this.knowledgeLists = list
-      this.resetPage()
-    },
+
+    // defaultChapterCheck(list) {
+    //   this.chapterLists[0] = list
+    //   this.getresourceList()
+    // },
+    // getCheckedChapters(list) {
+    //   this.chapterLists = list
+    //   this.resetPage()
+
+    // },
+    // defaultKnowsCheck(list) {
+    //   this.knowledgeLists[0] = list
+    // },
+    // getCheckedKnows(list) {
+    //   this.knowledgeLists = list
+    //   this.resetPage()
+    // },
     // 分页
     handleSizeChange(val) {
       this.search.size = val
@@ -281,14 +326,19 @@ export default {
       // this.getTableData()
     // },
     },
-    setparams(volumeId,subjectCode) {
+    // setparams(volumeId,subjectCode) {
 
-      this.volumeId = volumeId
+    //   this.volumeId = volumeId
 
-      this.subjectCode = subjectCode
+    //   this.subjectCode = subjectCode
 
+    //   if(this.activeType == 'chapter' && !this.volumeId) {
+    //     this.tableData = []
+    //     this.total = 0
+
+    //   }
       
-    },
+    // },
 
     resourcePreview(resourceId) {
 
@@ -320,26 +370,34 @@ export default {
     },
     getresourceList:debounce(function() {
 
-      let chapterIds = []
+      // if(this.activeType == 'chapter' && !this.volumeId) {
+      //   this.tableData = []
+      //   this.total = 0
 
-      this.chapterLists.forEach(item=>{
-        chapterIds.push(item.id)
-      })
+      //   return
+      // }
 
 
-      let knowledgeIds = []
-      this.knowledgeLists.forEach(item=>{
-        knowledgeIds.push(item.id)
-      })
+      // let chapterIds = []
+
+      // this.chapterLists.forEach(item=>{
+      //   chapterIds.push(item.id)
+      // })
+
+
+      // let knowledgeIds = []
+      // this.knowledgeLists.forEach(item=>{
+      //   knowledgeIds.push(item.id)
+      // })
 
       let type = this.$route.query.type
-
 
       let params = {
         searchType: type?'school':'open',
         fileType: this.search.fileType,
         resourceName: this.search.fileName,
         resourceType: this.resourceType.id,
+        subjectCode: this.subjectCode,
         // oeseType:'',
         // grade: this.filter.grade.key,
         // oeseId:,
@@ -351,19 +409,19 @@ export default {
         page: this.search.page - 1,
         size: this.search.size
       }
-      if(this.activeType == 'chapter') {
-        knowledgeIds = []
-      }else {
-        params.oeseBookId = ''
-        chapterIds = []
-      }
+      // if(this.activeType == 'chapter') {
+      //   knowledgeIds = []
+      // }else {
+      //   params.oeseBookId = ''
+      //   chapterIds = []
+      // }
 
 
 
 
     	this.$http.post(`/api/open/resources/list`, {
-        chapterIds: chapterIds,
-        knowledgeIds:knowledgeIds},params)
+        chapterIds: this.chapterIds,
+        knowledgeIds:this.knowledgeIds},params)
 
     	.then((data)=>{
     		if(data.status == '200') {
@@ -394,10 +452,34 @@ export default {
             wordicon: true
           }
           break;
+        case 'EXCEL':
+          obj = {
+            iconExcel:true,
+            excelicon: true
+          }
+          break;
+        case 'Picture':
+          obj = {
+            icontupian:true,
+            wordicon: true
+          }
+          break;
+        case 'Video':
+          obj = {
+            iconshipin1:true,
+            wordicon: true
+          }
+          break;
+        case 'Frequency':
+          obj = {
+            iconyinpin4:true,
+            audioicon: true
+          }
+          break;
         default:
           obj = {
-            iconword2:true,
-            wordicon: true
+            iconweizhizhuangtai:true,
+            inknowicon: true
           }
       } 
       return obj;
@@ -411,6 +493,10 @@ export default {
   .content-wrap {
     width: 68% !important;
     margin:0 auto !important;
+  }
+
+  .fixedclass {
+    left: 8% !important;
   }
 }
 
@@ -496,13 +582,23 @@ export default {
           }
 
           .excelicon {
-            color: #0f7b10;
+            color: #3C734D;
             font-size: 1.3rem;
           }
 
           .pdficon {
 						color: #dc2e1b;
 						font-size: 1.3rem;
+          }
+
+          .audioicon {
+            color: #dc5e55;
+            font-size: 1.3rem;
+          }
+
+          .inknowicon {
+            color: red;
+            font-size: 1.3rem;
           }
         }
 

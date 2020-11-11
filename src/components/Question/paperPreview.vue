@@ -17,7 +17,7 @@
       <div class="paper-content-wrap" v-for="(list,index) in questionList">
         <p><span>{{$changeIndex(index+1)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
         <div v-for="(list1, index1) in list.list">
-          <singleQuestion :list="list1" :index="index1" shadow="none" :showAction='false'>
+          <singleQuestion :list="list1" :index="index1" shadow="none" :showAction='false' :isAnswer="isAnswer">
           
           </singleQuestion>
         </div>
@@ -39,7 +39,7 @@
 import { mapGetters } from 'vuex'
 import scoredialog from "@/components/Dialog/score_setting";
 import singleQuestion from '@/components/Question/singleQuestion'
-
+import { handleQuestion } from '@/utils/public.js';
 export default {
   components: {
     scoredialog,
@@ -153,14 +153,11 @@ export default {
               // item.answers = []
               // this.handleQuestion(item,item)
               item.answers = []
-              this.handleQuestion(item,item)
+              handleQuestion(item,item)
               list[list.length-1].list.push(item)
             })
           }
 
-
-
-          // console.log(list)
 
 
           this.questionList = list
@@ -169,53 +166,6 @@ export default {
       })
     },
 
-    handleQuestion(item,item0) {
-      //选项
-      item.selectoption = []
-      if(item.options && item.options.length) {
-        item.options.forEach(item1=>{
-          item.selectoption.push({key:item1.key,id:item1.value.id,value:item1.value.name})
-          // for(let key in item1) {
-          //   item.selectoption.push({word:key,value:item1[key]})
-          // }
-        })
-      }
-      //答案
-      //item.answers = []
-      if(item.fillAnswers && item.fillAnswers.length) {
-        item.fillAnswers.forEach(item1=>{
-          // for(let key in item1) {
-            item0.answers.push(item1.value.name)
-          // }
-        })
-      }
-
-
-      //章节
-      item.chapterPoint = []
-      if(item.chapters && item.chapters.length) {
-        item.chapters.forEach(item1=>{
-          item.chapterPoint.push(item1.name)
-        })
-      }
-
-
-      //知识点
-      item.knowledgesPoint = []
-      if(item.knowledges && item.knowledges.length) {
-        item.knowledges.forEach(item1=>{
-          item.knowledgesPoint.push(item1.name)
-        })
-      }
-
-      if(item.smallQuestions && item.smallQuestions.length) {
-        item.smallQuestions.forEach((item1,index1)=>{
-          item1.index = "("+ Number(index1 + 1) + ")"
-          this.handleQuestion(item1,item)
-        })
-        
-      }
-    },
 
 
     setScore(list) {

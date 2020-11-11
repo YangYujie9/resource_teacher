@@ -5,6 +5,7 @@
       :close-on-click-modal='false'
       width="860px"
       custom-class="error-class"
+      @open="geterrorType"
       :before-close="closeDialog">
       <div class="">
         <el-form ref="form" :model="error" label-width="100px">
@@ -39,7 +40,7 @@
 import Cookies from 'js-cookie'
 
 export default {
-  props: ['dialogVisible','questionId'],
+  props: ['dialogVisible','questionId','typeTemplate'],
   data() {
     return {
       error: {
@@ -50,8 +51,14 @@ export default {
     };
   },
   mounted() {
-    this.geterrorType()
+    // this.geterrorType()
    
+  },
+
+  activated() {
+    
+    // this.geterrorType()
+
   },
   computed: {
 
@@ -69,7 +76,7 @@ export default {
 
       this.error.desc = ''
 
-      this.$http.get(`/api/open/common/errorType`)
+      this.$http.get(`/api/open/common/errorType/${this.typeTemplate}`)
       .then(data=>{
         if(data.status == '200') {
           this.errorTypeList = data.data
@@ -85,6 +92,7 @@ export default {
       }
 
       Cookies.set("errorContent", this.error.desc)
+      this.$emit('close')
       this.$router.push({ path: '/questions/submitQuestions', query: { questionId: this.questionId, errorType: this.error.type}})
 
     },

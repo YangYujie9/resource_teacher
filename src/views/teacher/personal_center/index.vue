@@ -32,11 +32,14 @@
         </div>
         <div class="personal-content-wrap">
           <div class="middle-tree-wrap" v-if="showTree && resourceType != 'actualpaper'">
+            
             <div class="tree-wrap" :class="{fixedclass:isfixTab}">
-              <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
+              <selectPointTree ref="tree" @getPointIds="getPointIds" :isfixTab="isfixTab"></selectPointTree>
+              <!-- <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
                 <div slot="reference">
                   <p class="top-title">
                     <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
+                    <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
                     <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
                     <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span>
                     
@@ -67,11 +70,17 @@
                   </el-tab-pane>
                 </el-tabs>
 
-              </div>
-            </div>
+              </div>-->
+            </div> 
           </div>
           <div class="right-content-wrap" :class="{fixedright:isfixTab}">
-              <router-view :chapterIds="chapterIds" :knowledgeIds="knowledgeIds" :resourceType="resourceType" :fileTypeList="fileTypeList" v-if="isOk"></router-view>
+
+
+            <router-view :chapterIds="chapterIds" :knowledgeIds="knowledgeIds" :resourceType="resourceType" :fileTypeList="fileTypeList" v-if="!$route.meta.keepAlive && isOk"></router-view>
+            <keep-alive>
+              <router-view :chapterIds="chapterIds" :knowledgeIds="knowledgeIds" :resourceType="resourceType" :fileTypeList="fileTypeList" v-if="$route.meta.keepAlive && isOk"></router-view>
+            </keep-alive>
+              <!-- <router-view :chapterIds="chapterIds" :knowledgeIds="knowledgeIds" :resourceType="resourceType" :fileTypeList="fileTypeList" v-if="isOk"></router-view> -->
           </div>
         </div>
       </div>  
@@ -84,6 +93,7 @@ import { mapGetters } from 'vuex'
 import teacherNav from "@/components/Nav/teacherNav";
 import topPopover from "@/components/Popover/topPopover";
 import { getfileType } from '@/utils/basic.service.js'
+import selectPointTree from "@/components/Popover/selectPointTree";
 export default {
   props: {
     isfixTab:{
@@ -96,7 +106,8 @@ export default {
   },
   components: {
     teacherNav,
-    topPopover
+    topPopover,
+    selectPointTree
   },
   data() {
     return {
@@ -119,6 +130,8 @@ export default {
       chapterRootId:[],
       knowledgeRootId:[],
       isOk: false,
+      chapterIds:[],
+      knowledgeIds:[],
     };
   },
 
@@ -179,7 +192,7 @@ export default {
 
     this.getfileType()
     this.init()
- 
+  console.log(this.$route)
     // this.subjectCode = this.getuserInfo.subjectCode
 
   },
@@ -195,15 +208,17 @@ export default {
         
         this.$nextTick(()=>{
           this.resourceType = '0'
-          this.$refs.chapterTree.clearNodeCheck();
-          this.$refs.knowledgeTree.clearNodeCheck();  
+          // this.$refs.chapterTree.clearNodeCheck();
+          // this.$refs.knowledgeTree.clearNodeCheck();  
 
-          this.chapterIds = this.activeType == 'chapter'?this.chapterRootId:[]
-          this.knowledgeIds = this.activeType == 'chapter'?[]:this.knowledgeRootId
+          // this.chapterIds = this.activeType == 'chapter'?this.chapterRootId:[]
+          // this.knowledgeIds = this.activeType == 'chapter'?[]:this.knowledgeRootId
 
           this.isOk = true
         })
     
+      }else {
+        this.isOk = true
       }
       
       // this.chapterIds = []
@@ -224,7 +239,20 @@ export default {
         }
       })
     },
+    getPointIds(list1,list2,subjectCode) {
+      
+      this.chapterIds = list1
+      this.knowledgeIds = list2
 
+      if(this.subjectCode != subjectCode) {
+        
+        this.subjectCode = subjectCode
+
+        // this.getquestionType()
+      }
+      
+      // this.resetPage()
+    },
     defaultChapterCheck(list) {
       if(list && list.id) {
         this.chapterRootId[0] = list.id
@@ -282,11 +310,22 @@ export default {
 </script>
 <style lang="less">
 .personal {
+  .tree-wrap {
+    .tree-class {
+      overflow: auto;
+      // overflow-x: hidden;
+      max-height: calc(100vh - 520px);
+      padding-bottom: 20px;
+    }
 
+    .treeclassfixed {
+      max-height: calc(100vh - 280px) !important;
+    }
+  }
 
   .el-radio-button__inner {
     border: 0px;
-    background-color: transparent;
+    // background-color: transparent;
     border-radius: 3px;
     font-size: 14px;
     color: #666;
@@ -431,7 +470,7 @@ export default {
           width: 300px;
           // max-width: 350px;
           min-height: 300px;
-          padding: 20px 0px;
+          padding: 20px;
           border: 1px solid #e2e2e2;
           z-index:1;
 
@@ -447,6 +486,7 @@ export default {
             overflow: auto;
             // overflow-x: hidden;
             max-height: calc(100vh - 520px);
+            padding-bottom: 20px;
           }
 
           .treeclassfixed {
@@ -482,6 +522,7 @@ export default {
 
       .right-content-wrap {
         width: 100%;
+        min-width: 0px;
         // background:red;
         // min-height: calc(100vh - 328px); 
       }

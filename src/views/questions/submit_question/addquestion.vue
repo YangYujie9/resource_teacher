@@ -3,12 +3,13 @@
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left">
         <!-- <div class="tree-wrap" :class="{fixedclass:isfixTab}" style="z-index: 1000;"> -->
-          <top-popover v-if="isReady&&topReady" :chooseType="activeType" ref="filter" @setparams="setparams" :acVersionList="versionList" :acVolumeList="volumeList" :subjectCode="subjectCode" :isError="isError" :questionDetail="questionDetail">
+          <top-popover v-if="isReady && topReady" :chooseType="activeType" ref="filter" @setparams="setparams" :isActual="isActual" :gradeId="actualPaper.grade" :subjectCode="subjectCode" :isError="isError" :questionDetail="questionDetail">
             <div slot="reference">
               <p class="top-title">
                 <span v-if="$refs.filter" >{{$refs.filter.subject.subjectName}}</span>
-                <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
-                <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span>
+                <span v-if="$refs.filter && $refs.filter.grade && activeType=='chapter'">/{{$refs.filter.grade.value}}</span>
+                <span v-if="$refs.filter && $refs.filter.oese && activeType=='chapter'">/{{$refs.filter.oese.name}}</span>
+                <span v-if="$refs.filter && $refs.filter.volume && activeType=='chapter'">/{{$refs.filter.volume.name}}</span>
                 
                 <i class="iconfont iconshezhi settingicon"></i>
               </p>
@@ -135,9 +136,9 @@
                 >
                   <el-option
                     v-for="item in templateList"
-                    :key="item.key"
-                    :label="item.value"
-                    :value="item.key"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id"
                   ></el-option>
                 </el-select>
 
@@ -222,8 +223,8 @@
               <ckeditor ref="ckF" v-show="currentOption.label == 'F'" :readOnly="isError&&optionReadonly"></ckeditor>
               <ckeditor ref="ckG" v-show="currentOption.label == 'G'" :readOnly="isError&&optionReadonly"></ckeditor>
               <ckeditor ref="ckH" v-show="currentOption.label == 'H'" :readOnly="isError&&optionReadonly"></ckeditor>
-              <ckeditor ref="ck✓" v-show="currentOption.label == '✓'" :readOnly="isError&&optionReadonly"></ckeditor>
-              <ckeditor ref="ck×" v-show="currentOption.label == '×'" :readOnly="isError&&optionReadonly"></ckeditor>
+              <!-- <ckeditor ref="ck✓" v-show="currentOption.label == '✓'" :readOnly="isError&&optionReadonly"></ckeditor>
+              <ckeditor ref="ck×" v-show="currentOption.label == '×'" :readOnly="isError&&optionReadonly"></ckeditor> -->
             </div>
             <!-- <div v-if="templateKey=='BoolentemplateKey'">
               <ckeditor ref="ckY" v-show="currentOption.label == 'Y'"></ckeditor>
@@ -235,20 +236,21 @@
             style="display:flex;margin-top:20px;"
             v-show="(templateKey=='SingleChoose' ||templateKey=='MultipleChoose'||templateKey=='BoolenQuestion')"
           >
-            <p>
+            <p v-show="templateKey=='MultipleChoose'">
               <span>答案个数：</span>
               <el-select
                 v-model="form.relOptionNum"
                 placeholder="请选择"
-                style="width:60px;"
+                style="width:60px;margin-right: 20px;"
                 size="mini"
                 :disabled="templateKey=='SingleChoose'||templateKey=='BoolenQuestion' ||isError"
               >
                 <el-option v-for="item in relOptions" :key="item" :label="item" :value="item"></el-option>
               </el-select>
+
             </p>
             <p v-show="templateKey=='SingleChoose' ||templateKey=='MultipleChoose'||templateKey=='BoolenQuestion'">
-              <span style="margin-left:20px;">正确选项:</span>
+              <span style="">正确选项: </span>
               <el-select
                 v-model="answers[index].value"
                 placeholder="请选择"
@@ -267,6 +269,8 @@
 
                 ></el-option>
               </el-select>
+
+              <span style="margin-left: 20px;" v-if="templateKey=='BoolenQuestion'">（提示：A:正确; B:错误）</span>
             </p>
             <!-- <p style="margin-right:10px;" v-show="templateKey=='FillingtemplateKey'">
               <span style="margin-left:20px;">正确答案:</span>
@@ -409,7 +413,7 @@ export default {
       // ],
       //ansCotent:[],
       relOptions: [1, 2, 3, 4, 5, 6, 7, 8],
-      answers: [{value:"A"}, {value:"A"}, {value:"A"}, {value:"A"},{value:"A"}, {value:"A"}, {value:"A"}, {value:"A"}],
+      answers: [{value:"A"}, {value:"B"}, {value:"C"}, {value:"D"},{value:"E"}, {value:"F"}, {value:"G"}, {value:"H"}],
       questionType: "",
       form: {
         optionNum: 4,
@@ -437,24 +441,7 @@ export default {
       volumeId:'',
       subjectCode:'',
       // qnumDisable:false,
-      templateList: [
-        {
-          key:'SingleChoose',
-          value:'单选题'
-        },{
-          key:'MultipleChoose',
-          value:'多选题'
-        },{
-          key:'BoolenQuestion',
-          value:'判断题'
-        },{
-          key:'SubjectiveItem',
-          value:'主观题录入类'
-        },{
-          key:'NoSingleQues',
-          value:'问题无需单独录入'
-        },
-      ],
+      templateList: [],
       versionList:[],
       volumeList:[],
       isError: false,
@@ -536,8 +523,14 @@ export default {
     },
 
     showQuestionTab() {
-
-      if(this.form.templateType == 'NoSingleQues' ||this.form.questionNum == 1 ||this.questionTemplate =='MatchingTemplate' ||this.questionTemplate =='GestaltFillsUpTemplate' || this.templateKey == "FillingQuestionTemplate") {
+      /*
+      {id: "SingleChoose",name: "单选题类型"}
+      {id: "MultipleChoose",name: "多选题类型"}
+      {id: "BoolenQuestion",name: "判断题类型"}
+      {id: "SubjectiveQuestionEnter",name: "主观题录入类"}
+      {id: "NoAloneEnter",name: "问题无需单独录入"}
+      */
+      if(this.form.templateType == 'NoAloneEnter' ||this.form.questionNum == 1 ||this.questionTemplate =='MatchingTemplate' ||this.questionTemplate =='GestaltFillsUpTemplate' || this.templateKey == "FillingQuestionTemplate") {
         return false
       }else {
         return true
@@ -560,7 +553,7 @@ export default {
     },
 
     templateSelectShow() {
-      if((this.questionTemplate == 'SolvingQuestionTemplate' || this.questionTemplate =='ReadingComprehensionTemplate' || this.questionTemplate =='GestaltFillsUpTemplate') ) {
+      if((this.questionTemplate == 'SolvingQuestionTemplate' || this.questionTemplate =='ReadingComprehensionTemplate' || this.questionTemplate =='GestaltFillsUpTemplate') && this.form.questionNum>1) {
         return true
       }else {
         return false
@@ -614,8 +607,8 @@ export default {
         this.typeDisable = true
         this.subjectCode = this.actualPaper.subjectCode
 
-
-        this.getyongshu()
+        this.topReady = true
+        // this.getyongshu()
 
       }else if(this.query && this.query.questionId) {
         this.isError = true
@@ -664,40 +657,50 @@ export default {
       }
 
       this.getdifficultyType();  
+
+      this.getSmallQuestionsType()
     
   },
   methods: {
 
+    getSmallQuestionsType() {
 
-    getyongshu() {
-
-      this.$http.get(`/api/open/common/books/${this.getuserInfo.school.id}?subjectCode=${this.subjectCode}&grade=${this.actualPaper.grade}`)
+      this.$http.get(`/api/open/common/getSmallQuestionsType`)
       .then(data=>{
         if(data.status == '200') {
-
-          if(data.data && data.data.oese&& data.data.oese.id) {
-            this.versionList.push({oeseId:data.data.oese.id,name:data.data.oese.name})
-
-            let arr = []
-            data.data.volumes.forEach(item=>{
-              arr.push({oeseId:item.id,name:item.name})
-            })
-            this.volumeList = arr
-            this.topReady = true
-          }else {
-            this.$alert('请先联系管理员绑定相关的教材版本和册别', '提示', {
-              confirmButtonText: '确定',
-              callback: action => {
-
-                this.$router.push(`/questions/actualPaper/maintain/${this.actualPaper.paperId}`)
-                
-              }
-            });
-          }
-
+          this.templateList = data.data
         }
       })
     },
+    // getyongshu() {
+
+    //   this.$http.get(`/api/open/common/books/${this.getuserInfo.school.id}?subjectCode=${this.subjectCode}&grade=${this.actualPaper.grade}`)
+    //   .then(data=>{
+    //     if(data.status == '200') {
+
+    //       if(data.data && data.data.oese&& data.data.oese.id) {
+    //         this.versionList.push({oeseId:data.data.oese.id,name:data.data.oese.name})
+
+    //         let arr = []
+    //         data.data.volumes.forEach(item=>{
+    //           arr.push({oeseId:item.id,name:item.name})
+    //         })
+    //         this.volumeList = arr
+    //         this.topReady = true
+    //       }else {
+    //         this.$alert('请先联系管理员绑定相关的教材版本和册别', '提示', {
+    //           confirmButtonText: '确定',
+    //           callback: action => {
+
+    //             this.$router.push(`/questions/actualPaper/maintain/${this.actualPaper.paperId}`)
+                
+    //           }
+    //         });
+    //       }
+
+    //     }
+    //   })
+    // },
     // init() {
 
     //   this.currentOption = this.optionList[0]
@@ -749,7 +752,6 @@ export default {
 
       this.templateSelectShow? this.form.templateType = 'SingleChoose':null
 
-
       this.changeOption()
       // val == 1 ? (this.activeName = "analysis") : null;
     },
@@ -764,12 +766,19 @@ export default {
 
 
     changeOption(flag) {
+
       this.activeName = this.showQuestionTab? 'stems': "analysis"
 
       if(this.questionTemplate == 'SolvingQuestionTemplate' || this.questionTemplate =='ReadingComprehensionTemplate' || this.questionTemplate =='GestaltFillsUpTemplate' ) {
-        (!flag && this.form.questionNum>1)?this.form.templateType = this.templateList[0].key:null
+        (!flag && this.form.questionNum>1)?this.form.templateType = this.templateList[0].id:null
+        this.form.questionNum == 1?this.form.templateType = '':null
+
+
+      }else if(this.questionTemplate =='MatchingTemplate') {
+          this.form.marchingAnsw =  "A"
+          this.form.templateType = 'NoAloneEnter'
       }else {
-        this.form.marchingAnsw = this.questionTemplate =='MatchingTemplate'?  "A":''
+        
         this.form.templateType = ''
       }
 
@@ -794,7 +803,7 @@ export default {
 
           this.currentOption = this.optionList[0]
           this.form.optionNum = 4;
-          this.answers = [{value:"A"}, {value:"A"}, {value:"A"}, {value:"A"},{value:"A"}, {value:"A"}, {value:"A"}, {value:"A"}];
+          this.answers = [{value:"A"}, {value:"B"}, {value:"C"}, {value:"D"},{value:"E"}, {value:"F"}, {value:"G"}, {value:"H"}];
 
           if (this.templateKey == "SingleChoose") {
             this.form.relOptionNum = 1;
@@ -807,13 +816,15 @@ export default {
           // this.qnumDisable = true
           
           this.optionList = [
-            { label: "×", content: "" },
-            { label: "✓", content: "" }
+            { label: "A", content: "正确" },
+            { label: "B", content: "错误" }
+            // { label: "×", content: "" },
+            // { label: "✓", content: "" }
           ];
           this.currentOption = this.optionList[0]
           this.form.optionNum = 2;
           this.form.relOptionNum = 1;
-          this.answers = [{value:"✓"}];
+          this.answers = [{value:"A"}];
         } else if (this.templateKey == "FillingQuestionTemplate") {
           
           // this.form.questionNum = 1
@@ -918,7 +929,7 @@ export default {
       //   item.check = false;
       // });
 
-      if(this.templateKey == "SingleChoose" ||this.templateKey == "MultipleChoose" ||this.templateKey == "BoolenQuestion") {
+      if(this.templateKey == "SingleChoose" ||this.templateKey == "MultipleChoose" ) {
         this.optionList.forEach(item=>{
           let str = this.$refs[`ck${item.label}`].getData()
           item.content = str?str:''
@@ -929,7 +940,7 @@ export default {
 
       
       let ques = ''
-      if(this.form.questionNum!=1 && this.form.templateType!='NoSingleQues'){
+      if(this.form.questionNum!=1 && this.form.templateType!='NoAloneEnter'){
         ques = this.$refs.ck1.getData()
         
       }
@@ -944,7 +955,7 @@ export default {
           item.answ = answ;
           item.questionType = this.questionType;
           item.templateKey = this.templateKey;
-          item.templateType = this.form.templateType;
+          item.questionType = this.form.templateType;
           item.difficulty = this.form.difficulty;
           item.selectOptions = this.optionList;
           item.answers = this.answers;
@@ -970,14 +981,14 @@ export default {
 
       this.editable = list.edit ? true : false;
 
-      this.form.templateType = list.templateType?list.templateType:''
+      this.form.templateType = list.questionType?list.questionType:''
 
 
 
         list.ques = list.ques?list.ques:''
         list.analyze = list.analyze?list.analyze:''
         list.answ = list.answ?list.answ:''
-        if(this.form.templateType != 'NoSingleQues') {
+        if(this.form.templateType != 'NoAloneEnter') {
           this.$nextTick(()=>{
             this.$refs.ck1.setData(list.ques);
           })
@@ -1115,8 +1126,10 @@ export default {
             })[0].code 
             if(this.templateKey == 'BoolenQuestion') {
               this.optionList = [
-                { label: "×", content: "" },
-                { label: "✓", content: "" }
+                { label: "A", content: "正确" },
+                { label: "B", content: "错误" }
+                // { label: "×", content: "" },
+                // { label: "✓", content: "" }
               ];
               this.form.optionNum = 2;
             }
@@ -1173,6 +1186,12 @@ export default {
 
 
       for (let i = 0; i < this.form.questionNum; i++) {
+
+        if(this.form.questionNum > 1 && !this.questionOtions[i].questionType) {
+          return this.$message.warning('请完善小题')
+        }
+
+
         questions[i] = {}
         let selectOption = []
         let answerOption =[]
@@ -1182,8 +1201,9 @@ export default {
 
         if ( type == "SingleChoose" ||type == "MultipleChoose" ||type == "BoolenQuestion") {
           // console.log(type,this.questionOtions)
-          if(type == "SingleChoose" ||type == "MultipleChoose") {
+          // if(type == "SingleChoose" ||type == "MultipleChoose") {
             let optionflag = false
+            console.log(this.questionOtions[i])
             for (let j = 0; j < this.questionOtions[i].optionNum; j++) {
               if(this.questionOtions[i].selectOptions[j].content) {
                 selectOption.push({word:this.questionOtions[i].selectOptions[j].label,content:this.questionOtions[i].selectOptions[j].content});
@@ -1200,7 +1220,7 @@ export default {
                 type:'warning'
               })
             } 
-          }
+          // }
          
           
 
@@ -1229,7 +1249,6 @@ export default {
 
         //this.questionOtions[i].questionOptions = selectOption
         //this.questionOtions[i].fillAnswers = answerOption
-
 
         questions[i] = {
           questionType: this.questionOtions[i].questionType,
@@ -1270,6 +1289,7 @@ export default {
       let requestBody = {}
       if(questions.length == 1) {
         questions[0].name = name
+        questions[0].questionType = this.questionType
         requestBody = questions[0]
       }else {
         requestBody = {
@@ -1309,7 +1329,7 @@ export default {
 
 
             }).catch(() => {
-              this.reload()
+              this.$router.push(`/questions/actualPaper/search/false`)
             });
           }
 
@@ -1344,7 +1364,8 @@ export default {
 
 
             }).catch(() => {
-              this.reload()
+              // this.reload()
+              this.$router.go(-1)
             });
           }
 
@@ -1546,7 +1567,7 @@ export default {
 
           this.questionDetail.versionId = data.data.oese && data.data.oese.id?data.data.oese.id:''  //教材版本
 
-          this.questionDetail.volumeId = data.data.oeseId     //  册别
+          this.questionDetail.volumeId = data.data.oeseBook && data.data.oeseBook.id?data.data.oeseBook.id:''     //  册别
 
           // this.activeType = (this.questionDetail.chapters && this.questionDetail.chapters.length)?'chapter':'knowledge'
 
@@ -1567,6 +1588,8 @@ export default {
               this.questionOtions[i].questionId = this.questionDetail.smallQuestions[i].questionId;
 
               this.questionOtions[i].difficulty = this.questionDetail.smallQuestions[i].difficultyType;
+
+              this.questionOtions[i].questionType = this.questionDetail.smallQuestions[i].questionType
 
               let arr = []
 
@@ -1595,19 +1618,19 @@ export default {
 
 
 
-              if(this.questionDetail.smallQuestions[i].options && this.questionDetail.smallQuestions[i].options.length) {
-                if(this.questionDetail.smallQuestions[i].fillAnswers.length > 1) {
-                  this.questionOtions[i].templateType = 'MultipleChoose'
-                }else {
-                  this.questionOtions[i].templateType = 'SingleChoose'
-                }
-              }else if(this.questionDetail.smallQuestions[i].fillAnswers && this.questionDetail.smallQuestions[i].fillAnswers.length) {
-                this.questionOtions[i].templateType = 'BoolenQuestion'
-              }else if(!this.questionDetail.smallQuestions[i].name) {
-                this.questionOtions[i].templateType = 'NoSingleQues'
-              }else {
-                this.questionOtions[i].templateType = 'SubjectiveItem'
-              }
+              // if(this.questionDetail.smallQuestions[i].options && this.questionDetail.smallQuestions[i].options.length) {
+              //   if(this.questionDetail.smallQuestions[i].fillAnswers.length > 1) {
+              //     this.questionOtions[i].templateType = 'MultipleChoose'
+              //   }else {
+              //     this.questionOtions[i].templateType = 'SingleChoose'
+              //   }
+              // }else if(this.questionDetail.smallQuestions[i].fillAnswers && this.questionDetail.smallQuestions[i].fillAnswers.length) {
+              //   this.questionOtions[i].templateType = 'BoolenQuestion'
+              // }else if(!this.questionDetail.smallQuestions[i].name) {
+              //   this.questionOtions[i].templateType = 'NoSingleQues'
+              // }else {
+              //   this.questionOtions[i].templateType = 'SubjectiveItem'
+              // }
 
        
               this.questionOtions[i].selectOptions = JSON.parse(JSON.stringify(arr));
@@ -1630,7 +1653,7 @@ export default {
             // this.$refs.ck2.setData(this.questionOtions[0].analyze)
             // this.$refs.ck3.setData(this.questionOtions[0].answ)
 
-            this.form.templateType = this.questionOtions[0].templateType
+            this.form.templateType = this.questionOtions[0].questionType
             if(this.questionOtions[0].showQuestionTab) {
               this.$refs.ck1.setData(this.questionOtions[0].ques)
               this.activeName = 'stems'

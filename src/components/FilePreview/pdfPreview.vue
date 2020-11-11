@@ -1,6 +1,7 @@
 <template>
   <div class="pdf-view">
-<!--     <div style="text-align:center;line-height: 42px;">
+
+  <!--     <div style="text-align:center;line-height: 42px;">
       <i @touchstart="idx=0" @touchend="idx=-1" @click="scaleD" class="el-icon-zoom-in pdf-icon"></i>
       <span @click="changePdfPage(0)" class="cursor"><i class="iconfont el-icon-arrow-left"></i></span>
       <span style="font-size:15px;font-weight:600;margin-left:10px;">{{currentPage}}</span> 
@@ -15,7 +16,7 @@
     <pdf
       ref="pdf"
       class="pdf-wrap"
-      :src="pdfUrl"
+      :src="pdfPreviewUrl"
       :page='currentPage'
       @num-pages="pageCount=$event" 
       @page-loaded="currentPage=$event"
@@ -26,8 +27,9 @@
       class="pdf-wrap"
       v-for="i in currentPageNum"
       :key="i"
-      :src="pdfUrl"
+      :src="pdfPreviewUrl"
       :page="i"
+      @page-loaded="pageLoaded"
     ></pdf>
 
     <div v-if="pdfPagenum && pdfPagenum>currentPageNum" style="text-align: center;line-height: 40px;">
@@ -51,7 +53,8 @@ export default {
       scale: 90, //放大系数
       idx: -1,
       currentPageNum: 0,
-
+      loadedRatio:0,
+      show: false,
     }
   },
 
@@ -66,13 +69,11 @@ export default {
   },
 
   created() {
-    this.pdfPreviewUrl = pdf.createLoadingTask(this.pdfUrl);
-
     
   },
 
   mounted() {
-
+    this.pdfPreviewUrl = pdf.createLoadingTask(this.pdfUrl);
     this.currentPageNum = this.pdfPagenum < 10? this.pdfPagenum: 10
   },
   methods: {
@@ -85,8 +86,6 @@ export default {
         this.currentPage++;
       }
     },
-
-
 
     //预览pdf
     previewPDF(url){
@@ -135,32 +134,36 @@ export default {
         }
     },
 
-
-      //放大
-      scaleD() {
-        if (this.scale == 100) {
-          return;
-        }
-        this.scale += 5;
-        this.$refs.pdf.$el.style.width = parseInt(this.scale) + "%";
-      },
- 
-      //缩小
-      scaleX() {
-        if (this.scale == 70) {
-          return;
-        }
-        this.scale += -5;
-        this.$refs.pdf.$el.style.width = parseInt(this.scale) + "%";
-      },
-
-      addPageNum() {
-        if(this.pdfPagenum<this.currentPageNum + 10) {
-          this.currentPageNum = this.pdfPagenum
-        }else {
-          this.currentPageNum += this.currentPageNum
-        }
+    //放大
+    scaleD() {
+      if (this.scale == 100) {
+        return;
       }
+      this.scale += 5;
+      this.$refs.pdf.$el.style.width = parseInt(this.scale) + "%";
+    },
+
+    //缩小
+    scaleX() {
+      if (this.scale == 70) {
+        return;
+      }
+      this.scale += -5;
+      this.$refs.pdf.$el.style.width = parseInt(this.scale) + "%";
+    },
+
+    addPageNum() {
+      if(this.pdfPagenum<this.currentPageNum + 10) {
+        this.currentPageNum = this.pdfPagenum
+      }else {
+        this.currentPageNum += this.currentPageNum
+      }
+    },
+
+
+    pageLoaded(e) {
+      e === this.currentPageNum? this.show = true:null
+    }
   }
 }
 </script>

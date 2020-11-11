@@ -1,16 +1,15 @@
 <template>
   <div class="chapter">
     <!-- <ul><li v-for="i in 89">{{i}}</li></ul> -->
+    <!-- <el-backtop target=".home .el-scrollbar__wrap" :bottom="80"></el-backtop> -->
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left">
-        <!-- <div class="tree-wrap" :class="{fixedclass:isfixTab}" style="z-index: 1000;"> -->
-
-          <top-popover v-if="isReady" ref="filter" @setparams="setparams">
+        <selectPointTree ref="tree" @getPointIds="getPointIds" treeType="chapter" :isfixTab="isfixTab"></selectPointTree>
+         <!--  <top-popover v-if="isReady" ref="filter" @setparams="setparams">
             <div slot="reference">
               <p class="top-title">
                 <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
                 <span v-if="$refs.filter">{{$refs.filter.oese.name}}</span>
-                <!-- <span v-if="$refs.filter" >{{$refs.filter.volume.name}}</span> -->
                 
                 <i class="iconfont iconshezhi settingicon"></i>
               </p>
@@ -24,9 +23,8 @@
             <div class="tree-class" :class="{treeclassfixed:isfixTab}" v-if="getuserInfo.learningSection">
               <pointTree chooseType="chapter" :volumeId="volumeId" :subjectCode="subjectCode"  @getCheckedNodes="getCheckedChapters" ref="chapterTree"></pointTree>
             </div>
-          </div>
+          </div> -->
 
-        <!-- </div> -->
       </div>
 
       <div slot="right">
@@ -48,7 +46,7 @@
           </div>
         </div>
         <div class="tab-div">
-          <test-question :chapterList="chapterList" :volumeId="volumeId" :subjectCode="subjectCode" @backToTop="backToTop"></test-question>
+          <test-question :chapterIds="chapterIds" :volumeId="volumeId" :subjectCode="subjectCode" @backToTop="backToTop"></test-question>
 <!-- 
           <el-tabs v-model="activeName" stretch>
             <el-tab-pane label="同步题" name="question">
@@ -69,15 +67,17 @@
 <script>
   import { mapGetters } from 'vuex'
 import leftFixedNav from "@/components/Nav/leftFixedNav";
-import topPopover from "@/components/Popover/topPopover";
+// import topPopover from "@/components/Popover/topPopover";
 import testQuestion from "./test_question";
 import testPaper from "./test_paper";
+import selectPointTree from "@/components/Popover/selectPointTree";
 export default {
   components: {
     leftFixedNav,
-    topPopover,
+    // topPopover,
     testQuestion,
-    testPaper
+    testPaper,
+    selectPointTree
   },
   props: ["isfixTab"],
   data() {
@@ -98,6 +98,7 @@ export default {
       visionList:[],
       volumeId:'',
       subjectCode: '',
+      chapterIds:[],
 
 
     };
@@ -116,10 +117,13 @@ export default {
 
       ]),
   },
+  activated() {
+    
 
+  },
 
   mounted() {
-    // console.log(this.gradeList)
+
     this.gradeList.length? this.filter.grade = this.gradeList[0]: null
 
     if(this.getuserInfo.userType == 'Teacher') {
@@ -131,11 +135,25 @@ export default {
   },
   methods: {
 
-    setparams(volumeId,subjectCode) {
+
+    getPointIds(list1,list2,subjectCode,volumeId) {
+
+      this.chapterIds = list1
+
+      if(this.subjectCode != subjectCode) {
+        
+        this.subjectCode = subjectCode
+
+      }
 
       this.volumeId = volumeId
+      
+    },
+    setparams(volumeId,subjectCode) {
 
-      this.subjectCode = subjectCode
+      this.volumeId != volumeId?this.volumeId = volumeId:null
+
+      this.subjectCode != subjectCode?this.subjectCode = subjectCode:null
       
     },
     getCheckedChapters(list) {

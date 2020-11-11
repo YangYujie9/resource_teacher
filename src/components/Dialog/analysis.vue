@@ -150,7 +150,7 @@ export default {
         series: [
           {
             type: "pie",
-            radius: "70%",
+            radius: "60%",
             center: ["50%", "50%"],
             //selectedMode: 'single',
             label: {
@@ -184,7 +184,7 @@ export default {
           left: "center",
           top: "0%"
         },
-        color: ["#4fa0f7", "#95c8ff", "#2489f6","#89b5e6", "#79aee8","#0f77e6"],
+        color: ["#4fa0f7", "#95c8ff", "#2489f6","#89b5e6", "#79aee8","#0f77e6","#7fdeff","#39cccc","#1ca7ec","#22deca"],
         tooltip: {
           trigger: "item",
           formatter: "{b} : {c} ({d}%)"
@@ -205,7 +205,7 @@ export default {
         series: [
           {
             type: "pie",
-            radius: "70%",
+            radius: "60%",
             center: ["50%", "50%"],
             //selectedMode: 'single',
             label: {
@@ -357,7 +357,7 @@ export default {
 
     .circle {
       display: flex;
-      height: 200px;
+      height: 300px;
     }
   }
 }

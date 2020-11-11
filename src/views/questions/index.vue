@@ -1,6 +1,8 @@
 <template>
-  <div class="home"  ref="home"  v-loading.fullscreen.lock="!isReady">
+  <div class="home"  v-loading.fullscreen.lock="!isReady">
    <!--  /*<el-scrollbar style="height:100%"  ref="home">*/ -->
+    <el-backtop target=".home .el-scrollbar__wrap" :bottom="80"></el-backtop>
+    <div class="el-scrollbar__wrap" ref="home">
       <page-head  v-if="isReady"></page-head>
       <div class="home-wrap">
         <div class="nav" :class="{ fixedNavbar: isfixTab}" ref="navBar">
@@ -12,12 +14,17 @@
             >{{list.label}}</li>
           </ul>
         </div>
+        <router-view v-if="!$route.meta.keepAlive && isReady"  :isfixTab="isfixTab" @backToTop="backToTop" ></router-view>
+        <keep-alive>
+          <router-view v-if="$route.meta.keepAlive && isReady"  :isfixTab="isfixTab" @backToTop="backToTop"></router-view>
+        </keep-alive>
 
-        <router-view :isfixTab="isfixTab" @backToTop="backToTop"  v-if="isReady"></router-view>
+
+        <!-- <router-view :isfixTab="isfixTab" @backToTop="backToTop"  v-if="isReady"></router-view> -->
 
       </div>
       <div class="footer">{{getsiteInfo.copyright}}</div>
-
+    </div>
 <!--     </el-scrollbar> -->
   </div>
 </template>
@@ -50,7 +57,7 @@ export default {
         },
         {
           label: "智能挑题",
-          route: "/questions/chooseByIntelligent",
+          route: "/questions/chooseByIntelligents",
           check: false
         },
         {
@@ -114,6 +121,7 @@ export default {
       // let scrollTop = this.$refs['home'].$refs['wrap'].scrollTop;
       let scrollTop = this.$refs['home'].scrollTop;
       let offsetTop = this.$refs.navBar.scrollTop;
+
       scrollTop > 208 ? (this.isfixTab = true) : (this.isfixTab = false);
     },
 

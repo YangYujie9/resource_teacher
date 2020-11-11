@@ -6,12 +6,12 @@
   			<li class="flex-class">
   				<p class="p1">学段：{{getuserInfo.sectionName}}</p>
   				<p class="p1">学科：{{getuserInfo.subjectName}}</p>
-  				<p class="p1">身份：{{getuserInfo.userType=="Teacherx"?"老师":'录题员'}}</p>
+  				<p class="p1">身份：{{getuserInfo.userType=="Teacher"?"老师":'录题员'}}</p>
   			</li>
   			<li class="flex-class">
   				<p class="p1">年级：{{gradeList.join()}}</p>
   				<p class="p1">学校：{{getuserInfo.school.name}}</p>
-  				<p class="p1">地区：{{getuserInfo.username}}</p>
+  				<!-- <p class="p1">地区：{{getuserInfo.username}}</p> -->
   			</li>
   		</ul>
   	</div>
@@ -56,7 +56,7 @@
 						</div>
 		    	</div>
 		    </el-tab-pane>
-		    <el-tab-pane label="登陆历史" name="history">登陆历史</el-tab-pane>
+		    <!-- <el-tab-pane label="登陆历史" name="history">登陆历史</el-tab-pane> -->
 		  </el-tabs>
   	</div>
 

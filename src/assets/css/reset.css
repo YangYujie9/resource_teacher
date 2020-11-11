@@ -157,6 +157,11 @@ input:focus {
   background-color:transparent;
 }
 
+.hiddentext {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 figure {
   width: auto !important;

@@ -4,16 +4,22 @@
       <p class="titlep">
         <slot name="reference"></slot>
       </p>
-      <div class="popover-div">
+      <div class="popover-div" v-show="!isError">
           <div style="padding-bottom: 8px;">
             <p>学科：</p>
-             <el-radio-group v-model="subject" size="mini" :disabled="subjectEditable" @change="getVersion">
+             <el-radio-group v-model="subject" size="mini" :disabled="subjectEditable" @change="getOeseList">
                 <el-radio-button :label="item" :key="item.code" v-for="item in subjectList">{{item.subjectName}}</el-radio-button>
             </el-radio-group>
           </div>
           <div v-show="chooseType=='chapter'"  class="one-part">
+            <p>年级：</p>
+             <el-radio-group v-model="grade" size="mini" @change="getOeseList" :disabled="isError">
+              <el-radio-button :label="list" :key="list.key" v-for="list in gradeList">{{list.value}}</el-radio-button>
+            </el-radio-group>
+          </div>
+          <div v-show="chooseType=='chapter'"  class="one-part">
             <p>教材版本：</p>
-             <el-radio-group v-model="oese" size="mini" @change="getVolumeList" :disabled="isError">
+             <el-radio-group v-model="oese" size="mini" :disabled="isError">
                 <el-radio-button :label="item" :key="item.oeseId" v-for="item in versionList">{{item.name}}</el-radio-button>
             </el-radio-group>
           </div>
@@ -42,11 +48,12 @@ export default {
     subjectCode: {
       type:String,
     },
-    acVersionList: {
-      type:Array,
+    isActual: {
+      type: Boolean,
+      default: false
     },
-    acVolumeList: {
-      type: Array
+    gradeId: {
+      type: String
     },
     isError: {
       type: Boolean,
@@ -65,6 +72,7 @@ export default {
         volume:'',
       },
       subject:'',
+      grade:'',
       oese:'',
       volume:'',
       subjectEditable:false,
@@ -76,13 +84,19 @@ export default {
   watch: {
 
     volume(val) {
-
-      val?this.$emit('setparams',val.oeseId,this.subject.code):null
+      let id = val?val.id:''
+      this.$emit('setparams',id,this.subject.code)
     },
 
     subject(val) {
 
-      this.$emit('setparams',this.volume.oeseId,val.code)
+      this.$emit('setparams',this.volume.id,val.code)
+    },
+
+
+    oese(val) {
+      let id = val?val.id:''
+      this.$emit('setoeseId', id)
     }
 
 
@@ -90,6 +104,7 @@ export default {
   computed: {
 
     ...mapGetters([
+      'gradeList',
       'subjectList',
       'getuserInfo',
       'isReady'
@@ -97,17 +112,23 @@ export default {
     ]),
   },
   mounted() {
-      if(this.acVersionList&&this.acVersionList.length) {
+      if(this.isActual) {
         this.subjectEditable = true
         this.subject = this.subjectList.filter(item=>{
           return item.code == this.subjectCode
         })[0]
 
-        this.versionList = this.acVersionList
-        this.oese = this.versionList[0]
 
-        this.volumeList = this.acVolumeList
-        this.volume = this.volumeList[0]
+        this.grade = this.gradeList.filter(item=>{
+          return item.key == this.gradeId
+        })[0]
+
+        this.getOeseList()
+        // this.versionList = this.acVersionList
+        // this.oese = this.versionList[0]
+
+        // this.volumeList = this.acVolumeList
+        // this.volume = this.volumeList[0]
 
         // this.$emit('setparams',this.volume.oeseId,this.subject.code)
       }else if(this.isError){
@@ -116,7 +137,16 @@ export default {
             return item.code == this.questionDetail.subjectCode
           })[0]
 
-        this.getVersion()
+
+          if(this.questionDetail.oeseBook && this.questionDetail.oeseBook.id)
+          this.volume = {
+            id: this.questionDetail.oeseBook.id,
+            name: this.questionDetail.oeseBook.name
+          }
+
+        // this.getVersion()
+
+
       
       }else {
 
@@ -130,7 +160,9 @@ export default {
           
         }
 
-        this.getVersion()
+        this.grade = this.gradeList[0] 
+
+        this.getOeseList()
       }
 
     
@@ -142,6 +174,49 @@ export default {
 
   },
   methods: {
+
+
+    getOeseList() {
+      this.versionList = []
+      this.volumeList = []
+
+      this.$http.get(`/api/open/common/books/${this.getuserInfo.school.id}?subjectCode=${this.subject.code}&grade=${this.grade.key}`)
+      .then(data=>{
+        if(data.status == '200') {
+          if(data.data.oese && data.data.oese.id) {
+            this.versionList.push(data.data.oese)
+            // this.oese = this.versionList[0]
+
+            if(this.isError) {
+              this.oese = this.versionList.filter(list=>{
+                return list.oeseId == this.questionDetail.versionId
+              })[0]
+            }else {
+              this.oese = this.versionList[0]
+            }
+
+          }else {
+            this.oese = ''
+          }
+
+          if(data.data.volumes && data.data.volumes.length) {
+            this.volumeList = data.data.volumes
+            // this.volume = this.volumeList[0]
+
+            if(this.isError) {
+              this.volume = this.volumeList.filter(list=>{
+                return list.oeseId == this.questionDetail.volumeId
+              })[0]
+            }else {
+              this.volume = this.volumeList[0]
+            }
+
+          }else {
+            this.volume = ''
+          }
+        }
+      })
+    },
 
     getVersion() {
       
@@ -238,7 +313,7 @@ export default {
     height: 36px;
     position: relative;
     cursor: pointer;
-    z-index: 1000;
+    z-index: 10;
 
     &:hover {
       .popover-div {
@@ -251,20 +326,29 @@ export default {
       font-weight: 600;
       line-height: 36px;
       // text-align: center;
-
+      padding: 0 40px 0 20px;
+      position: relative;
 
       .top-title {
-        position: relative;
-        padding: 0 20px;
-        display: flex;
-      justify-content: space-around;
+        
+        // padding: 0 40px 0 20px;
+        // display: flex;
+        // justify-content: space-around;
+        
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow:ellipsis;
+
+
+
+      }
 
         .settingicon {
           position: absolute;
-          right: 20px;
+          right: 10px;
           color: #cdd7d7;
         }
-      }
     }
 
     .popover-div {

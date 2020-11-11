@@ -36,8 +36,11 @@
 
         <div class="singal-paper" v-for="list in tableData">
           <div class="singal-paper-left">
-            <div	 class="left-title">
-            	<p @click="resourcePreview(list.resourceId)"><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
+            <div class="left-title">
+            	<p @click="resourcePreview(list.resourceId)" class="hiddentext">
+                <i class="iconfont" :class="setClass(list.fileType)"></i>
+                <span class="text">{{list.name}}</span>
+              </p>
             	<p class="type-class" :style="statusStyle(list.applyState)">{{list.applyName}}</p>
             </div>
             <p>
@@ -149,6 +152,11 @@ export default {
   		this.resetPage()
   	},
   },
+  activated() {
+    
+    this.getTableData()
+
+  },
   mounted() {
 
   	this.getTableData()
@@ -178,6 +186,12 @@ export default {
     	this.getTableData()
     },
     getTableData: debounce(function() {
+
+      if(!this.chapterIds.length && !this.knowledgeIds.length) {
+          this.tableData = []
+          this.total = 0
+          return 
+      }
         let params = {
           searchType : 'person',
            fileType:this.search.fileType,
@@ -347,6 +361,7 @@ export default {
             &-left {
 
             	width: 70%;
+              min-width: 0px;
 		          .left-title {
 		            padding-right: 20px;
 		            font-size: 1.2rem;
@@ -356,7 +371,7 @@ export default {
 		            display: flex;
 		            align-items: center;
 		            justify-content: space-between;
-
+                // white-space: nowrap;
 		            .text {
 		              margin-left: 3px;
 		            }
@@ -409,6 +424,7 @@ export default {
 	          	width: 30%;
 	          	border-left: 1px solid #e2e2e2;
 	          	text-align: center;
+              // flex-shrink: 0;
 	          }
 
 

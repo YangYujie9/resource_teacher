@@ -49,8 +49,11 @@
 
                 <div class="singal-paper" v-for="list in tableData">
                   <div class="singal-paper-left">
-			              <div	 class="left-title">
-			              	<p @click="resourcePreview(list.resourceId)"><i class="iconfont" :class="setClass(list.fileType)"></i><span class="text">{{list.name}}</span></p>
+			              <div class="left-title">
+			              	<p @click="resourcePreview(list.resourceId)" class="hiddentext">
+                        <i class="iconfont" :class="setClass(list.fileType)"></i>
+                        <span class="text">{{list.name}}</span>
+                      </p>
 			              </div>
 			              <p>
 			                <span>贡献者：{{list.userName}}</span>
@@ -151,6 +154,12 @@ export default {
   		this.resetPage()
   	},
   },
+  
+  activated() {
+    
+    this.getTableData()
+
+  },
   mounted() {
   	this.getTableData()
   },
@@ -181,7 +190,11 @@ export default {
 
 
     getTableData:debounce(function() {
-
+      if(!this.chapterIds.length && !this.knowledgeIds.length) {
+          this.tableData = []
+          this.total = 0
+          return 
+      }
     	// console.log(this.chapterIds,this.knowledgeIds)
 
       let params = {
@@ -315,6 +328,9 @@ export default {
             &-left {
 
             	width: 70%;
+              min-width: 0px;
+
+                  
 		          .left-title {
 		            padding-right: 20px;
 		            font-size: 1.2rem;

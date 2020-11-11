@@ -1,7 +1,6 @@
 <template>
   <div class="test-ques">
-    <!-- <ul><li v-for="i in 89">{{i}}</li></ul> -->
-    
+
     <div class="search-div radio-group">
       <ul>
         <li>
@@ -87,14 +86,15 @@
       </p>
     </div>
 
-    <div class="card-wrap">
+    <div class="card-wrap" v-loading="loading">
+
        <!-- <div v-for="(list,index) in tableData">
           <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder">
             
           </singleQuestion>
 
         </div>   -->
-        <questionList :isAnswer="isAnswer" :tableData="tableData" knowledgeType="chapter" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" ></questionList>   
+        <questionList :isAnswer="isAnswer" :tableData="tableData" :subjectCode="subjectCode" knowledgeType="chapter" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" ></questionList>   
 
 
       <div class="pagination">
@@ -145,7 +145,7 @@ export default {
     singleQuestion,
     questionList
   },
-  props: ['chapterList','subjectCode','volumeId'],
+  props: ['chapterIds','subjectCode','volumeId'],
   data() {
     return {
       search: {
@@ -170,6 +170,7 @@ export default {
       errorVisible: false,
       favoriteVisible:false,
       testBasket:0,
+      loading: false,
 
 
     };
@@ -193,18 +194,24 @@ export default {
 
     },
 
-    volumeId(val) {
-      if(val) {
-
+    chapterIds(val) {
+      
+      if(val.length) {
         this.resetPage()
         
+      }else {
+        this.tableData = []
+        this.total = 0
       }
     },
 
-    chapterList(val) {
 
-      this.resetPage()
-    }
+  },
+
+  activated() {
+    this.getmyTestBasket()
+    this.getTableData()
+    
   },
   mounted() {
     // this.$nextTick(()=>{
@@ -279,11 +286,18 @@ export default {
       this.getTableData()
     },
     getTableData: debounce(function() {
-      let chapterIds = []
-      this.chapterList.forEach(item=>{
-        chapterIds.push(item.id)
-      })
+      // let chapterIds = []
+      // this.chapterList.forEach(item=>{
+      //   chapterIds.push(item.id)
+      // })
+      this.loading = true
 
+      if(!this.chapterIds.length) {
+        this.tableData = []
+        this.total = 0
+        return
+        
+      }
 
       let params = {
         method:1,
@@ -300,21 +314,31 @@ export default {
         // knowledgeId: this.search.difficulty,
       }
       this.$http.post(`/api/open/question/1/questions`,{
-        chapterIds: chapterIds,
+        chapterIds: this.chapterIds,
       },params)
       .then((data)=>{
-        data.data.content.forEach(item=>{
+        // data.data.content.forEach(item=>{
 
-          item.showDetail = false
-          item.answers = []
-          this.handleQuestion(item,item)
+        //   item.showDetail = false
+        //   item.answers = []
+        //   this.handleQuestion(item,item)
 
 
-        })
+        // })
+        if(data.data.content && data.data.content.length) {
 
-        this.tableData = data.data.content
-        // console.log(this.tableData)
-        this.total = data.data.totalElements
+          this.tableData = data.data.content
+          // console.log(this.tableData)
+          this.total = data.data.totalElements
+
+        }else {
+
+          this.tableData = []
+          this.total = 0
+        }
+
+        this.loading = false
+
 
 
         
@@ -322,42 +346,7 @@ export default {
     }),
 
 
-    handleQuestion(item,item0) {
-      //选项
-      item.selectoption = []
-      if(item.options && item.options.length) {
-        item.options.forEach(item1=>{
-          item.selectoption.push(item1)
-          // for(let key in item1) {
-          //   item.selectoption.push({word:key,value:item1[key]})
-          // }
-        })
-      }
-      //答案
-      //item.answers = []
-      if(item.fillAnswers && item.fillAnswers.length) {
-        item.fillAnswers.forEach(item1=>{
-          for(let key in item1) {
-            item0.answers.push(item1[key])
-          }
-        })
-      }
 
-      //知识点
-      item.knowledgesPoint = []
-      if(item.chapters && item.chapters.length) {
-        item.chapters.forEach(item1=>{
-          item.knowledgesPoint.push(item1.name)
-        })
-      }
-
-      if(item.smallQuestions && item.smallQuestions.length) {
-        item.smallQuestions.forEach(item1=>{
-          this.handleQuestion(item1,item)
-        })
-        
-      }
-    },
 
 
     getmyTestBasket() {
@@ -387,7 +376,8 @@ export default {
       })
 
       this.$http.post(`/api/open/paper/addTestBasket/batchAdd`,{
-        questionIds:ids.join()
+        questionIds:ids.join(),
+        subjectCode: this.subjectCode
       })
       .then((data)=>{
         if(data.status == '200') {

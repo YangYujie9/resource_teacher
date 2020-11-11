@@ -2,12 +2,14 @@
   <div class="Intelligent">
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left">
+        <!-- <selectPointTree ref="tree" @getPointList="getPointList" :isfixTab="isfixTab"></selectPointTree> -->
           <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
             <div slot="reference">
               <p class="top-title">
                 <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
-                <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
-                <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span>
+                <span v-if="$refs.filter && $refs.filter.grade && activeType=='chapter'">/{{$refs.filter.grade.value}}</span>
+                <span v-if="$refs.filter && $refs.filter.oese && activeType=='chapter'">/{{$refs.filter.oese.name}}</span>
+                <span v-if="$refs.filter && $refs.filter.volume && activeType=='chapter'" >/{{$refs.filter.volume.name}}</span>
                 
                 <i class="iconfont iconshezhi settingicon"></i>
               </p>
@@ -21,7 +23,7 @@
             <el-tabs stretch v-model="activeType" @tab-click="handleClick">
               <el-tab-pane label="按章节" name="chapter">
                 <div class="tree-class" :class="{treeclassfixed:isfixTab}">
-                  <pointTree chooseType="chapter" :volumeId="volumeId" @getCheckedNodes="getCheckedChapters" ref="chapterTree"></pointTree>
+                  <pointTree chooseType="chapter" :volumeId="volumeId"  :subjectCode="subjectCode" @getCheckedNodes="getCheckedChapters" @selectnode="defaultChapterCheck" ref="chapterTree"></pointTree>
                 </div>
               </el-tab-pane>
               <el-tab-pane label="按考点" name="knowledge">
@@ -79,6 +81,7 @@
                     size="mini"
                     style="width:122px;"
                   ></el-input>
+                  <span class="label2"> 可选{{type.count}}题</span>
                 </p>
               </div>
             </li>
@@ -129,14 +132,15 @@ import leftFixedNav from "@/components/Nav/leftFixedNav";
 import { mapGetters } from 'vuex'
 import topPopover from "@/components/Popover/topPopover";
 import { getquestionType } from '@/utils/basic.service.js'
-
+// import selectPointTree from "@/components/Popover/selectPointTree";
 
 export default {
   components: {
     leftFixedNav,
     // scoredialog,
     // analysisdialog,
-    topPopover
+    topPopover,
+    // selectPointTree,
   },
   props: ["isfixTab"],
   inject: ['reload'],
@@ -183,17 +187,17 @@ export default {
 
   watch: {
 
-    gradeList(val) {
-      if(val.length) {
-        this.filter.grade = val[0]
-      }
+    // gradeList(val) {
+    //   if(val.length) {
+    //     this.filter.grade = val[0]
+    //   }
 
-    },
+    // },
   },
 
 
   mounted() {
-    this.gradeList.length? this.filter.grade = this.gradeList[0]: null
+    // this.gradeList.length? this.filter.grade = this.gradeList[0]: null
     // this.subjectCode = this.getuserInfo.subjectCode
     this.search.difficulty = this.partDifficultyList[0].key
     // this.subjectCode = this.getuserInfo.subjectCode
@@ -202,6 +206,24 @@ export default {
     //console.log(this.form.type);
   },
   methods: {
+
+
+    // getPointList(list1,list2,subjectCode,volumeId) {
+
+
+    //   if(this.subjectCode != subjectCode) {
+        
+    //     this.subjectCode = subjectCode
+    //     this.getquestionType()
+    //   }
+
+    //   this.volumeId = volumeId
+      
+    //   this.chapterTags = list1
+    //   this.knowledgeTags = list2
+
+
+    // },
 
     handleClick(tab, event) {
       if(tab.name == "chapter") {
@@ -213,11 +235,14 @@ export default {
 
     setparams(volumeId,subjectCode) {
 
-      this.volumeId = volumeId
+      this.volumeId!=volumeId?this.volumeId = volumeId:null
 
-      this.subjectCode = subjectCode
+      if(this.subjectCode != subjectCode) {
+        
+        this.subjectCode = subjectCode
 
-      this.getquestionType()
+        this.getquestionType()
+      }
       
     },
 
@@ -246,11 +271,14 @@ export default {
             
             data.data.forEach(item=>{
               item.number = ''
+              item.count = 0
             })
             this.typeList = data.data
 
-            this.search.type.push(this.typeList[0]);
+            // this.search.type.push(this.typeList[0]);
             // this.search.type = this.typeList[0];
+
+            this.getTypeCount()
 
         } 
       })
@@ -282,6 +310,14 @@ export default {
       this.knowledgeTags.forEach(item=>{
         knowledgeIds.push(item.id)
       })
+
+      if(this.activeType == 'chapter') {
+        knowledgeIds = []
+      }else {
+        chapterIds = []
+      }
+
+
       let flag = false;
       this.search.type.forEach(item=>{
         if(!item.number) {
@@ -308,7 +344,7 @@ export default {
         difficultyType: this.search.difficulty,
         chapterIds: chapterIds,
         knowledgeIds:knowledgeIds,
-        grade:this.filter.grade.key
+        // grade:this.filter.grade.key
       }
 
       // if(this.activeType == "chapter") {
@@ -345,6 +381,59 @@ export default {
       })
       
     },
+
+    getTypeCount() {
+
+
+      if(!this.chapterTags.length && !this.knowledgeTags.length) {
+
+        this.typeList.forEach(item=>{
+          item.number = ''
+          item.count = 0
+        })
+        return 
+      }
+      let chapterIds = []
+      let knowledgeIds = []
+
+      this.chapterTags.forEach(item=>{
+        chapterIds.push(item.id)
+      })
+      this.knowledgeTags.forEach(item=>{
+        knowledgeIds.push(item.id)
+      })
+      if(this.activeType == 'chapter') {
+        knowledgeIds = []
+      }else {
+        chapterIds = []
+      }
+
+      this.$http.post(`/api/open/common/questionTypeNQuestionCount`,{
+        chapterIds: chapterIds,
+        knowledgeIds:knowledgeIds,
+      })
+      .then(data=>{
+        if(data.status == '200') {
+          if(data.data.length) {
+
+            for(let i=0;i<data.data.length;i++) {
+
+              for (var key in data.data[i]) {
+
+                for(let j=0;j<this.typeList.length;j++) {
+
+                  if(key == this.typeList[j].code) {
+                    this.typeList[j].count = data.data[i][key]
+                    break
+                  }
+                }
+              }
+            }
+          }
+
+        }
+      })
+    },
     // closescore() {
     //   this.scoredialogVisible = false;
     // },
@@ -364,16 +453,19 @@ export default {
       this.pointList.splice(index, 1);
       this.$refs.tree1.setCheckedNodes(this.pointList);
     },
-
+    defaultChapterCheck(list) {
+      this.chapterTags = []
+    },
     getCheckedChapters(list) {
       this.chapterTags = list
       this.tagsList = this.chapterTags
-
+      this.getTypeCount()
     },
 
     getCheckedKnows(list) {
       this.knowledgeTags = list
       this.tagsList = this.knowledgeTags
+      this.getTypeCount()
     },
   }
 };
@@ -512,6 +604,12 @@ export default {
             border-radius: 4px;
             font-size: 12px;
             margin-right: 10px;
+          }
+
+          .label2 {
+            color: #9e9fa0;
+            font-size: 10px;
+            margin-left: 8px;
           }
         }
 

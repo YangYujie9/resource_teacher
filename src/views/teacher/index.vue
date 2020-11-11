@@ -1,7 +1,7 @@
 <template>
   <div class="ques-home">
     <el-scrollbar style="height:100%" ref="quesHome">
-      <page-head></page-head>
+      <page-head v-if="isReady"></page-head>
       <div class="ques-home-wrap">
         <div class="nav" :class="{ fixedNavbar: isfixTab}" ref="navBar">
           <ul>
@@ -12,8 +12,11 @@
             >{{list.label}}</li>
           </ul>
         </div>
-
-        <router-view :isfixTab="isfixTab" @backToTop="backToTop" :resourceTypeList="resourceTypeList"  v-if="resourceTypeList.length"></router-view>
+        <router-view v-if="!$route.meta.keepAlive && resourceTypeList.length" :isfixTab="isfixTab" @backToTop="backToTop" :resourceTypeList="resourceTypeList" ></router-view>
+        <keep-alive>
+          <router-view v-if="$route.meta.keepAlive && resourceTypeList.length" :isfixTab="isfixTab" @backToTop="backToTop" :resourceTypeList="resourceTypeList" ></router-view>
+        </keep-alive>
+       <!--  <router-view :isfixTab="isfixTab" @backToTop="backToTop" :resourceTypeList="resourceTypeList"  v-if="resourceTypeList.length"></router-view> -->
       </div>
       <div class="footer">{{getsiteInfo.copyright}}</div>
     </el-scrollbar>
@@ -51,7 +54,6 @@ export default {
     $route(to,from){
 
       this.$refs["quesHome"].$refs["wrap"].scrollTop = 0
-
 
       this.NavList.forEach(list=>{
         // console.log(list.route,to.path)

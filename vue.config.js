@@ -30,6 +30,22 @@ module.exports = {
     chainWebpack(config) {
       config.plugins.delete('preload') 
       config.plugins.delete('prefetch') 
+
+      // config.module
+      //   .rule("vue")
+      //   .use("vue-loader")
+      //   .loader("vue-loader")
+      //   .tap(options => {
+      //       options.compilerOptions.directives = {
+      //           html(node, directiveMeta) {
+      //               (node.props || (node.props = [])).push({
+      //                   name: "innerHTML",
+      //                   value: `xss(_s(${directiveMeta.value}))`
+      //               });
+      //           }
+      //       };
+      //       return options;
+      // });
     },
     //如果想要引入babel-polyfill可以这样写
     // configureWebpack: (config) => {

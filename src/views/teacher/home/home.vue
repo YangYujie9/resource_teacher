@@ -6,31 +6,8 @@
 
       <div class="part-one home-content">
         <div class="top-left">
-       
-          <div class="search-wrap">
-            <el-radio-group v-model="activeType" size="mini" @change="getPonitTree">
-              <el-radio-button label="chapter">章节目录</el-radio-button>
-              <el-radio-button label="knowledge">知识点</el-radio-button>
-            </el-radio-group>
-          </div>
-          <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
-            <div slot="reference">
-              <p class="top-title">
-                <span v-if="$refs.filter" >{{$refs.filter.subject.subjectName}}</span>
-                <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
-                <!-- <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span> -->
-                
-                <i class="iconfont iconshezhi settingicon"></i>
-              </p>
-            </div>
-            <div slot="popover">
-            </div>
-          </top-popover>
+          <selectPointTree ref="tree" @getPointIds="getPointIds"></selectPointTree>
 
-          <div class="tree-class">
-            <pointTree chooseType="chapter" :volumeId="volumeId"  @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='chapter'"></pointTree>
-            <pointTree chooseType="knowledge"  :subjectCode="subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType=='knowledge'"></pointTree>
-          </div>
       
         </div>
 
@@ -40,7 +17,7 @@
         <div class="top-right ">
           <div style="border-bottom: 1px dashed #c8cacf;">
             <el-button type="danger" @click="uploadResource" size="large" style="width: 100%"><i class="iconfont iconshangchuan"></i> 上传我的资源</el-button>
-            <p style="line-height: 38px;text-align: center;font-size: 16px;">已有资源<span style="color: #5182f4;">{{resourceCount}}</span> 份 </p>
+            <p style="line-height: 38px;text-align: center;font-size: 16px;">已有资源 <span style="color: #5182f4;">{{resourceCount}}</span> 份 </p>
           </div>
 
           <p style="font-size: 16px;margin: 10px 0px;">资源统计</p>
@@ -50,8 +27,8 @@
         </div>
       </div>
 
-
-      <div v-for="list in NavigationBars">
+      <!-- 带图片样式 -->
+      <!-- <div v-for="list in NavigationBars">
         <div class="home-nav">
           <span>{{list.navigationName}}</span>
           <el-button type="text" style="color: #ffffff;" @click="getResourceList(list)" >换一批</el-button>
@@ -66,10 +43,53 @@
               <p class="title-class" style="">{{item.name}}</p>
               <p class="foot-tag">
                 <span>{{item.preview}}人阅读</span>
-                <!-- <span><i class="iconfont iconpinglun1 tag-icon" ></i>{{item.download}}</span>   评论数-->
+                <span><i class="iconfont iconpinglun1 tag-icon" ></i>{{item.download}}</span>   评论数
                 <span><i class="el-icon-download tag-icon" ></i>{{item.download}}</span>
                 <span><i class="iconfont icondianzan tag-icon"></i>{{item.thumbUp}}</span>
               </p>
+            </div>
+          </div>
+        </div>
+      </div> -->
+      <div class="home-nav-wrap">
+        <div v-for="list in NavigationBars">
+          <div class="home-nav">
+            <span>{{list.navigationName}}</span>
+            <!-- <div style="display: flex;">
+              <el-tabs v-model="activeName">
+                <el-tab-pane label="用户管理" name="first"></el-tab-pane>
+                <el-tab-pane label="配置管理" name="second"></el-tab-pane>
+                <el-tab-pane label="角色管理" name="third"></el-tab-pane>
+                <el-tab-pane label="定时任务补偿" name="fourth"></el-tab-pane>
+              </el-tabs> -->
+              <el-button type="text" style="color: #ffffff;margin-left: 50px;" @click="getResourceList(list)" >换一批</el-button>
+            <!-- </div> -->
+          </div>
+          <div class="home-content">
+            <div class="resource-wrap">
+
+              <ul>
+                <li v-for="item in list.resourceList" class="one-piece" @click="resourcePreview(item.resourceId)">
+                  <!-- <span style="display: inline-block;width: 3px;height: 3px;background-color: #333;margin-right: 8px;bottom: 3px;"></span> -->
+                  <!-- /*<span style="margin-right: 8px;font-size: 20px;font-weight: 600;">·</span>*/ -->
+                  <span class="tag-class">{{item.resourceName}}</span>
+                  <el-divider direction="vertical" style="color: #a7aeb4;"></el-divider>
+                  <span>{{item.name}}</span>
+                </li>
+              </ul>
+              <!-- <div class="one-resource" v-for="item in list.resourceList" @click="resourcePreview(item.resourceId)">
+
+
+                <img :src="item.surfaceUrl" alt="" class="pic-class" v-if="item.surfaceUrl">
+                <img src="@/assets/images/default.jpg" style="width: 100%;" v-if="!item.surfaceUrl">
+                <p class="title-class" style="">{{item.name}}</p>
+                <p class="foot-tag">
+                  <span>{{item.preview}}人阅读</span>
+                  <span><i class="iconfont iconpinglun1 tag-icon" ></i>{{item.download}}</span>   评论数
+                  <span><i class="el-icon-download tag-icon" ></i>{{item.download}}</span>
+                  <span><i class="iconfont icondianzan tag-icon"></i>{{item.thumbUp}}</span>
+                </p>
+              </div> -->
             </div>
           </div>
         </div>
@@ -77,35 +97,11 @@
 
 
 
-<!--       <div class="home-nav">
-        <span>热门资源</span>
-        <el-button type="text" style="color: #ffffff;" @click="getHotList" >换一批</el-button>
-      </div>
-      <div class="home-content">
-        <div class="resource-wrap">
-          <div class="one-resource" v-for="item in hotList" @click="resourcePreview(item.resourceId)">
-            <img :src="item.surfaceUrl" alt="" v-if="item.surfaceUrl">
-            <img src="@/assets/images/default.jpg" style="width: 100%;" v-if="!item.surfaceUrl">
-
-            <p class="title-class" >{{item.name}}</p>
-            <p class="foot-tag">
-              <span>{{item.preview}}人阅读</span>
-              
-              <span><i class="el-icon-download tag-icon" ></i>{{item.download}}</span>
-              <span><i class="iconfont icondianzan tag-icon"></i>{{item.thumbUp}}</span>
-            </p>
-          </div>
-        </div>
-      </div> -->
-
     </div>  
 
 
 
 
-    <!-- <div class="home-content">
-      <el-button type="danger" @click="uploadResource" size="small">上传我的资源</el-button>
-    </div> -->
 
 
   </div>
@@ -113,11 +109,14 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import topPopover from "@/components/Popover/topPopover";
+// import topPopover from "@/components/Popover/topPopover";
+import selectPointTree from "@/components/Popover/selectPointTree";
+
 export default {
   props: ["isfixTab"],
   components: {
-    topPopover,
+    // topPopover,
+    selectPointTree
   },
 
   data() {
@@ -135,6 +134,9 @@ export default {
       volumeId:'',
       subjectCode:'',
       NavigationBars:[],
+      activeName:'',
+      chapterIds:[],
+      knowledgeIds:[]
 
 
 
@@ -195,7 +197,20 @@ export default {
     getCheckedKnows(list) {
 
     },
+    getPointIds(list1,list2,subjectCode,volumeId) {
 
+      this.chapterIds = list1
+      this.knowledgeIds = list2
+
+      if(this.subjectCode != subjectCode) {
+        
+        this.subjectCode = subjectCode
+
+      }
+
+      this.volumeId = volumeId
+      
+    },
     setparams(volumeId,subjectCode) {
 
       this.volumeId = volumeId
@@ -264,9 +279,9 @@ export default {
       this.$http.get(`/api/open/resources/list/number`,{
           // grade:this.filter.grade.key,
           learningSection: this.getuserInfo.learningSection,
-          subject: this.getuserInfo.subjectCode,
+          subject: this.subjectCode,
           type:item.url,
-          number:10
+          number:18
         })
         .then((data)=>{
           if(data.status == '200') {
@@ -311,12 +326,48 @@ export default {
 };
 </script>
 <style lang="less">
-// 
+.tearch-home {
+  .pageTree {
+    overflow: auto;
+    height: calc(40vh - 100px);
+  }
+
+  .tree-class {
+    padding: 0 5px;
+  }
+
+  .el-divider {
+    background-color: #a7aeb4;
+  }
+
+  .resource-wrap {
+
+    li:hover {
+      .el-divider {
+        background-color: #409EFE;
+      }
+    }
+
+
+    
+  }
+
+  .top-left {
+    .settingicon {
+      display: none;
+    }
+    .titlep {
+      padding: 0 20px !important;
+    }
+  }
+}
 </style>
 <style lang="less" scoped>
 .tearch-home {
 
+  .home-nav-wrap {
 
+    padding-bottom: 30px;
     .home-nav {
       height: 40px;
       line-height: 40px;
@@ -336,6 +387,8 @@ export default {
         background-color:blue;
       }
     }
+  }
+
   .home-part-warp {
     
     img {
@@ -346,7 +399,7 @@ export default {
     .home-content {
       width: 75%;
       margin: 0 auto;
-      min-height: 300px;
+      min-height: 220px;
       // background-color:red;
       // height: 300px;
 
@@ -356,6 +409,8 @@ export default {
         margin-right: -4%;
         display: flex;
         flex-wrap: wrap;
+
+
         .one-resource {
           width: 16%;
           margin-bottom: 20px;
@@ -398,6 +453,54 @@ export default {
             }
           }
         }
+
+
+        ul {
+          display: flex;
+          flex-wrap: wrap;
+          width: 100%;
+          // list-style-type: disc;
+
+          li {
+            width: 33%;
+            line-height: 32px;
+            cursor: pointer;
+            white-space:nowrap;
+            overflow:hidden; 
+            text-overflow:ellipsis;
+            position:relative;
+            padding-left: 10px;
+
+
+            .tag-class {
+              display: inline-block;
+              width: 60px;
+              color: #9e9fa0;
+              text-align: right;
+            }
+
+            &:hover {
+              color: #409EFE;
+              .tag-class {
+                color: #409EFE;
+              }
+            }
+
+            // &::before {
+            //   position: absolute;
+            //   left: 0;
+            //   content: '';
+            //   top: 16px;
+            //   width: 3px;
+            //   height: 3px;
+            //   background: #b4c6d0;
+            // }
+
+            // &:hover:before {
+            //   background: #4b98ff;
+            // }
+          }
+        }
       }
 
     }
@@ -415,7 +518,7 @@ export default {
         width: 20%;
         min-width: 200px;
         // left: -20%;
-        padding: 20px 5px;
+        padding: 20px 0px;
         border: 1px solid #e2e2e2;
         // background-color:blue;
 
@@ -427,10 +530,18 @@ export default {
           text-align: center;
         }
 
-        .tree-class {
-          overflow: auto;
-          height: calc(100% - 50px);
+        .left-tree-content {
+          padding: 0 5px;
+          height: calc(100% - 10px);
+
+          .tree-class {
+            overflow: auto;
+            height: calc(100% - 50px);
+            padding-bottom: 20px;
+          }
         }
+
+
       }
 
       .top-middle {
