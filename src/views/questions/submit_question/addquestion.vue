@@ -37,6 +37,7 @@
       </div>
 
       <div slot="right">
+        <el-button type="text" style="position: absolute;right: -30px;" v-if="isError" @click="$router.go(-1)">返回</el-button>
         <div class="content-class">
           <div class="form-class" style="margin-top: 0px;">
             <el-form>
@@ -1203,7 +1204,7 @@ export default {
           // console.log(type,this.questionOtions)
           // if(type == "SingleChoose" ||type == "MultipleChoose") {
             let optionflag = false
-            console.log(this.questionOtions[i])
+            
             for (let j = 0; j < this.questionOtions[i].optionNum; j++) {
               if(this.questionOtions[i].selectOptions[j].content) {
                 selectOption.push({word:this.questionOtions[i].selectOptions[j].label,content:this.questionOtions[i].selectOptions[j].content});
@@ -1213,7 +1214,7 @@ export default {
               }
               
             }
-
+            console.log(this.questionOtions[i])
             if(optionflag)  {
               return this.$message({
                 message:'选项不可以为空',
@@ -1544,12 +1545,12 @@ export default {
       this.$http.post(`/api/open/errorCorrection/addErrorCorrection`,{
         errorType: this.query.errorType,
         questionId: this.query.questionId,
-        content: Cookies.get('errorContent'),
+        content: JSON.parse(localStorage.getItem("errorContent")),//Cookies.get('errorContent')
         errorContentList: errorContentList
       })
       .then(data=>{
         if(data.status == '200') {
-          Cookies.set("errorContent", '')
+          localStorage.removeItem("errorContent")
           this.$message.success('纠错成功')
           this.$router.go(-1)
         }

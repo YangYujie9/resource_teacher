@@ -174,8 +174,12 @@ export default {
 				          confirmButtonText: '确定',
 				          callback: action => {
 
+										// let cookies = Cookies.get()
+										// for(let key in cookies) {
+										// 	Cookies.remove(key)
+										// }
 										Cookies.remove("resource-teacher")
-
+										localStorage.clear()
 										this.$router.replace("/login")
 				          }
 				        });

@@ -2,9 +2,9 @@
   <div class="single-question">
     <el-card class="box-card" :shadow="shadow" >
 
-      <div class="cursor" @click="question.showDetail=!question.showDetail" >
+      <div class="cursor">
 
-        <div :class="{questionwrap: !showSimilarity}">
+        <div :class="{questionwrap: !showSimilarity}" @click="question.showDetail=!question.showDetail">
           <section class="content">
             <div class="qt1">
               <div class="ques-body">
@@ -80,11 +80,11 @@
               </div>
               <div>
                 <p class="title">【分析】</p>
-                <p v-html="question.analysis"></p>
+                <p v-html="question.analysis" style="width: 100%;"></p>
               </div>
               <div>
                 <p class="title">【详解】</p>
-                <p v-html="question.detailedAnalysis"></p>
+                <p v-html="question.detailedAnalysis" style="width: 100%;"></p>
               </div>
             </div>
           </section>
@@ -98,6 +98,7 @@
             <span>组卷：{{question.groupCount}}</span>
             <span>难度：{{question.difficultyTypeName}}</span>
             <span>题型：{{question.questionTypeName}}</span>
+            <span v-if="showScore">分数：{{question.score}}</span>
           </p>
           <p class="pt2" v-if="showAction">
             <span @click.stop="getSimilarity(question.questionId)" class="foot-icon" v-if="showSimilarity">
@@ -132,8 +133,8 @@
               <span v-if="!isAnswer" @click="isAnswer=true"></span>
               <span v-else @click="isAnswer=false"></span>
             </span> -->
-            <el-button type="warning" size="mini" v-if="question.isTestBasket" @click.stop="deleteTestBasket(question.questionId)">移除试卷</el-button>
-            <el-button type="primary" size="mini" v-if="!question.isTestBasket"  @click.stop="addTestBasket(question.questionId)">加入试卷</el-button>
+            <el-button type="warning" size="mini" v-if="question.isTestBasket" :disabled="question.disabled" @click.stop="deleteTestBasket(question.questionId)">移除试卷</el-button>
+            <el-button type="primary" size="mini" v-if="!question.isTestBasket" :disabled="question.disabled" @click.stop="addTestBasket(question.questionId)">加入试卷</el-button>
           </p>
         </section>
         </div>
@@ -147,7 +148,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import similarityDialog from '@/components//Dialog/similarity'
+import similarityDialog from '@/components/Dialog/similarity'
 import errorDialog from '@/components/Dialog/error'
 import favoriteDialog from '@/components/Dialog/favorite'
 import { handleQuestion } from '@/utils/public.js';
@@ -182,6 +183,10 @@ export default {
       type: String,
     },
     isAnswer: {
+      type: Boolean,
+      default: false
+    },
+    showScore: {
       type: Boolean,
       default: false
     }
@@ -259,7 +264,10 @@ export default {
     });
 
   },
-
+  deactivated() {
+    document.oncontextmenu = null;
+    document.oncopy = null
+  },
   destroyed(){
     document.oncontextmenu = null;
     document.oncopy = null
@@ -308,15 +316,21 @@ export default {
     },
 
     addTestBasket(id) {
+
+      this.$set( this.question, 'disabled', true )
+
       this.$http.post(`/api/open/paper/addTestBasket/hand/${id}`,{},{
         subjectCode: this.subjectCode,
       })
       .then((data)=>{
         if(data.status == '200') {
           this.isReset = false
-          this.$emit('getData')
-          // this.getTableData()
-          this.getmyTestBasket()
+          // this.$emit('getData')
+          this.question.isTestBasket = true
+          // this.question.disabled = false
+          this.$emit('getmyTestBasket',()=>{
+            this.question.disabled = false
+          })
 
           this.$message({
             message:'加入试卷成功',
@@ -328,14 +342,18 @@ export default {
     },
 
     deleteTestBasket(id) {
+      this.$set( this.question, 'disabled', true )
+
       this.$http.delete(`/api/open/paper/${this.paperId}/${id}`)
       .then((data)=>{
         if(data.status == '200') {
           this.isReset = false
-          this.$emit('getData')
-          // this.getTableData()
-          this.getmyTestBasket()
-
+          // this.$emit('getData')
+          this.question.isTestBasket = false
+          
+          this.$emit('getmyTestBasket',()=>{
+            this.question.disabled = false
+          })
           this.$message({
             message:'移除试卷成功',
             type:'success'
@@ -366,7 +384,7 @@ export default {
       color: #666;
     }
     .el-input__inner {
-      background: #f0f3fa;
+      // background: #f0f3fa;
     }
 
     .el-radio-button:first-child .el-radio-button__inner,.el-radio-button:last-child .el-radio-button__inner {
@@ -383,17 +401,20 @@ export default {
             Arial, "宋体" !important;
       }
 
-      .table {
-        table {
-          // border: 1px solid #333;
-          border-collapse:collapse;
+      table {
+        // border: 1px solid #333;
+        border-collapse:collapse;
+      }
+      
+      .table, .edittable {
 
           td {
             padding: 3px 5px;
             border: 1px solid #333;
           }
-        }
+ 
       }
+      
     }
 
   .el-card {

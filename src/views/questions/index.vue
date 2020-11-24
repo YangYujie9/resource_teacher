@@ -2,7 +2,7 @@
   <div class="home"  v-loading.fullscreen.lock="!isReady">
    <!--  /*<el-scrollbar style="height:100%"  ref="home">*/ -->
     <el-backtop target=".home .el-scrollbar__wrap" :bottom="80"></el-backtop>
-    <div class="el-scrollbar__wrap" ref="home">
+    <div class="el-scrollbar__wrap" ref="home" :class="{lockscroll:isInnerScroll}">
       <page-head  v-if="isReady"></page-head>
       <div class="home-wrap">
         <div class="nav" :class="{ fixedNavbar: isfixTab}" ref="navBar">
@@ -44,6 +44,7 @@ export default {
         data: [],
         showCheckBox: false
       },
+      scorllHeight: 0,
       navList: [
         {
           label: "章节挑题",
@@ -84,7 +85,8 @@ export default {
     ...mapGetters([
       'getuserInfo',
       'isReady',
-      'getsiteInfo'
+      'getsiteInfo',
+      'isInnerScroll'
 
     ]),
 
@@ -100,6 +102,25 @@ export default {
         to.path.indexOf(list.route)>-1?list.check=true:list.check=false
       })
 
+    },
+
+
+    isInnerScroll(val) {
+
+      if(val) {
+        this.$refs['home'].style.overflowY = 'hidden'
+
+      }else {
+        this.$refs['home'].style.overflowY = 'auto'
+      }
+      
+      console.log(this.$refs['home'].style.overflowY)
+      // console.log(val,this.$refs['home'].scrollTop)
+      // if(val) {
+      //   this.scorllHeight = this.$refs['home'].scrollTop
+      //   this.$refs['home'].scrollTop = this.scorllHeight
+      // }
+      
     }
 
   },
@@ -107,7 +128,13 @@ export default {
     //window.addEventListener('scroll', this.handleTabFix, true)
     // el-scrollbar需要加上wrap this.$refs.home.wrap.addEventListener("scroll", this.handleTabFix, true);
     this.$refs.home.addEventListener("scroll", this.handleTabFix, true);
+    // this.$nextTick(()=>{
+    //   this.$refs['home'].scrollTo(100,0)
+    //   console.log(this.$refs['home'].scrollTop)
+    // })
+    
 
+    
     this.navList.forEach(list=>{
       this.$route.fullPath.indexOf(list.route)>-1?list.check=true:list.check=false
     })
@@ -122,7 +149,7 @@ export default {
       let scrollTop = this.$refs['home'].scrollTop;
       let offsetTop = this.$refs.navBar.scrollTop;
 
-      scrollTop > 208 ? (this.isfixTab = true) : (this.isfixTab = false);
+      scrollTop > 178 ? (this.isfixTab = true) : (this.isfixTab = false);
     },
 
     choose_nau(list) {
@@ -148,6 +175,13 @@ export default {
 };
 </script>
 <style lang="less">
+
+.home {
+  .el-scrollbar__wrap {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
   .form-class {
     .el-radio-button__inner {
       border-left: 1px solid #b3d8ff;
@@ -195,13 +229,16 @@ export default {
   overflow-y: auto;
   width: 100%;
   min-width: 1400px;
-
+  .lockscroll {
+    overflow-y: hidden;
+    padding-right: 7px;
+  }
 
   &-wrap {
     width: 100%;
     position: relative;
     
-    min-height: 100%;
+    min-height: calc(100% - 238px);
 
     .nav {
       min-width: 1300px;
@@ -211,7 +248,7 @@ export default {
       color: #ffffff;
       background-color: #5182f4;
       margin-bottom: 20px;
-      z-index: 1000;
+      z-index: 2001;
       ul {
         display: flex;
         justify-content: center;

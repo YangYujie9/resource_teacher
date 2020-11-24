@@ -185,7 +185,9 @@ export default {
   .el-dialog__footer {
     text-align: center;
   }
-
+  .el-input__inner {
+      // background: transparent !important;
+  }
   
 }
 </style>

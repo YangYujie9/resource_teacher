@@ -68,11 +68,11 @@
             </div>
             <div>
               <p class="title">【分析】</p>
-              <p v-html="list.analysis"></p>
+              <p v-html="list.analysis" style="width: 100%;"></p>
             </div>
             <div>
               <p class="title">【详解】</p>
-              <p v-html="list.detailedAnalysis"></p>
+              <p v-html="list.detailedAnalysis" style="width: 100%;"></p>
             </div>
           </div>
         </section>
@@ -95,12 +95,16 @@
               <span @click.stop="errorCorrection(list)" class="foot-icon">
                 <i class="iconfont iconjiucuo iconcolor"></i> 纠错
               </span>
-              <span class="foot-icon" @click.stop="addCollectFolder(list.questionId)">
+              <span class="foot-icon" @click.stop="addCollectFolder(list.questionId)" v-if="!isCollected">
                 <!-- <i class="iconfont iconshoucang1" style="color:#ffda33;"></i> -->
                 <i class="iconfont iconshoucang2 iconcolor"></i>
                 收藏
               </span>
-
+              <span class="foot-icon" @click.stop="deleteCollectFolder(list.questionId)" v-if="isCollected">
+                <!-- <i class="iconfont iconshoucang1" style="color:#ffda33;"></i> -->
+                <i class="iconfont iconshoucang1 iconcolor"></i>
+                取消收藏
+              </span>
 
               <span class="foot-icon" @click.stop="list.showDetail=!list.showDetail" v-if="showSimilarity">
                 <i class="iconfont iconxiangqing1 iconcolor"></i> {{list.showDetail?'收起':'详情'}}
@@ -122,8 +126,8 @@
               <span v-if="!isAnswer" @click="isAnswer=true"></span>
               <span v-else @click="isAnswer=false"></span>
             </span> -->
-            <el-button type="warning" size="mini" v-if="list.isTestBasket" @click.stop="deleteTestBasket(list.questionId)">移除试卷</el-button>
-            <el-button type="primary" size="mini" v-if="!list.isTestBasket"  @click.stop="addTestBasket(list.questionId)">加入试卷</el-button>
+            <el-button type="warning" size="mini" v-if="list.isTestBasket" :disabled="list.disabled" @click.stop="deleteTestBasket(list)">移除试卷</el-button>
+            <el-button type="primary" size="mini" v-if="!list.isTestBasket" :disabled="list.disabled" @click.stop="addTestBasket($event,list)">加入试卷</el-button>
           </p>
         </section>
       </div>
@@ -175,6 +179,13 @@ export default {
     },
     subjectCode: {
       type: String,
+    },
+    isCollected: {
+      type: Boolean,
+      default: false
+    },
+    folderId: {
+      type:String
     }
 
   },
@@ -262,6 +273,33 @@ export default {
     document.oncontextmenu = null;
     document.oncopy = null
   },
+
+  activated() {
+
+    this.$nextTick(() => {
+
+      let that = this
+      // 禁用右键
+      document.oncontextmenu = new Function("event.returnValue=false");
+      // 禁用选择
+      // document.onselectstart = new Function("alert('select')");
+
+      document.oncopy = function() {
+        that.$alert('本页内容禁止复制，谢谢', '提示', {
+          confirmButtonText: '确定',
+          callback: action => {
+            
+          }
+        });
+        return false;      
+      }
+    });
+    
+  },
+  deactivated() {
+    document.oncontextmenu = null;
+    document.oncopy = null
+  },
   methods: {
     initTableData(data) {
 
@@ -269,7 +307,7 @@ export default {
 
       data.forEach((item,index)=>{
         // 
-        item.showDetail = false
+        item.showDetail = this.isAnswer
 
         item.answers = []
 
@@ -285,6 +323,8 @@ export default {
 
       })
     },
+
+
     // handleQuestion(item,item0,index) {
     //   //选项
     //   item.selectoption = []
@@ -347,10 +387,10 @@ export default {
 
     errorCorrection(list) {
 
-      this.error.errorId = list.id
+      this.error.errorId = list.questionId
 
       this.error.typeTemplate = list.questionTypeTemplate
-      
+
       this.errorVisible = true
     },
 
@@ -359,6 +399,25 @@ export default {
       this.collectId = id
       // console.log(this.collectId)
       this.favoriteVisible = true
+    },
+
+    deleteCollectFolder(questionId) {
+      this.$confirm('确定删除收藏的该试题吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$http.delete(`/api/open/collectFolder/${this.folderId}/${questionId}`)
+        .then(data=>{
+          if(data.status == '200') {
+            this.$message.success('删除成功')
+            this.$emit('getData')
+          }
+        })
+      }).catch(() => {
+         
+      });
+
     },
     close_similarity() {
       this.similarityVisible = false
@@ -373,23 +432,30 @@ export default {
       // this.getTableData()
     },
 
-    addTestBasket(id) {
+    addTestBasket(event,list) {
       // console.log(this.testBasket)
+      this.$set( list, 'disabled', true )
+
       if(this.testBasket>=40) {
         return this.$message({
           message:'试题蓝中题数不能超过40题',
           type:'warning'
         })
       }
-      this.$http.post(`/api/open/paper/addTestBasket/hand/${id}`,{},{
+      this.$http.post(`/api/open/paper/addTestBasket/hand/${list.questionId}`,{},{
         subjectCode: this.subjectCode,
       })
       .then((data)=>{
         if(data.status == '200') {
           this.isReset = false
-          this.$emit('getData')
-          // this.getTableData()
-          this.getmyTestBasket()
+          // this.$emit('getData')
+          list.isTestBasket = true
+
+          this.$emit('getmyTestBasket',()=>{
+            list.disabled = false
+          },event)
+
+
 
           this.$message({
             message:'加入试卷成功',
@@ -400,14 +466,20 @@ export default {
       })
     },
 
-    deleteTestBasket(id) {
-      this.$http.delete(`/api/open/paper/${this.paperId}/${id}`)
+    deleteTestBasket(list) {
+
+      this.$set( list, 'disabled', true )
+      // list.disabled = true
+      this.$http.delete(`/api/open/paper/${this.paperId}/${list.questionId}`)
       .then((data)=>{
         if(data.status == '200') {
           this.isReset = false
-          this.$emit('getData')
-          // this.getTableData()
-          this.getmyTestBasket()
+          // this.$emit('getData')
+          list.isTestBasket = false
+          
+          this.$emit('getmyTestBasket',()=>{
+            list.disabled = false
+          })
 
           this.$message({
             message:'移除试卷成功',
@@ -418,59 +490,14 @@ export default {
       })
     },
 
-    getmyTestBasket() {
-      this.$emit('getmyTestBasket')
+    getmyTestBasket(callback) {
+      this.$emit('getmyTestBasket',callback)
     }
   }
 };
 </script>
 <style lang="less">
 
-
-.MathJye {
-    direction: ltr;
-    display: inline-block;
-    float: none;
-    font-family: "Times New Roman","宋体";
-    font-size: 15px;
-    font-style: normal;
-    font-weight: normal;
-    letter-spacing: 1px;
-    line-height: normal;
-    text-align: left;
-    text-indent: 0px;
-    text-transform: none;
-    white-space: nowrap;
-    word-spacing: normal;
-    overflow-wrap: normal;
-    text-size-adjust: none;
-    border-width: 0px;
-    border-style: none;
-    border-color: initial;
-    border-image: initial;
-    margin: 0px;
-    padding: 0px;
-
-    table {
-      display: inline-block;
-      vertical-align: middle;
-
-      td {
-        text-align: center;
-      }
-    }
-
-    span {
-      display: inline;
-      position: static;
-      border: 0;
-      padding: 0;
-      margin: 0;
-      vertical-align: 0;
-      line-height: normal;
-      text-decoration: none;
-    }
-}
 .single-question {
     .el-card__body {
       padding: 0px;
@@ -494,6 +521,69 @@ export default {
     }
 
     .content {
+
+      .MathJye {
+          direction: ltr;
+          display: inline-block;
+          float: none;
+          font-family: "Times New Roman","宋体";
+          font-size: 1rem;
+          font-style: normal;
+          font-weight: normal;
+          letter-spacing: 1px;
+          line-height: normal;
+          text-align: left;
+          text-indent: 0px;
+          text-transform: none;
+          white-space: nowrap;
+          word-spacing: normal;
+          overflow-wrap: normal;
+          text-size-adjust: none;
+          border-width: 0px;
+          border-style: none;
+          border-color: initial;
+          border-image: initial;
+          margin: 0px;
+          padding: 0px;
+
+
+
+          table {
+            display: inline-block;
+            vertical-align: middle;
+
+            td {
+              text-align: center;
+              border: 0px;
+              font-size: 1rem;
+            }
+          }
+
+          span {
+            display: inline;
+            position: static;
+            border: 0;
+            padding: 0;
+            margin: 0;
+            vertical-align: 0;
+            line-height: normal;
+            text-decoration: none;
+          }
+      }
+
+      table {
+        border-collapse:collapse;
+      }
+      
+      .table, .edittable {
+
+          td {
+            padding: 3px 5px;
+            border: 1px solid #333;
+          }
+ 
+      }
+
       p,div,span {
         // line-height: 1 !important;
         background-color:transparent !important;
@@ -501,6 +591,9 @@ export default {
         font-family: "JyeMath", "JyeMathLetters", "Times New Roman", "微软雅黑",
             Arial, "宋体" !important;
       }
+
+
+
     }
 
   .el-card {

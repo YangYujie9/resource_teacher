@@ -70,17 +70,20 @@ export default {
 
   },
   activated() {
-    
-    this.meauList.forEach(list=>{
-      this.$route.fullPath.indexOf(list.index)>-1?this.activeIndex = list.index:null
+    this.$nextTick(()=>{
+      this.meauList.forEach(list=>{
+        this.$route.fullPath.indexOf(list.index)>-1?this.activeIndex = list.index:null
+      })
     })
 
   },
   mounted() {
-
+    this.$nextTick(()=>{
       this.meauList.forEach(list=>{
         this.$route.fullPath.indexOf(list.index)>-1?this.activeIndex = list.index:null
       })
+    })
+
 
 
   },

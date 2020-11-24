@@ -8,7 +8,6 @@
       :default-expanded-keys="expandedKeys"
       class="pageTree"
       :props="defaultProps"
-      accordion
       :highlight-current="!showCheckbox"
       @check="getCheckedNodes"
       :filter-node-method="filterNode"
@@ -108,7 +107,8 @@ export default {
   },
 
   mounted() {
-    this.subjectCode?this.getTreeData():null
+
+    this.subjectCode || this.volumeId?this.getTreeData():null
 
   },
 
@@ -161,6 +161,11 @@ export default {
   },
   methods: {
     getCheckedNodes(node, data) {
+
+
+      // let nodeCheck = data.checkedKeys.indexOf(node.id) > -1? true: false
+      // this.$refs.tree.store.nodesMap[node.id].expanded = nodeCheck;
+
       if(this.showCheckbox) {
 
       // console.log(node,data)
@@ -188,7 +193,6 @@ export default {
 
 
     getTreeData() {
-
       if(this.chooseType == 'chapter') {
         if(!this.volumeId) {
           this.originalTreeData = []
@@ -356,6 +360,7 @@ export default {
     clearNodeCheck() {
       this.$refs.tree.setCheckedKeys([]);
       this.$emit('getCheckedNodes',[]) ;
+      // this.$emit('selectnode',this.currenttNode )
     }
 
   }
@@ -512,6 +517,7 @@ export default {
 .point {
   font-size: 13px;
   min-height: 56px;
+  height: 100%;
   // margin-left: -10px;
     .custom-tree-node {
       flex: 1;

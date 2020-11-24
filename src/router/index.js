@@ -147,10 +147,16 @@ Vue.use(VueRouter)
         name: 'personal',
         redirect:'personal/myResources',
         component: ()=>import('@/views/teacher/personal_center/index'),
+        meta: {
+          keepAlive: true
+        },
         children: [{
           path: 'profile',
           name: 'profile',
           component: ()=>import('@/views/teacher/personal_center/profile'),
+          meta: {
+            keepAlive: true
+          },
         },{
           path: 'myResources',
           name: 'myResources',

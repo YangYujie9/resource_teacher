@@ -179,6 +179,12 @@ export default {
     this.getTableData()
 
   },
+  deactivated(){
+    console.log('deactivated')
+  },
+  destroyed(){
+    console.log('destroyed')
+  },
   methods: {
 
     close_similarity() {
@@ -293,9 +299,9 @@ export default {
 
       
     }),
-    getmyTestBasket() {
+    getmyTestBasket(callback) {
       this.$nextTick(()=>{
-        this.$refs.basketTag.getmyTestBasket()
+        this.$refs.basketTag.getmyTestBasket(callback)
       })
 
       

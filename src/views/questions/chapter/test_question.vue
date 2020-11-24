@@ -86,7 +86,7 @@
       </p>
     </div>
 
-    <div class="card-wrap" v-loading="loading">
+    <div class="card-wrap">
 
        <!-- <div v-for="(list,index) in tableData">
           <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder">
@@ -94,8 +94,15 @@
           </singleQuestion>
 
         </div>   -->
-        <questionList :isAnswer="isAnswer" :tableData="tableData" :subjectCode="subjectCode" knowledgeType="chapter" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" ></questionList>   
+      <div v-loading="loading"     
+       element-loading-text="拼命加载中"
+       element-loading-spinner="el-icon-loading"
+       element-loading-background="#f2f5fc" 
+       style="min-height: 100px;">
+        <questionList :isAnswer="isAnswer" :tableData="tableData" :subjectCode="subjectCode" knowledgeType="chapter" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder"></questionList> 
 
+        <p v-if="isEmpty" style="text-align: center;padding-top: 40px;">暂无数据</p>  
+      </div>
 
       <div class="pagination">
         <el-pagination
@@ -171,6 +178,7 @@ export default {
       favoriteVisible:false,
       testBasket:0,
       loading: false,
+      isEmpty: false,
 
 
     };
@@ -200,8 +208,10 @@ export default {
         this.resetPage()
         
       }else {
+        this.isEmpty = true
         this.tableData = []
         this.total = 0
+        this.loading = false
       }
     },
 
@@ -209,10 +219,35 @@ export default {
   },
 
   activated() {
+
     this.getmyTestBasket()
     this.getTableData()
+
+
+    // this.$nextTick(() => {
+
+    //   let that = this
+    //   // 禁用右键
+    //   document.oncontextmenu = new Function("event.returnValue=false");
+    //   // 禁用选择
+    //   // document.onselectstart = new Function("alert('select')");
+
+    //   document.oncopy = function() {
+    //     that.$alert('本页内容禁止复制，谢谢', '提示', {
+    //       confirmButtonText: '确定',
+    //       callback: action => {
+            
+    //       }
+    //     });
+    //     return false;      
+    //   }
+    // });
     
   },
+  // deactivated() {
+  //   document.oncontextmenu = null;
+  //   document.oncopy = null
+  // },
   mounted() {
     // this.$nextTick(()=>{
     //   MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
@@ -224,13 +259,12 @@ export default {
 
     this.subjectCode?this.getquestionType():null
     
-    this.getmyTestBasket()
+    // this.getmyTestBasket()
 
   },
 
   methods: {
 
-    
     backToTop() {
       this.$emit('backToTop')
     },
@@ -290,11 +324,15 @@ export default {
       // this.chapterList.forEach(item=>{
       //   chapterIds.push(item.id)
       // })
+      this.isEmpty = false
       this.loading = true
+      this.tableData = []
 
       if(!this.chapterIds.length) {
-        this.tableData = []
+        
         this.total = 0
+        this.loading = false
+        this.isEmpty = true
         return
         
       }
@@ -337,7 +375,11 @@ export default {
           this.total = 0
         }
 
+        
+
         this.loading = false
+
+        this.isEmpty = data.data.empty
 
 
 
@@ -349,10 +391,9 @@ export default {
 
 
 
-    getmyTestBasket() {
+    getmyTestBasket(callback,event) {
 
-
-      this.$refs.basketTag.getmyTestBasket()
+      this.$refs.basketTag.getmyTestBasket(callback,event)
 
 
     },

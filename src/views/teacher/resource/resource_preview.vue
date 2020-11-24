@@ -19,7 +19,7 @@
                   disabled
                   show-score
                   text-color="#ff9900"
-                  style="flex-shrink: 0;"
+                  style="flex-shrink: 0;margin-left: 10px;"
                   disabled-void-color="#C0C4CC"
                   score-template="{value}">
                 </el-rate>
@@ -39,7 +39,7 @@
               <span class="cursor" @click="changeContent('comment')"><i class="iconfont iconpinglun1 icon-color"></i> 评论</span>
               <span class="cursor" v-if="!resourceInfo.isCollect" @click="addCollect"><i class="iconfont iconshoucang2 icon-color"></i> 收藏</span>
               <span class="cursor" v-if="resourceInfo.isCollect" @click="deleteCollect"><i class="iconfont iconshoucang1 icon-color"></i> 已收藏</span>
-              <span class="cursor" @click="dialogShareVisible = true"><i class="iconfont iconfenxiang icon-color"></i> 分享</span>
+              <!-- <span class="cursor" @click="dialogShareVisible = true"><i class="iconfont iconfenxiang icon-color"></i> 分享</span> -->
               <span class="cursor" @click="downloadFile"><i class="iconfont iconxiazai2 icon-color"></i> 下载</span>
             </p>
           </div>

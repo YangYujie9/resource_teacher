@@ -39,7 +39,7 @@
       <div slot="right">
         <div class="bread-div">
           <div>
-            <i class="iconfont iconshouye iconclass"></i>当前位置：智能挑题 > 按章节
+            <i class="iconfont iconshouye iconclass"></i>当前位置：智能挑题 
           </div>
         </div>
 
@@ -112,7 +112,7 @@
               <p class="title2" style="text-align: center;">
                 <!-- <el-button type="primary" size="mini" @click="scoredialogVisible=true">分值设定</el-button>
                 <el-button type="primary" size="mini" @click="analysisdialogVisible=true">试卷分析</el-button> -->
-                <el-button type="primary" size="mini" @click="IntelligentChoose">完成组卷</el-button>
+                <el-button type="primary" size="mini" @click="IntelligentChoose">智能组卷</el-button>
               </p>
             </li>
           </ul>
@@ -231,6 +231,7 @@ export default {
       }else {
         this.tagsList = this.knowledgeTags
       }
+      this.getTypeCount()
     },
 
     setparams(volumeId,subjectCode) {
@@ -319,19 +320,33 @@ export default {
 
 
       let flag = false;
-      this.search.type.forEach(item=>{
+      
+      this.search.type.every(item=>{
+        //判断数量不可以为空
         if(!item.number) {
           flag = true
-          this.$message({
-            message:`${item.value}题量不可以为空`,
-            type: 'warning'
-          })
-          return
+          this.$message.warning(`${item.name}题量不可以为空`)
+          return false
+        }
+
+        //判断数量是否为整数
+        if(!(/^[0-9]+$/.test(item.number))) {
+          flag = true
+          this.$message.warning(`${item.name}数量必须为整数`)
+          return false
+        }
+
+
+        //判断数量是否大于可选数量
+        if(Number(item.number) > Number(item.count)) {
+          flag = true
+          this.$message.warning(`${item.name}数量不可以大于可选数`)
+          return false
         }
 
         questions.push({questionType:item.code, number:item.number})
         
-        
+        return true;
       })
 
       if(flag) {
@@ -347,18 +362,18 @@ export default {
         // grade:this.filter.grade.key
       }
 
-      // if(this.activeType == "chapter") {
-      //   params.chapterIds = tagIds
-      // }else {
-      //   params.knowledgeIds = tagIds
-      // }
 
       // console.log(params)
       this.$http.post(`/api/open/paper/addTestBasket/auto`,params)
       .then((data)=>{
 
         if(data.status == '200') {
+          this.getquestionType()
+          this.search.difficulty = this.partDifficultyList[0].key
+          this.name = ''
 
+          this.$refs.chapterTree.clearNodeCheck()
+          this.$refs.knowledgeTree.clearNodeCheck()
 
           this.$confirm('组卷完成，是否进入试卷中心？', '', {
             confirmButtonText: '进入',
@@ -373,7 +388,7 @@ export default {
 
 
           }).catch(() => {
-            this.reload()
+            // this.reload()
           });
         }
 
@@ -384,13 +399,16 @@ export default {
 
     getTypeCount() {
 
+      // console.log(this.chapterTags.length,this.knowledgeTags.length,this.typeList)
 
-      if(!this.chapterTags.length && !this.knowledgeTags.length) {
+      if(!this.tagsList.length) {
 
         this.typeList.forEach(item=>{
+          
           item.number = ''
-          item.count = 0
+          item.count = '0'
         })
+
         return 
       }
       let chapterIds = []

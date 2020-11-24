@@ -81,11 +81,17 @@ axiosService.interceptors.response.use(
         !response.config.httpConfig.clsoeMessage && response.data && Message.error(response.data.data.msg || '网络异常');
         if(response.data.status === "401") {
           // 清空失效 token，防止无效 token 重复请求
-          Cookies.remove('resource-teacher');
+          // let cookies = Cookies.get()
+          // for(let key in cookies) {
+          //   Cookies.remove(key)
+          // }
+
+          Cookies.remove("resource-teacher")
+          
           localStorage.removeItem('resource-teacher');
           setTimeout(function(){
-            window.location.href = "/login";
-          }, 3000)
+            window.location.reload()
+          }, 1000)
         }
         return Promise.reject(response.data);
       } else {

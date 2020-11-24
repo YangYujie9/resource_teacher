@@ -7,14 +7,14 @@
       <div class="popover-div" v-show="!isError">
           <div style="padding-bottom: 8px;">
             <p>学科：</p>
-             <el-radio-group v-model="subject" size="mini" :disabled="subjectEditable" @change="getOeseList">
+             <el-radio-group v-model="subject" size="mini" :disabled="subjectEditable" @change="changeSubject">
                 <el-radio-button :label="item" :key="item.code" v-for="item in subjectList">{{item.subjectName}}</el-radio-button>
             </el-radio-group>
           </div>
           <div v-show="chooseType=='chapter'"  class="one-part">
             <p>年级：</p>
              <el-radio-group v-model="grade" size="mini" @change="getOeseList" :disabled="isError">
-              <el-radio-button :label="list" :key="list.key" v-for="list in gradeList">{{list.value}}</el-radio-button>
+              <el-radio-button :label="list" :key="list.key" v-for="list in customGradeList">{{list.value}}</el-radio-button>
             </el-radio-group>
           </div>
           <div v-show="chooseType=='chapter'"  class="one-part">
@@ -61,6 +61,10 @@ export default {
     },
     questionDetail: {
       type: Object
+    },
+    isRemembered: {
+      type: Boolean,
+      default: false
     }
   },
   components: {},
@@ -79,18 +83,20 @@ export default {
       versionList:[],
       volumeList:[],
       query: {},
+      rememberedSearch:'',
     };
   },
   watch: {
 
     volume(val) {
       let id = val?val.id:''
-      this.$emit('setparams',id,this.subject.code)
+      let oeseId = this.oese.id?this.oese.id:''
+      this.$emit('setparams',id,this.subject.code, this.grade.key, oeseId)
     },
 
     subject(val) {
-
-      this.$emit('setparams',this.volume.id,val.code)
+      let oeseId = this.oese.id?this.oese.id:''
+      this.$emit('setparams',this.volume.id,val.code, this.grade.key, oeseId)
     },
 
 
@@ -110,73 +116,114 @@ export default {
       'isReady'
 
     ]),
+
+    customGradeList() {
+
+      if(this.subject.code == 'SubjectPhysic') {
+        let list = []
+        this.gradeList.forEach(item=>{
+          if(item.key != 'SEVENTH_GRADE_U' && item.key != 'SEVENTH_GRADE_D') {
+            list.push(item)
+          }
+        })
+        return list
+      }else {
+        return this.gradeList
+      }
+    }
   },
+
+
   mounted() {
-      if(this.isActual) {
+    if(this.isActual) {
+      this.subjectEditable = true
+      this.subject = this.subjectList.filter(item=>{
+        return item.code == this.subjectCode
+      })[0]
+
+
+      this.grade = this.gradeList.filter(item=>{
+        return item.key == this.gradeId
+      })[0]
+
+      this.getOeseList()
+      // this.versionList = this.acVersionList
+      // this.oese = this.versionList[0]
+
+      // this.volumeList = this.acVolumeList
+      // this.volume = this.volumeList[0]
+
+      // this.$emit('setparams',this.volume.oeseId,this.subject.code)
+    }else if(this.isError){
         this.subjectEditable = true
         this.subject = this.subjectList.filter(item=>{
-          return item.code == this.subjectCode
+          return item.code == this.questionDetail.subjectCode
         })[0]
 
 
-        this.grade = this.gradeList.filter(item=>{
-          return item.key == this.gradeId
-        })[0]
-
-        this.getOeseList()
-        // this.versionList = this.acVersionList
-        // this.oese = this.versionList[0]
-
-        // this.volumeList = this.acVolumeList
-        // this.volume = this.volumeList[0]
-
-        // this.$emit('setparams',this.volume.oeseId,this.subject.code)
-      }else if(this.isError){
-          this.subjectEditable = true
-          this.subject = this.subjectList.filter(item=>{
-            return item.code == this.questionDetail.subjectCode
-          })[0]
-
-
-          if(this.questionDetail.oeseBook && this.questionDetail.oeseBook.id)
-          this.volume = {
-            id: this.questionDetail.oeseBook.id,
-            name: this.questionDetail.oeseBook.name
-          }
-
-        // this.getVersion()
-
-
-      
-      }else {
-
-        if(this.getuserInfo.userType == 'Teacher') {
-          this.subjectEditable = true
-          this.subject = this.subjectList.filter(item=>{
-            return item.code == this.getuserInfo.subjectCode
-          })[0]
-        }else {
-          this.subject = this.subjectList[0]
-          
+        if(this.questionDetail.oeseBook && this.questionDetail.oeseBook.id)
+        this.volume = {
+          id: this.questionDetail.oeseBook.id,
+          name: this.questionDetail.oeseBook.name
         }
 
-        this.grade = this.gradeList[0] 
+      // this.getVersion()
 
-        this.getOeseList()
+
+    
+    }else {
+
+
+      if(this.getuserInfo.userType == 'Teacher') {
+        this.subjectEditable = true
+        this.subject = this.subjectList.filter(item=>{
+          return item.code == this.getuserInfo.subjectCode
+        })[0]
+      }else {
+        this.subject = this.subjectList[0]
+        
       }
 
-    
+      this.rememberedSearch = JSON.parse(localStorage.getItem("rememberedSearch"))
+
+      if(this.isRemembered && this.rememberedSearch) {
+        
+
+        let grade = this.customGradeList.filter(item=>{
+          return item.key == this.rememberedSearch.gradeId
+        })
+
+        this.grade = (grade && grade.length)?grade[0]:this.customGradeList[0]
+        console.log(this.grade)
+      }else {
+        this.grade = this.customGradeList[0] 
+      }
       
 
-        // console.log(this.acVersionList, this.acVolumeList, this.subjectCode)
+      this.getOeseList('mounted')
+
+
+
+    }
+
+  
     
+
+      // console.log(this.acVersionList, this.acVolumeList, this.subjectCode)
+  
     
 
   },
   methods: {
+    changeSubject() {
+      this.grade = this.customGradeList[0]
+      this.getOeseList()
+    },
+
+    getOeseList(flag) {
 
 
-    getOeseList() {
+
       this.versionList = []
       this.volumeList = []
 
@@ -185,15 +232,15 @@ export default {
         if(data.status == '200') {
           if(data.data.oese && data.data.oese.id) {
             this.versionList.push(data.data.oese)
-            // this.oese = this.versionList[0]
+            this.oese = this.versionList[0]
 
-            if(this.isError) {
-              this.oese = this.versionList.filter(list=>{
-                return list.oeseId == this.questionDetail.versionId
-              })[0]
-            }else {
-              this.oese = this.versionList[0]
-            }
+            // if(this.isError) {
+            //   this.oese = this.versionList.filter(list=>{
+            //     return list.oeseId == this.questionDetail.versionId
+            //   })[0]
+            // }else {
+            //   this.oese = this.versionList[0]
+            // }
 
           }else {
             this.oese = ''
@@ -201,18 +248,42 @@ export default {
 
           if(data.data.volumes && data.data.volumes.length) {
             this.volumeList = data.data.volumes
-            // this.volume = this.volumeList[0]
+            this.volume = this.volumeList[0]
 
-            if(this.isError) {
-              this.volume = this.volumeList.filter(list=>{
-                return list.oeseId == this.questionDetail.volumeId
-              })[0]
-            }else {
-              this.volume = this.volumeList[0]
-            }
+            // if(this.isError) {
+            //   this.volume = this.volumeList.filter(list=>{
+            //     return list.oeseId == this.questionDetail.volumeId
+            //   })[0]
+            // }else {
+            //   this.volume = this.volumeList[0]
+            // }
 
           }else {
             this.volume = ''
+          }
+
+          if(!this.oese && !this.volume) {
+
+            let oeseId = this.oese.id?this.oese.id:''
+
+            this.$emit('setparams',this.volume.id,this.subject.code, this.grade.key, oeseId)
+          }
+
+
+          //记住首页选项的页面
+
+          if(this.isRemembered && flag=='mounted') {
+
+              let oese = this.versionList.filter(list=>{
+                return list.id == this.rememberedSearch.oeseId
+              })
+              let volume = this.volumeList.filter(list=>{
+                return list.id == this.rememberedSearch.volumeId
+              })
+              oese && oese.length?this.oese = oese[0]:null
+
+              volume && volume.length?this.volume = volume[0]:null
+
           }
         }
       })
@@ -313,7 +384,7 @@ export default {
     height: 36px;
     position: relative;
     cursor: pointer;
-    z-index: 10;
+    z-index: 2000;
 
     &:hover {
       .popover-div {

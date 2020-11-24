@@ -46,7 +46,7 @@
 
         <div class="exam-wrap" v-if="questionList && questionList.length">
           <p class="title">
-            <el-input v-model="paperName" placeholder="请输入内容" style="width:360px;" @change="setScore"></el-input>
+            <el-input v-model="paperName" placeholder="请输入内容" style="width:90%;" @change="setScore"></el-input>
           </p>
           <div class="content">
             <!-- <el-button type="primary" size="mini" class="uploadbtn" @click="downloadVisible = true">试卷下载</el-button> -->
@@ -267,7 +267,10 @@ export default {
     document.oncontextmenu = null;
     document.oncopy = null
   },
-
+  deactivated() {
+    document.oncontextmenu = null;
+    document.oncopy = null
+  },
   
   methods: {
     setScoreShow() {
@@ -592,7 +595,7 @@ export default {
 
   .title {
     .el-input__inner {
-      font-size: 18px;
+      font-size: 17px;
     }
   }
 
@@ -613,16 +616,65 @@ export default {
     }
   }
 
-  .table {
-    table {
-      // border: 1px solid #333;
-      border-collapse:collapse;
+  .content {
+      .MathJye {
+          direction: ltr;
+          display: inline-block;
+          float: none;
+          font-family: "Times New Roman","宋体";
+          font-size: 15px;
+          font-style: normal;
+          font-weight: normal;
+          letter-spacing: 1px;
+          line-height: normal;
+          text-align: left;
+          text-indent: 0px;
+          text-transform: none;
+          white-space: nowrap;
+          word-spacing: normal;
+          overflow-wrap: normal;
+          text-size-adjust: none;
+          border-width: 0px;
+          border-style: none;
+          border-color: initial;
+          border-image: initial;
+          margin: 0px;
+          padding: 0px;
 
-      td {
-        padding: 3px 5px;
-        border: 1px solid #333;
+          table {
+            display: inline-block;
+            vertical-align: middle;
+
+            td {
+              text-align: center;
+              border: 0px;
+            }
+          }
+
+          span {
+            display: inline;
+            position: static;
+            border: 0;
+            padding: 0;
+            margin: 0;
+            vertical-align: 0;
+            line-height: normal;
+            text-decoration: none;
+          }
       }
-    }
+
+      table {
+        border-collapse:collapse;
+      }
+      
+      .table, .edittable {
+
+          td {
+            padding: 3px 5px;
+            border: 1px solid #333;
+          }
+ 
+      }
   }
   .el-card__body {
     padding: 0px;

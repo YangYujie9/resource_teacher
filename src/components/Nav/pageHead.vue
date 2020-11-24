@@ -2,7 +2,7 @@
   <div class="header">
     <div class="top">
       <div class="top-wrap">
-        <p>{{getuserInfo.person.fullName}}您好，欢迎来到教育云资源平台！</p>
+        <p>{{getuserInfo.person.fullName}}您好，欢迎来到教育资源云平台！</p>
         <div class="fr">
           <ul>
             <li>              
@@ -160,10 +160,18 @@ export default {
               //退出登录
     exit() {
 
-      Cookies.remove('resource-teacher')
-      localStorage.clear()
-      //this.$router.push('/login')
-      window.location.reload()
+      this.$http.get(`/api/open/user/logout`)
+      .then(data=>{
+        if(data.status == '200') {
+
+          Cookies.remove("resource-teacher")
+
+          localStorage.clear()
+          //this.$router.push('/login')
+          window.location.reload()
+        }
+      })
+
 
       
     },
@@ -293,7 +301,7 @@ export default {
   }
 
   .middle {
-    height: 160px;
+    height: 130px;
     position: relative;
 
     .resource-tag {

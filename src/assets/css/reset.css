@@ -166,3 +166,7 @@ input:focus {
 figure {
   width: auto !important;
 }
+
+.el-loading-mask {
+  z-index: 199;
+}

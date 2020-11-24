@@ -72,14 +72,14 @@
             <p class="top-p">共有<span class="activecolor">{{total}}</span>个资源符合结果</p>
           </div>
           <div class="question-wrap-bottom">
-            <questionList :isAnswer="isAnswer" :tableData="tableData" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" :testBasket="testBasket"></questionList>
+            <questionList :isAnswer="isAnswer" :tableData="tableData"  :folderId="folderId" @getData="getTableData" :isCollected="true" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" :testBasket="testBasket"></questionList>
           </div>
 
           <basketTag ref="basketTag" @gettestBasket="gettestBasket"></basketTag>
         </div>
 
         <div v-else-if="resourceType == 'actualpaper'" class="actual-wrap">
-          <div class="top-search">
+          <div class="top-search el-radio-costom">
             <el-form  :model="search" class="demo-form-inline" label-width="80px">
                 <el-form-item label="年级">
                   <el-radio-group v-model="search.grade" size="mini" @change="resetPage">
@@ -346,6 +346,7 @@ export default {
       testPaperTypeList:[],
       regionList:[],
       yearList:[],
+      folderId:'',
     };
   },
   computed: {
@@ -450,6 +451,12 @@ export default {
       })
 
       list.check = true
+
+
+      // let checkedFolder = this.folderNameList.filter(item=>{
+      //   return item.check
+      // })
+      this.folderId = list.folderId
       this.resetPage()
     },
     getquestionType() {
@@ -475,7 +482,7 @@ export default {
 
         if(this.folderNameList.length) {
           this.folderNameList[0].check = true
-
+          this.folderId = this.folderNameList[0].folderId
         }
 
    
@@ -566,13 +573,9 @@ export default {
       if(this.resourceType == 'question') {
 
 
-        let checkedFolder = this.folderNameList.filter(item=>{
-          return item.check
-        })
-        let folderId = checkedFolder.length? checkedFolder[0].folderId:''
         let params = {
           // grade: this.grade,
-          folderId:folderId,
+          folderId: this.folderId,
           questionType: this.search.questionType,
           difficultyType: this.search.difficultyType,
           startTime: this.search.time?this.search.time[0]:'',
@@ -642,9 +645,9 @@ export default {
         })
       }
     }),
-    getmyTestBasket() {
+    getmyTestBasket(callback) {
       this.$nextTick(()=>{
-        this.$refs.basketTag.getmyTestBasket()
+        this.$refs.basketTag.getmyTestBasket(callback)
       })
 
       
@@ -823,25 +826,14 @@ export default {
   .el-dialog__footer {
     text-align: center;
   }
-  .question-wrap {
-    .el-radio-group {
-      width: 100%;
-    }
-    .el-radio-button {
-      width: 100%;
-    }
-    .el-radio-button__inner {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
+  .actual-wrap {
+    .el-radio-button__orig-radio:disabled:checked+.el-radio-button__inner {
+      background-color: #a5a7a9;
+      border-color: #a5a7a9;
+      box-shadow: -1px 0 0 0 #a5a7a9;
     }
 
-    .el-radio-button__orig-radio:checked+.el-radio-button__inner {
-      background-color:transparent;
-      border-color: transparent;
-      color: #409EFF;
-      box-shadow: 0px 0 0 0 #409EFF;
-    }
+
   }
 }
 

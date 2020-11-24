@@ -6,13 +6,24 @@
 
       <div class="part-one home-content">
         <div class="top-left">
-          <selectPointTree ref="tree" @getPointIds="getPointIds"></selectPointTree>
+          <selectPointTree ref="tree" @getPointIds="getPointIds" :isSetCache="true" :isRemembered="true"></selectPointTree>
 
       
         </div>
 
-        <div class="top-middle">
-          <img src="@/assets/images/carousel.png" alt="" width="100%" height="100%">
+        <div class="top-middle" ref="pic_wrap">
+          <el-carousel height="100%" indicator-position="none" :interval="4000">
+            <el-carousel-item >
+              <img src="@/assets/images/home1.png" alt="" width="100%" height="100%">
+            </el-carousel-item>
+            <el-carousel-item >
+              <img src="@/assets/images/home2.png" alt="" width="100%" height="100%">
+            </el-carousel-item>
+            <el-carousel-item >
+              <img src="@/assets/images/home3.png" alt="" width="100%" height="100%">
+            </el-carousel-item>
+          </el-carousel>
+          <!-- <img src="@/assets/images/carousel.png" alt="" width="100%" height="100%"> -->
         </div>
         <div class="top-right ">
           <div style="border-bottom: 1px dashed #c8cacf;">
@@ -22,7 +33,9 @@
 
           <p style="font-size: 16px;margin: 10px 0px;">资源统计</p>
           <ul>
-            <li v-for="item in staticList"><span>{{item.resourceName}}</span> <span>{{item.number}}</span> </li>
+            <li v-for="item in staticList" @click="gotoResource(item.resourceName)" class="cursor">
+              <span>{{item.resourceName}}</span> <span>{{item.number}}</span> 
+            </li>
           </ul>
         </div>
       </div>
@@ -62,7 +75,7 @@
                 <el-tab-pane label="角色管理" name="third"></el-tab-pane>
                 <el-tab-pane label="定时任务补偿" name="fourth"></el-tab-pane>
               </el-tabs> -->
-              <el-button type="text" style="color: #ffffff;margin-left: 50px;" @click="getResourceList(list)" >换一批</el-button>
+              <el-button type="text" style="color: #ffffff;margin-left: 50px;" @click="getResourceList(list)" v-if="list.url!='newResource' && list.resourceList.length == 18 ">换一批</el-button>
             <!-- </div> -->
           </div>
           <div class="home-content">
@@ -136,7 +149,8 @@ export default {
       NavigationBars:[],
       activeName:'',
       chapterIds:[],
-      knowledgeIds:[]
+      knowledgeIds:[],
+      height: 100,
 
 
 
@@ -144,42 +158,51 @@ export default {
   },
 
   watch: {
-    gradeList(val) {
 
-      if(val.length) {
-        this.filter.grade = val[0]
-      }
-      
 
-    },
+    openState(val) {
+      this.getNavData()
+      this.getResourceCount()
+      this.getResourceStatic()
+    }
 
 
   },
   computed: {
 
     ...mapGetters([
-      'gradeList',
+      'resource',
       'getuserInfo',
       'isReady'
 
     ]),
-
-
+    openState() {
+      return this.$route.query.type
+    }
   },
-
+  beforeRouteEnter(to, from, next) {
+    if (from.path == "/teacher/resourceRreview") {
+      to.meta.keepAlive = true;
+    } else {
+      to.meta.keepAlive = false;
+    }
+    next();
+  }, 
   mounted() {
 
 
-    this.gradeList.length? this.filter.grade = this.gradeList[0]: null
     // this.subjectCode = this.getuserInfo.subjectCode
     this.getResourceCount()
 
     this.getResourceStatic()
 
-    this.getNavigationBars()
-
-
     
+
+
+    this.$nextTick(()=>{
+      this.height = this.$refs.pic_wrap.offsetHeight - 105
+      this.$refs.tree.$refs.tree_wrap.style.height = this.height + 'px'
+    })
     
   },
   methods: {
@@ -205,17 +228,26 @@ export default {
       if(this.subjectCode != subjectCode) {
         
         this.subjectCode = subjectCode
-
+        this.getNavigationBars()
       }
 
       this.volumeId = volumeId
       
     },
-    setparams(volumeId,subjectCode) {
+    setparams(volumeId,subjectCode,gradeId,oeseId) {
 
       this.volumeId = volumeId
 
       this.subjectCode = subjectCode
+
+      let rememberedSearch = {
+        volumeId: volumeId,
+        subjectCode: subjectCode,
+        gradeId: gradeId,
+        oeseId: oeseId
+      }
+
+      localStorage.setItem('rememberedSearch',JSON.stringify(rememberedSearch))
 
       
     },
@@ -230,7 +262,11 @@ export default {
 
     //获取公开的资源总数
     getResourceCount(){
-      this.$http.get(`/api/open/resources/list/count`)
+
+      
+      
+      let schoolId = this.openState? this.getuserInfo.school.id:''
+      this.$http.get(`/api/open/resources/list/count?schoolId=${schoolId}`)
         .then((result)=>{
           if(result.status == '200') {
             this.resourceCount = result.data
@@ -240,7 +276,10 @@ export default {
 
     //获取每个资源类型的统计数
     getResourceStatic(){
-      this.$http.get(`/api/open/resources/list/static`)
+
+      
+      let schoolId = this.openState? this.getuserInfo.school.id:''
+      this.$http.get(`/api/open/resources/list/static?schoolId=${schoolId}`)
         .then((result)=>{
           if(result.status == '200') {
             this.staticList = result.data
@@ -276,11 +315,16 @@ export default {
     },
 
     getResourceList(item) {
+
+      
+
+
       this.$http.get(`/api/open/resources/list/number`,{
           // grade:this.filter.grade.key,
           learningSection: this.getuserInfo.learningSection,
           subject: this.subjectCode,
           type:item.url,
+          openState:this.openState?'SemiOvert':'',
           number:18
         })
         .then((data)=>{
@@ -291,30 +335,41 @@ export default {
         })
     },
 
+
+    getNavData() {
+      this.NavigationBars.forEach(item=>{
+
+        // item.resourceList = []
+        this.$set( item, 'resourceList', [] )
+        this.getResourceList(item)
+
+      })
+    },
     getNavigationBars() {
       this.$http.get(`/api/open/common/enabledNavigationBars/1`)
       .then((data)=>{
         if(data.status = '200') {
 
           this.NavigationBars = data.data
-
-          this.NavigationBars.forEach(item=>{
-
-            // item.resourceList = []
-            this.$set( item, 'resourceList', [] )
-            this.getResourceList(item)
-
-          })
-
-
-
-
+          this.getNavData()
           // console.log(this.NavigationBars)
           
           
         }
         
       })
+    },
+
+    gotoResource(name) {
+
+      let list = this.resource.filter(item=>{
+        return item.value == name
+      })
+
+      if(list && list.length) {
+        this.$router.push(`/teacher/resource/${list[0].key}`)
+      }
+
     },
     resourcePreview(resourceId) {
 
@@ -327,14 +382,22 @@ export default {
 </script>
 <style lang="less">
 .tearch-home {
-  .pageTree {
-    overflow: auto;
-    height: calc(40vh - 100px);
-  }
 
-  .tree-class {
+
+  .el-carousel__item.is-animating {
+    transition: transform 0.8s ease-in-out;
+  }
+  .el-carousel {
+    height: 100%;
+  }
+  .tree-content {
     padding: 0 5px;
   }
+  .tree-class {
+    overflow: auto;
+
+  }
+
 
   .el-divider {
     background-color: #a7aeb4;
@@ -509,12 +572,12 @@ export default {
     .part-one {
       height: calc(40vh);
       position: relative;
-
+      min-height: 370px;
       display: flex;
 
       .top-left {
         // position:absolute;
-        height: 100%;
+        // height: 100%;
         width: 20%;
         min-width: 200px;
         // left: -20%;
@@ -547,6 +610,7 @@ export default {
       .top-middle {
         width: 58%;
         // border: 1px solid #e2e2e2;
+        height: 100%;
         margin-right: 1%;
       }
 
@@ -569,7 +633,7 @@ export default {
             display: flex;
             justify-content: space-between;
             padding: 0 20px;
-            line-height: 32px;
+            line-height: 30px;
 
           }
         }

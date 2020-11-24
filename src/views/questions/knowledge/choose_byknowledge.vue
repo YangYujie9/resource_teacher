@@ -111,8 +111,16 @@
           <!-- <singleQuestion :list="list" :index="index" :isAnswer="isAnswer" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" :tableData="tableData">
             
           </singleQuestion> -->
-          <questionList :isAnswer="isAnswer" :subjectCode="subjectCode" :tableData="tableData" knowledgeType="knowledge" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" ></questionList>
+          <div v-loading="loading"     
+           element-loading-text="拼命加载中"
+           element-loading-spinner="el-icon-loading"
+           element-loading-background="#f2f5fc" 
+           style="min-height: 100px;">
+            <questionList :isAnswer="isAnswer" :subjectCode="subjectCode" :tableData="tableData" knowledgeType="knowledge" @getData="getTableData" @getmyTestBasket="getmyTestBasket" @getSimilarity="getSimilarity" @addCollectFolder="addCollectFolder" ></questionList>
 
+
+            <p v-if="isEmpty" style="text-align: center;margin-top: 40px;">暂无数据</p>
+          </div>
 
           <div class="pagination">
             <el-pagination
@@ -198,7 +206,9 @@ export default {
       errorVisible: false,
       favoriteVisible:false,
       subjectCode:'',
-      knowledgeIds:[]
+      knowledgeIds:[],
+      loading: false,
+      isEmpty: false,
     };
   },
   computed: {
@@ -238,14 +248,16 @@ export default {
     // this.subjectCode = this.getuserInfo.subjectCode
 
     
-    this.getmyTestBasket()
+    // this.getmyTestBasket()
 
 
   },
   activated() {
     this.getmyTestBasket()
     this.getTableData()
+
   },
+
   methods: {
     // setparams(volumeId,subjectCode) {
 
@@ -333,7 +345,7 @@ export default {
       if(!list2.length) {
         this.tableData = []
         this.total = 0
-
+        this.loading = false
         return
       }
 
@@ -358,6 +370,9 @@ export default {
       // this.knowledgeList.forEach(item=>{
       //   knowledgeIds.push(item.id)
       // })
+      this.loading = true
+      // this.tableData = []
+      
 
       let params = {
         method:1,
@@ -388,7 +403,9 @@ export default {
         this.tableData = data.data.content
         // console.log(this.tableData)
         this.total = data.data.totalElements
+        this.loading = false
 
+        this.isEmpty = data.data.empty
 
         
       })
@@ -468,9 +485,9 @@ export default {
     //   })
     // },
 
-    getmyTestBasket() {
+    getmyTestBasket(callback, event) {
 
-      this.$refs.basketTag.getmyTestBasket(this.filter.grade.value)
+      this.$refs.basketTag.getmyTestBasket(callback, event)
 
     },
 

@@ -17,7 +17,7 @@
       <div class="paper-content-wrap" v-for="(list,index) in questionList">
         <p><span>{{$changeIndex(index+1)}}</span>、{{list.type}}（共{{list.list.length}}小题）</p>
         <div v-for="(list1, index1) in list.list">
-          <singleQuestion :list="list1" :index="index1" shadow="none" :showAction='false' :isAnswer="isAnswer">
+          <singleQuestion :list="list1" :index="index1" shadow="none" :showAction='false' :isAnswer="isAnswer" :showScore="true">
           
           </singleQuestion>
         </div>

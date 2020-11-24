@@ -157,6 +157,13 @@ export default {
     this.getTableData()
 
   },
+
+  deactivated(){
+    console.log('deactivated')
+  },
+  destroyed(){
+    console.log('destroyed')
+  },
   mounted() {
 
   	this.getTableData()

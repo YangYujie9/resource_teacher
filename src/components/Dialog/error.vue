@@ -37,7 +37,6 @@
 </template>
 
 <script>
-import Cookies from 'js-cookie'
 
 export default {
   props: ['dialogVisible','questionId','typeTemplate'],
@@ -91,10 +90,10 @@ export default {
         return this.$message.warning('错误描述内容不能为空')
       }
 
-      Cookies.set("errorContent", this.error.desc)
-      this.$emit('close')
+      localStorage.setItem('errorContent',JSON.stringify(this.error.desc))
       this.$router.push({ path: '/questions/submitQuestions', query: { questionId: this.questionId, errorType: this.error.type}})
-
+      this.$emit('close')
+      this.$emit('close_similarity')
     },
 
 

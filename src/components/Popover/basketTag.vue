@@ -1,26 +1,31 @@
 <template>
 	<div class="basket-tag">
+
+    <div class="ball" :class="{ball_hover: isAdd}" ref="ball"></div>
     <div class="right-tag" @click="gotoExamination">
-      <el-badge :value="testBasket" class="item" >
-        <div class="circle">
+      <el-badge :value="testBasket" class="item">
+        <div class="circle"  ref="basket">
           <i class="iconfont iconjiagouwuche iconposition"></i>
         </div>
       </el-badge>
       <span class="spandiv">试题篮</span>
     </div>
+
   </div>
 </template>
 
 <script>
-import Cookies from 'js-cookie'
+
 export default {
 
   props: {
 
   },
+
   data() {
     return {
     	testBasket: 0,
+      isAdd: false,
 
     };
   },
@@ -36,24 +41,39 @@ export default {
   },
 
   methods: {
+    addToBasket(event,callback) {
+      // 
+      this.$refs.ball.style.top = event.pageY + 'px'
+      this.$refs.ball.style.left = event.pageX + 'px'
+      this.$refs.ball.style.opacity = 1
+      this.$refs.ball.style.transition = 'left 0s, top 0s';
+      setTimeout(()=>{
 
-    getmyTestBasket() {
-
+        let basket = this.$refs.basket.getBoundingClientRect()
+        this.$refs.ball.style.top = basket.top + 20 +'px';
+        this.$refs.ball.style.left = basket.left + 30 +'px';
+        this.$refs.ball.style.opacity = '0'
+        this.$refs.ball.style.transition = 'left 0.5s linear, top 0.5s ease-in, opacity 1s ease-in';
+          // this.getmyTestBasket(callback)
+      }, 20)
+    },
+    getmyTestBasket(callback,event) {
 
     	this.$http.get(`/api/open/paper/myTestBasket`)
 
     	.then((data)=>{
 
+        this.$store.commit('setpaperId',data.data.paperId)
         
-        if(data.data.paperId != Cookies.get('paperId')) {
+        if(data.data.paperId != JSON.parse(localStorage.getItem("paperId"))) {
 
-          this.$store.commit('setpaperId',data.data.paperId)
-
-          Cookies.set("paperId", data.data.paperId)
+          
+          localStorage.setItem('paperId',JSON.stringify(data.data.paperId))
         }
         
 
-
+        event? this.addToBasket(event):null
+        
         let count = 0
         if(data.data.questionMap) {
           for(let key in data.data.questionMap) {
@@ -67,6 +87,7 @@ export default {
         }
         this.testBasket = count
         this.$emit('gettestBasket',this.testBasket)
+        callback && callback()
 
       })
     },
@@ -89,6 +110,29 @@ export default {
 </style>
 <style scoped lang="less">
 .basket-tag {
+  .ball {
+    width: 8px;
+    height: 8px;         
+    background: #409EFF;
+    border-radius: 50%;
+    position: fixed;
+    left: 90px;
+    top: 100px;
+    opacity: 0;
+
+  }
+
+  .ball_hover {    
+      top: 58%;
+      left: 93%;
+      transition: right 1s linear, top 1s ease-in;
+      width:12px;
+      height:12px;
+      background: #5EA345;
+      border-radius: 50%;
+      position: fixed;
+      background: red;
+  }
   .right-tag {
     cursor: pointer;
     position: fixed;

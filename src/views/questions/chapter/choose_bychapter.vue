@@ -119,7 +119,7 @@ export default {
   },
   activated() {
     
-
+    console.log('activated')
   },
 
   mounted() {

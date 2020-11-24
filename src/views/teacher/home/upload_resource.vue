@@ -6,9 +6,10 @@
           <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
             <div slot="reference">
               <p class="top-title">
-                <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
-                <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span>
-                <span v-if="$refs.filter && activeType=='knowledge'" >{{$refs.filter.subject.subjectName}}</span>
+                <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
+                <span v-if="$refs.filter && $refs.filter.grade && activeType=='chapter'">/{{$refs.filter.grade.value}}</span>
+                <span v-if="$refs.filter && $refs.filter.oese && activeType=='chapter'">/{{$refs.filter.oese.name}}</span>
+                <span v-if="$refs.filter && $refs.filter.volume && activeType=='chapter'">/{{$refs.filter.volume.name}}</span>
                 <i class="iconfont iconshezhi settingicon"></i>
               </p>
             </div>
@@ -153,7 +154,7 @@
           </div>
 
           <div class="active-div">
-            <el-button type="primary" @click="submitResource" size="mini">发布资源 </el-button>
+            <el-button type="primary" @click="submitResource" :disabled="resourceDisabled" size="mini">发布资源 </el-button>
             <el-button @click="toPageBack" size="mini">取 消</el-button>
             
           </div>
@@ -176,6 +177,7 @@ export default {
   inject: ['reload'],
   data() {
     return {
+      resourceDisabled:false,
       resourceForm:{
         name:'',
         resourceSite:null,
@@ -349,7 +351,7 @@ export default {
       if (this.uploadSiteList.length > 0){
         this.resourceForm.resourceSite = {id:this.uploadSiteList[0].id};
       } else {
-        this.$message({message:'请上传资源',type:'error'});
+        return this.$message({message:'请上传资源',type:'error'});
       }
       if (this.resourceForm.resourceType=='4') {
         if(this.uploadAnswerList.length > 0) {
@@ -362,6 +364,8 @@ export default {
       if(!this.knowledgeTags.length && !this.chapterTags.length) {
         return this.$message.warning('请选择关联的章节或者知识点');
       }
+
+      this.resourceDisabled = true;
       
       let knowledgeIds = []
       let chapterIds = []
@@ -371,7 +375,6 @@ export default {
       this.chapterTags.forEach(item=>{
         chapterIds.push(item.id)
       })
-
 
       this.resourceForm.chapterIdList = chapterIds;
       this.resourceForm.knowledgeIdList = knowledgeIds;
@@ -389,7 +392,9 @@ export default {
                   // this.toPageBack();
                 }
               })
+            this.resourceDisabled = false;
           } else {
+            this.resourceDisabled = false;
             return false;
           }
       })

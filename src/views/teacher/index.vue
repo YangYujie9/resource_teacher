@@ -33,7 +33,7 @@ export default {
   computed: {
 
     ...mapGetters([
-      'gradeList',
+      'resource',
       'isReady',
       'getsiteInfo'
 
@@ -87,33 +87,7 @@ export default {
     return {
       isfixTab: false,
       resourceTypeList:[],
-      resource: [
-        {
-          value: '课件',
-          key:'CourseWare',
-        },{
-          value: '教案',
-          key:'TeachPlan',
-        },{
-          value: '学案',
-          key:'LearningCase',
-        },{
-          value: '套题试卷',
-          key:'ExaminationPaper',
-        },{
-          value: '教学反思',
-          key:'TeachReflection',
-        },{
-          value: '微课',
-          key:'VideoLesson',
-        },{
-          value: '素材',
-          key:'Material',
-        },{
-          value: '电子教材',
-          key:'ElectronicMaterials',
-        }
-      ],
+
       NavList: [
         {
           label: "首页",
@@ -159,6 +133,9 @@ export default {
       NavigationBars:[],
     };
   },
+
+
+
   mounted() {
     //window.addEventListener('scroll', this.handleTabFix, true)
     this.$refs.quesHome.wrap.addEventListener(
@@ -176,8 +153,10 @@ export default {
     this.getNavigationBars()
 
     this.getResourceType()
-
+    
   },
+
+
   methods: {
     // 先分别获得id为testNavBar的元素距离顶部的距离和页面滚动的距离
     // 比较他们的大小来确定是否添加fixedNavbar样式
@@ -185,7 +164,7 @@ export default {
       let scrollTop = this.$refs["quesHome"].$refs["wrap"].scrollTop;
       //window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
       let offsetTop = this.$refs.navBar.scrollTop;
-      scrollTop > 208 ? (this.isfixTab = true) : (this.isfixTab = false);
+      scrollTop > 178 ? (this.isfixTab = true) : (this.isfixTab = false);
       //scrollTop > 268 ? this.isfixLeft = true : this.isfixLeft = false
       // console.log(this.isfixTab,this.isfixLeft)
     },
@@ -217,6 +196,7 @@ export default {
             })
 
             this.resourceTypeList = result.data
+
           }
         })
 
@@ -262,6 +242,10 @@ export default {
 </script>
 <style lang="less">
 .ques-home {
+  .el-scrollbar__wrap {
+    overflow-x: hidden;
+  }
+
 
   .el-card .qt1 img {
     vertical-align: middle;
@@ -354,7 +338,7 @@ export default {
     width: 100%;
     min-width: 1300px;
     position: relative;
-    min-height: calc(100vh - 268px);
+    min-height: calc(100vh - 238px);
     //height: 100%;
 
     .nav {
@@ -365,7 +349,7 @@ export default {
       color: #ffffff;
       background-color: #5182f4;
       margin-bottom: 20px;
-      z-index: 1000;
+      z-index: 2002;
       ul {
         display: flex;
         justify-content: center;

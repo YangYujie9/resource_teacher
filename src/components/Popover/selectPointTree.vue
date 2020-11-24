@@ -1,5 +1,5 @@
 <template>
-  <div class="select-point-tree">
+  <div class="select-point-tree" @mouseenter="$store.commit('setisInnerScroll',true)"  @mouseleave="$store.commit('setisInnerScroll',false)" >
 <!-- 	  <el-tabs stretch v-model="activeType" @tab-click="handleClick">
 	    <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
 	      <div slot="reference">
@@ -28,13 +28,13 @@
 
 
 
-    <div class="search-wrap" style="">
-      <el-radio-group v-model="activeType" size="mini" v-if="!treeType">
+    <div class="search-wrap" style="" v-if="!treeType">
+      <el-radio-group v-model="activeType" size="mini">
         <el-radio-button label="chapter">章节目录</el-radio-button>
         <el-radio-button label="knowledge">知识点</el-radio-button>
       </el-radio-group>
     </div>
-    <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
+    <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams" :isRemembered="isRemembered">
       <div slot="reference">
         <p class="top-title">
           <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
@@ -52,8 +52,8 @@
 
     <div class="tree-content">
 
-      <div class="tree-class":class="{treeclassfixed:isfixTab}">
-      	<div v-if="treeType!='knowledge'" >
+      <div class="tree-class" :class="{treeclassfixed:isfixTab}" ref="tree_wrap">
+      	<div v-if="treeType!='knowledge'">
         	<pointTree chooseType="chapter" :volumeId="volumeId" @selectnode="defaultChapterCheck" @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='chapter'"></pointTree>
         </div>
         <div v-if="treeType!='chapter'">
@@ -77,7 +77,15 @@ export default {
   	},
   	treeType: {
   		type: String,
-  	}
+  	},
+    isSetCache: {
+      type:Boolean,
+      default: false
+    },
+    isRemembered: {
+      type:Boolean,
+      default: false
+    }
   },
   components: {
   	topPopover
@@ -176,7 +184,7 @@ export default {
   	this.activeType = this.treeType?this.treeType:'chapter'
   },
   methods: {
-    setparams(volumeId,subjectCode) {
+    setparams(volumeId,subjectCode,gradeId,oeseId) {
 
       this.volumeId = volumeId
 
@@ -186,7 +194,17 @@ export default {
       //   this.chapterLists = []
 
       // }
-      
+      if(this.isSetCache) {
+        let rememberedSearch = {
+          volumeId: volumeId,
+          subjectCode: subjectCode,
+          gradeId: gradeId,
+          oeseId: oeseId
+        }
+        
+        localStorage.setItem('rememberedSearch',JSON.stringify(rememberedSearch))
+      }
+
     },
     handleClick() {
       // this.resetPage()
@@ -264,9 +282,12 @@ export default {
 </style>
 <style scoped lang="less">
 .select-point-tree {
+  height: 100%;
 	.search-wrap {
 		text-align: center;
 		padding: 0 30px;
+    height: 40px;
+    line-height: 40px;
 	}
 }
 </style>

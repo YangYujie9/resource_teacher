@@ -242,7 +242,8 @@ export default {
 
             this.$store.commit('setpaperId',data.data.id)
 
-            Cookies.set("paperId", data.data.id)
+            localStorage.setItem('paperId',JSON.stringify(data.data.id))
+            // Cookies.set("paperId", data.data.id)
 
             this.$router.push('/questions/examinationPaper')
           }

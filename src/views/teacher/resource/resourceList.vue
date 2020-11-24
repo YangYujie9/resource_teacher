@@ -5,37 +5,8 @@
     </div>
     <left-fixed-nav :isfixTab="isfixTab">
       <div slot="left">
-        <selectPointTree ref="tree" @getPointIds="getPointIds" :isfixTab="isfixTab"></selectPointTree>
-<!--         <div class="search-wrap" style="text-align: center;">
-          <el-radio-group v-model="activeType" size="mini" @change="handleClick">
-            <el-radio-button label="chapter">章节目录</el-radio-button>
-            <el-radio-button label="knowledge">知识点</el-radio-button>
-          </el-radio-group>
-        </div>
-        <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
-          <div slot="reference">
-            <p class="top-title">
-              <span v-if="$refs.filter">{{$refs.filter.subject.subjectName}}</span>
-              <span v-if="$refs.filter && activeType=='chapter'">{{$refs.filter.oese.name}}</span>
-              <span v-if="$refs.filter && activeType=='chapter'" >{{$refs.filter.volume.name}}</span>
-              
-              <i class="iconfont iconshezhi settingicon"></i>
-            </p>
-          </div>
-          <div slot="popover">
-          </div>
-        </top-popover>
+        <selectPointTree ref="tree" @getPointIds="getPointIds" :isfixTab="isfixTab" :isRemembered="true"></selectPointTree>
 
-
-        <div class="tree-content">
-
-          <div class="tree-class">
-            <pointTree chooseType="chapter" :volumeId="volumeId" @selectnode="defaultChapterCheck" @getCheckedNodes="getCheckedChapters" ref="chapterTree" v-show="activeType=='chapter'"></pointTree>
-            <pointTree chooseType="knowledge" :subjectCode="subjectCode" @selectnode="defaultKnowsCheck" @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType=='knowledge'"></pointTree>
-          </div>    
-
-        </div> -->
-        <!-- </div> -->
       </div>
 
       <div slot="right" class="rescoure-wrap">
@@ -251,6 +222,15 @@ export default {
     this.getfileType()
     // this.getresourceconsole.log(this.$refs.tree,this.$refs.tree.chapterIds)List()
   },
+
+  beforeRouteEnter(to, from, next) {
+    if (from.path == "/teacher/resourceRreview") {
+      to.meta.keepAlive = true;
+    } else {
+      to.meta.keepAlive = false;
+    }
+    next();
+  }, 
 
   methods: {
 
@@ -496,7 +476,7 @@ export default {
   }
 
   .fixedclass {
-    left: 8% !important;
+    // left: 8% !important;
   }
 }
 

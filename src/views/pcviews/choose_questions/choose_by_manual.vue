@@ -37,6 +37,8 @@
 			<div class="content-wrap">
 				
 				<questionList :isAnswer="isAnswer" :tableData="tableData" shadow="none" :showAction="false" :subjectCode="getuserInfo.subjectCode" knowledgeType="chapter" @getData="getTableData" @getmyTestBasket="getmyTestBasket"></questionList> 
+
+        <p v-if="!tableData.length" style="text-align: center;padding-top: 200px;">暂无数据</p>  
 			</div>
       <div class="content-foot">
         <el-pagination
@@ -122,6 +124,14 @@ export default {
     knowledgeList(val) {
       this.resetPage()
     },
+    volumeId(val) {
+      if(val) {
+        this.resetPage()
+      }else {
+        this.tableData = []
+        this.total = 0
+      }
+    }
   },
   mounted() {
   	this.getquestionType()
@@ -172,7 +182,14 @@ export default {
       let chapterIds = []
       let knowledgeIds = []
       let questions = []
-      console.log(this.chapterList, this.knowledgeList)
+      // if(!this.chapterList.length && !this.knowledgeList.length) {
+      //   this.tableData = []
+      //   this.total = 0
+      //   return
+      // }
+
+
+
       this.chapterList.forEach(item=>{
         chapterIds.push(item.id)
       })
@@ -259,15 +276,16 @@ export default {
         
       }
     },
-    getmyTestBasket() {
+    getmyTestBasket(callback) {
     	this.$http.get(`/api/open/paper/myTestBasket`)
 
     	.then((data)=>{
-        if(data.data.paperId != Cookies.get('paperId')) {
 
-          this.$store.commit('setpaperId',data.data.paperId)
+        this.$store.commit('setpaperId',data.data.paperId)
+        
+        if(data.data.paperId != JSON.parse(localStorage.getItem("paperId"))) {
 
-          Cookies.set("paperId", data.data.paperId)
+          localStorage.setItem('paperId',JSON.stringify(data.data.paperId))
         }
 
 
@@ -281,6 +299,8 @@ export default {
 
         }
         this.testBasket = count
+
+        callback && callback()
         // this.$emit('gettestBasket',this.testBasket)
 
       })

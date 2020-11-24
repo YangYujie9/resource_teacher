@@ -5,6 +5,7 @@
       :visible.sync="visible"
       :close-on-click-modal='false'
       width="800px"
+      @open="initTableData"
       :before-close="closeDialog">
       <div class="score-setting">
         <div class="p1">
@@ -199,7 +200,14 @@ export default {
       this.$emit('close')
     },
 
+    initTableData() {
+      this.tableData.forEach(item=>{
+        this.$set(item,'score','')
+      })
 
+      
+
+    },
     smallScore(smallQuestions) {
       let score = 0
 
@@ -299,7 +307,8 @@ export default {
     clearScore() {
 
       this.tableData.forEach(item=>{
-        item.score = ''
+          item.score = ''
+          console.log(item)
           item.list.forEach(list=>{
           if(list.smallQuestions && list.smallQuestions.length) {
             
@@ -313,6 +322,8 @@ export default {
         })
 
       })
+
+      console.log(this.tableData)
     }
 
   }
@@ -391,10 +402,11 @@ export default {
       .pub {
         border-right: 1px solid #e2e2e2;
         border-bottom: 1px solid #e2e2e2;
+        flex-wrap: wrap;
       }
       li {
         display: flex;
-        flex-wrap: wrap;
+        // flex-wrap: wrap;
         line-height: 36px;
         text-align: center;
 
@@ -404,16 +416,19 @@ export default {
 
         .col1 {
           width: 80px;
+          flex-shrink: 0;
         }
 
         .col3 {
           flex-grow: 1;
+          padding: 0 10px;
         }
 
         .col4 {
           width: 140px;
           text-align: left;
           padding-left: 20px;
+          flex-shrink: 0;
         }
 
         .col5 {

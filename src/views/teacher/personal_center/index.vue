@@ -33,7 +33,7 @@
         <div class="personal-content-wrap">
           <div class="middle-tree-wrap" v-if="showTree && resourceType != 'actualpaper'">
             
-            <div class="tree-wrap" :class="{fixedclass:isfixTab}">
+            <div class="middle-tree" :class="{fixedclass:isfixTab}">
               <selectPointTree ref="tree" @getPointIds="getPointIds" :isfixTab="isfixTab"></selectPointTree>
               <!-- <top-popover v-if="isReady" :chooseType="activeType" ref="filter" @setparams="setparams">
                 <div slot="reference">
@@ -192,7 +192,6 @@ export default {
 
     this.getfileType()
     this.init()
-  console.log(this.$route)
     // this.subjectCode = this.getuserInfo.subjectCode
 
   },
@@ -310,16 +309,21 @@ export default {
 </script>
 <style lang="less">
 .personal {
-  .tree-wrap {
+  .middle-tree {
+
+    .tree-content {
+      padding: 0 20px;
+    }
+    
     .tree-class {
       overflow: auto;
       // overflow-x: hidden;
-      max-height: calc(100vh - 520px);
+      max-height: calc(100vh - 490px);
       padding-bottom: 20px;
     }
 
     .treeclassfixed {
-      max-height: calc(100vh - 280px) !important;
+      max-height: calc(100vh - 250px) !important;
     }
   }
 
@@ -422,6 +426,8 @@ export default {
   display: flex;
 
 
+
+
   .fixedclass {
     position: fixed;
     top: 60px;
@@ -460,38 +466,21 @@ export default {
       display: flex;
 
       .middle-tree-wrap {
-        min-width: 300px;
+        width: 300px;
         flex-shrink: 0;
         margin-right: 20px;
 
 
 
-        .tree-wrap {
+        .middle-tree{
           width: 300px;
           // max-width: 350px;
           min-height: 300px;
-          padding: 20px;
+          padding: 20px 0px;
           border: 1px solid #e2e2e2;
           z-index:1;
+          // padding: 20px 0px;
 
-          .tab-class {
-            padding: 0 30px;
-          }
-
-          .tree-content {
-            padding: 0 20px;
-          }
-
-          .tree-class {
-            overflow: auto;
-            // overflow-x: hidden;
-            max-height: calc(100vh - 520px);
-            padding-bottom: 20px;
-          }
-
-          .treeclassfixed {
-            max-height: calc(100vh - 280px) !important;
-          }
 
 
           .knowwrap {

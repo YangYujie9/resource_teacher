@@ -106,7 +106,7 @@
     </el-dialog>
 
   <!--   <similarityDialog :dialogVisible="similarityVisible" :questionId="similarityId" @close="close_similarity" @getmyTestBasket="getmyTestBasket" @addCollectFolder="addCollectFolder"></similarityDialog> -->
-    <errorDialog :dialogVisible="errorVisible" :questionId="errorId" @close="close_error"></errorDialog>
+    <errorDialog :dialogVisible="errorVisible" :questionId="errorId" @close="close_error" @close_similarity="close_similarity"></errorDialog>
     <favoriteDialog :dialogVisible="favoriteVisible" :questionId="collectId" @close="close_favorite"></favoriteDialog>
   </div> 
 </template>
@@ -185,10 +185,16 @@ export default {
       this.favoriteVisible = true
     },
 
+    close_similarity() {
+      this.errorVisible = false
+      this.$emit('close')
+    },
     close_error() {
       this.errorVisible = false
       // this.getTableData()
     },
+
+
     close_favorite() {
       this.favoriteVisible = false
       // this.getTableData()
@@ -291,8 +297,9 @@ export default {
       
     },
 
-    getmyTestBasket() {
-      this.$emit('getmyTestBasket')
+    getmyTestBasket(callback) {
+
+      this.$emit('getmyTestBasket',callback)
     },
 
     // addCollectFolder() {

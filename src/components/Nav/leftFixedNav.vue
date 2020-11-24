@@ -122,7 +122,7 @@ export default {
   }
 
   .treeclassfixed {
-    max-height: calc(100vh - 280px) !important;
+    max-height: calc(100vh - 270px) !important;
   }
 }
   //  标签页
@@ -230,7 +230,7 @@ export default {
       .fixedclass {
         position: fixed;
         top: 60px;
-        left: 7%;
+        // left: 7%;
       }
     }
 
@@ -238,6 +238,7 @@ export default {
       width: 90%;
       min-width: 0px;
       min-height: calc(100vh - 328px);
+      position: relative;
     }
 
     .fixedright {

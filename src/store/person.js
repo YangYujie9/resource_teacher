@@ -6,7 +6,34 @@ const state = {
   //用户信息
   userInfo: {
   },
-
+  resource: [
+    {
+      value: '课件',
+      key:'CourseWare',
+    },{
+      value: '教案',
+      key:'TeachPlan',
+    },{
+      value: '学案',
+      key:'LearningCase',
+    },{
+      value: '套题试卷',
+      key:'ExaminationPaper',
+    },{
+      value: '教学反思',
+      key:'TeachReflection',
+    },{
+      value: '微课',
+      key:'VideoLesson',
+    }
+    // ,{
+    //   value: '素材',
+    //   key:'Material',
+    // },{
+    //   value: '电子教材',
+    //   key:'ElectronicMaterials',
+    // }
+  ],
   pageDict: [],
   staffVO: {
     Authorization: ''
@@ -21,6 +48,8 @@ const state = {
     picture:'',
     copyright:''
   },
+  isInnerScroll: false,
+
 }
 
 const getters = {
@@ -68,6 +97,15 @@ const getters = {
     return state.siteInfo
   },
 
+  resource: state => {
+
+    return state.resource
+  },
+
+  isInnerScroll: state => {
+
+    return state.isInnerScroll
+  },
 }
 
 const mutations = {
@@ -123,6 +161,11 @@ const mutations = {
 
     state.siteInfo.picture = data.picture
     state.siteInfo.copyright = data.copyright
+    
+  },
+  setisInnerScroll(state, data) {
+    
+    state.isInnerScroll = data
     
   },
 }
@@ -200,7 +243,7 @@ const actions = {
               // context.commit('setloading',false)
               getBasicList(data.data.school.id,context)
 
-              context.commit('setpaperId',Cookies.get('paperId'))
+              context.commit('setpaperId',JSON.parse(localStorage.getItem("paperId")))
 
             }
           

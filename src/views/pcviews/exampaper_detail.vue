@@ -406,50 +406,7 @@ export default {
 </script>
 <style lang="less">
 .exampaper-detail {
-.MathJye {
-    direction: ltr;
-    display: inline-block;
-    float: none;
-    font-family: "Times New Roman","宋体";
-    font-size: 15px;
-    font-style: normal;
-    font-weight: normal;
-    letter-spacing: 1px;
-    line-height: normal;
-    text-align: left;
-    text-indent: 0px;
-    text-transform: none;
-    white-space: nowrap;
-    word-spacing: normal;
-    overflow-wrap: normal;
-    text-size-adjust: none;
-    border-width: 0px;
-    border-style: none;
-    border-color: initial;
-    border-image: initial;
-    margin: 0px;
-    padding: 0px;
 
-    table {
-      display: inline-block;
-      vertical-align: middle;
-
-      td {
-        text-align: center;
-      }
-    }
-
-    span {
-      display: inline;
-      position: static;
-      border: 0;
-      padding: 0;
-      margin: 0;
-      vertical-align: 0;
-      line-height: normal;
-      text-decoration: none;
-    }
-}
 	.el-input__inner {
 		border-radius: 30px;
 	}
@@ -461,16 +418,67 @@ export default {
 	    color: #606266;
 		}
 	}
-  .table {
-    table {
-      // border: 1px solid #333;
-      border-collapse:collapse;
+  .content {
+      .MathJye {
+          direction: ltr;
+          display: inline-block;
+          float: none;
+          font-family: "Times New Roman","宋体";
+          font-size: 15px;
+          font-style: normal;
+          font-weight: normal;
+          letter-spacing: 1px;
+          line-height: normal;
+          text-align: left;
+          text-indent: 0px;
+          text-transform: none;
+          white-space: nowrap;
+          word-spacing: normal;
+          overflow-wrap: normal;
+          text-size-adjust: none;
+          border-width: 0px;
+          border-style: none;
+          border-color: initial;
+          border-image: initial;
+          margin: 0px;
+          padding: 0px;
 
-      td {
-        padding: 3px 5px;
-        border: 1px solid #333;
+
+          table {
+            display: inline-block;
+            vertical-align: middle;
+
+            td {
+              text-align: center;
+              border: 0px;
+            }
+          }
+
+          span {
+            display: inline;
+            position: static;
+            border: 0;
+            padding: 0;
+            margin: 0;
+            vertical-align: 0;
+            line-height: normal;
+            text-decoration: none;
+          }
       }
-    }
+
+      table {
+        border-collapse:collapse;
+      }
+      
+      .table, .edittable {
+
+          td {
+            padding: 3px 5px;
+            border: 1px solid #333;
+          }
+ 
+      }
+
   }
 
 }

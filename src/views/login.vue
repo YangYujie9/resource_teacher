@@ -1,14 +1,14 @@
 <template>
   <div class="login" v-loading="loading" element-loading-text="登陆中">
 		<div class="bg-class">
-			<p class="bg-class-title">{{ msg }}</p>
-			<p class="bg-class-title bg-class-tag">Education Cloud Platform</p>
+			<!-- <p class="bg-class-title">{{ msg }}</p>
+			<p class="bg-class-title bg-class-tag">Education Cloud Platform</p> -->
 		</div>
 		<div class="frames">
 		  
 		  <div class="center">
 		  	  <el-tabs v-model="loginType">
-				    <el-tab-pane label="账号登陆" name="account" >
+				    <el-tab-pane label="账号登录" name="account" >
 	    				<el-form :model="loginForm" :rules="rules" ref="formName" hide-required-asterisk>
 								<el-form-item prop="usertype" label="类型">
 									<div style="position: relative;">
@@ -116,6 +116,7 @@ export default {
 								
 						  }else {
 
+
 								Cookies.remove("resource-teacher")
 								this.$message({
 									message:data.msg,
@@ -150,6 +151,10 @@ export default {
 								
 						  }else {
 
+								// let cookies = Cookies.get()
+								// for(let key in cookies) {
+								// 	Cookies.remove(key)
+								// }
 								Cookies.remove("resource-teacher")
 								this.$message({
 									message:data.msg,
@@ -191,12 +196,14 @@ export default {
   position: fixed;
   height: 100%;
   width: 100%;
+  min-width: 1300px;
 
 
 
   .bg-class {
+
   	height: 100%;
-  	width: 80%;
+  	width: 100%;
 	  background: url(../assets/images/ban.png) no-repeat center center;
 		background-size:100% 100%;
 

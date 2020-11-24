@@ -2,43 +2,6 @@
   <div class="pc-home" v-if="isReady">
   	<div class="pc-home-wrap" @click="hideOption">
 	  	<div class="pc-home-wrap-left">
- 	  		<!--<div>
-
-			    <div class="popver-select" @click.stop="showOption=true">{{gradeName}}
-			    	<i class="el-icon-arrow-down popver-select-suffix"></i>
-			    	<div class="popver-select-option" v-show="showOption" ref="popver_option">
-			    		<div style="text-align: center;margin-bottom: 5px;">选择年级</div>
-			    		<div>
-				        <el-radio-group v-model="search.gradeId" size="mini" @change="getVolumeList">
-						      <el-radio-button :label="list.key" :key="list.key" v-for="list in gradeList">{{list.value}}</el-radio-button>
-
-						    </el-radio-group>
-			    		</div>
-			    	</div>
-			    </div>
-
-
-	  		</div>
-	  		<div class="search-p">
-	  		  <el-select v-model="search.oeseId" placeholder="请选择" size="small" style="width: 49%;">
-				    <el-option
-				    	v-for="list in oeseList"
-				      :key="list.id"
-				      :label="list.name"
-				      :value="list.id">
-				    </el-option>
-
-					</el-select>
-					<el-select v-model="search.volumeId" placeholder="请选择" size="small" style="width: 49%;margin-left: 2%;">
-				    <el-option
-				    	v-for="list in volumeList"
-				      :key="list.id"
-				      :label="list.name"
-				      :value="list.id">
-				    </el-option>
-
-					</el-select>
-	  		</div> -->
 
 	  		<div class="search-p">
 	        <el-radio-group v-model="activeType" size="small">
@@ -89,7 +52,7 @@
 		    		<pointTree chooseType="chapter" :volumeId="search.volume.id"  @getCheckedNodes="getCheckedChapters" ref="chapterTree"  v-show="activeType == 'chapter'"></pointTree>
 		    	</div>
 		    	<div>
-		    		<pointTree chooseType="knowledge" :subjectCode="search.subjectCode"  @getCheckedNodes="getCheckedKnows" ref="chapterTree"  v-show="activeType == 'knowledge'"></pointTree>
+		    		<pointTree chooseType="knowledge" :subjectCode="search.subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree"  v-show="activeType == 'knowledge'"></pointTree>
 		    		<!-- <pointTree chooseType="knowledge" :subjectCode="getuserInfo.subjectCode"  @getCheckedNodes="getCheckedKnows" ref="knowledgeTree" v-show="activeType == 'knowledge'"></pointTree> -->
 		    	</div>
 		    </div>
@@ -120,7 +83,6 @@ export default {
     	oeseList:[],
     	volumeList:[],
     	activeType:'chapter',
-    	showOption: false,
     	chapterList:[],
     	knowledgeList:[],
     	popverShow: false,
@@ -175,7 +137,9 @@ export default {
   		this.search.grade = this.gradeList[0]
 
   		this.search.subjectCode = this.getuserInfo.subjectCode
+
   		this.getVolumeList()
+
   	}
   	
 
@@ -201,7 +165,6 @@ export default {
   		.then(data=>{
   			if(data.status == '200') {
 
-  				this.showOption = false
 
   				if(data.data.oese && data.data.oese.id) {
 	  				this.oeseList.push(data.data.oese)
@@ -216,6 +179,7 @@ export default {
   				}else {
   					this.search.volume = ''
   				}
+
   				
   			}
   		})
